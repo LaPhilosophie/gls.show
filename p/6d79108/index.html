@@ -1,0 +1,873 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="bitxor 只能使用给定的运算符，得到异或操作的等价函数 类似于数电中与非逻辑门实现异或 x xor yt &#x3D; ~(~(~x&amp;y)&amp;~(x&amp;~y))  1234567891011&#x2F;*  * bitXor - x^y using only ~ and &amp;  *   Example: bitXor(4, 5) &#x3D; 1 *   Legal ops: ~ &amp; *">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CSAPP-lab1：Data lab">
+<meta property="og:url" content="http://gls.show/p/6d79108/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="bitxor 只能使用给定的运算符，得到异或操作的等价函数 类似于数电中与非逻辑门实现异或 x xor yt &#x3D; ~(~(~x&amp;y)&amp;~(x&amp;~y))  1234567891011&#x2F;*  * bitXor - x^y using only ~ and &amp;  *   Example: bitXor(4, 5) &#x3D; 1 *   Legal ops: ~ &amp; *">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/csapp1.png">
+<meta property="article:published_time" content="2022-09-04T06:32:56.873Z">
+<meta property="article:modified_time" content="2022-09-18T06:38:34.516Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/csapp1.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>CSAPP-lab1：Data lab - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="CSAPP-lab1：Data lab"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-09-04 14:32" pubdate>
+          2022年9月4日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          4.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          15 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">CSAPP-lab1：Data lab</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2022年9月18日 下午
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <h1 id="bitxor"><a href="#bitxor" class="headerlink" title="bitxor"></a>bitxor</h1><ul>
+<li>只能使用给定的运算符，得到异或操作的等价函数</li>
+<li>类似于数电中与非逻辑门实现异或</li>
+<li>x xor yt = <code>~(~(~x&amp;y)&amp;~(x&amp;~y))</code></li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* </span><br><span class="hljs-comment"> * bitXor - x^y using only ~ and &amp; </span><br><span class="hljs-comment"> *   Example: bitXor(4, 5) = 1</span><br><span class="hljs-comment"> *   Legal ops: ~ &amp;</span><br><span class="hljs-comment"> *   Max ops: 14</span><br><span class="hljs-comment"> *   Rating: 1</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">bitXor</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x, <span class="hljs-keyword">int</span> y)</span> </span>&#123;<br><br>  <span class="hljs-keyword">return</span> ~(~(~x&amp;y)&amp;~(x&amp;~y));<br>&#125;<br></code></pre></td></tr></table></figure>
+<h1 id="tmin"><a href="#tmin" class="headerlink" title="tmin"></a>tmin</h1><ul>
+<li>函数返回二进制补码表示的最小的数<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* </span><br><span class="hljs-comment"> * tmin - return minimum two&#x27;s complement integer </span><br><span class="hljs-comment"> *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;</span><br><span class="hljs-comment"> *   Max ops: 4</span><br><span class="hljs-comment"> *   Rating: 1</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">tmin</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span> </span>&#123;<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>&lt;&lt;<span class="hljs-number">31</span>;<span class="hljs-comment">//tmin is 100....0</span><br>&#125;<br></code></pre></td></tr></table></figure></li>
+</ul>
+<h1 id="isTmax"><a href="#isTmax" class="headerlink" title="isTmax"></a>isTmax</h1><ul>
+<li>检测传入的参数x是不是能表示的最大值</li>
+<li>若是最大值，那么一定满足：01111111，也即是满足：(x+1)^(~x)的值为0</li>
+<li>但是，满足(x+1)^(~x)的并不一定都是01111111，反例：11111111，因此可以利用!!(x+1)作为两者的区分<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*</span><br><span class="hljs-comment"> * isTmax - returns 1 if x is the maximum, two&#x27;s complement number,</span><br><span class="hljs-comment"> *     and 0 otherwise </span><br><span class="hljs-comment"> *   Legal ops: ! ~ &amp; ^ | +</span><br><span class="hljs-comment"> *   Max ops: 10</span><br><span class="hljs-comment"> *   Rating: 1</span><br><span class="hljs-comment"> */</span><br><span class="hljs-comment">/*x : 01111111</span><br><span class="hljs-comment">  ~x: 10000000</span><br><span class="hljs-comment">  y :11111111</span><br><span class="hljs-comment">  ~y:00000000</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">*/</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">isTmax</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x)</span> </span>&#123;<br>  <span class="hljs-keyword">int</span> y=(x+<span class="hljs-number">1</span>)^(~x);<br>  <span class="hljs-keyword">return</span> !y&amp;!!(x+<span class="hljs-number">1</span>);<br>&#125;<br></code></pre></td></tr></table></figure></li>
+</ul>
+<h1 id="allOddBits"><a href="#allOddBits" class="headerlink" title="allOddBits"></a>allOddBits</h1><ul>
+<li>如果奇数比特位上都是1那么函数返回1</li>
+<li>使用移位运算得到0xAAAAAAAA，x&amp;y0xAAAAAAAA可以过滤掉所有偶数位，然后将结果与0xAAAAAAAAy异或，如果是0那么满足题意</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* </span><br><span class="hljs-comment"> * allOddBits - return 1 if all odd-numbered bits in word set to 1</span><br><span class="hljs-comment"> *   where bits are numbered from 0 (least significant) to 31 (most significant)</span><br><span class="hljs-comment"> *   Examples allOddBits(0xFFFFFFFD) = 0, allOddBits(0xAAAAAAAA) = 1</span><br><span class="hljs-comment"> *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;</span><br><span class="hljs-comment"> *   Max ops: 12</span><br><span class="hljs-comment"> *   Rating: 2</span><br><span class="hljs-comment"> */</span><br><span class="hljs-comment">//0xAAAAAAAA=0b10101010101010101010101010101010</span><br><span class="hljs-comment">//0x55555555=0b01010101010101010101010101010101</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">allOddBits</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x)</span> </span>&#123;<br>  <span class="hljs-keyword">int</span> a=<span class="hljs-number">0xaa</span>;<br>  <span class="hljs-keyword">int</span> y=(a&lt;&lt;<span class="hljs-number">8</span>)+(a&lt;&lt;<span class="hljs-number">16</span>)+(a&lt;&lt;<span class="hljs-number">24</span>)+a;<br>  <span class="hljs-keyword">return</span> !((x&amp;y)^y);<br>&#125;<br></code></pre></td></tr></table></figure>
+<h1 id="negate"><a href="#negate" class="headerlink" title="negate"></a>negate</h1><ul>
+<li>得到x的负数形式</li>
+<li>直接取反加以即可</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* </span><br><span class="hljs-comment"> * negate - return -x </span><br><span class="hljs-comment"> *   Example: negate(1) = -1.</span><br><span class="hljs-comment"> *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;</span><br><span class="hljs-comment"> *   Max ops: 5</span><br><span class="hljs-comment"> *   Rating: 2</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">negate</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x)</span> </span>&#123;<span class="hljs-comment">//for all x,-x=~x+1</span><br>  <span class="hljs-keyword">return</span> ~x+<span class="hljs-number">1</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="isAsciiDigit"><a href="#isAsciiDigit" class="headerlink" title="isAsciiDigit"></a>isAsciiDigit</h1><ul>
+<li>判断是不是0-9的数字</li>
+<li>x应该满足：<ul>
+<li>大于等于0b00110000</li>
+<li>小于    0b00111010</li>
+</ul>
+</li>
+<li>首先判断前四位是不是0011，如果与3异或是0那么说明满足</li>
+<li>然后通过与0xf进行与运算的方式，将x去掉last 4 bits，然后减去1010，通过右移31位得到符号位从而判断正负。如果是负数那么说明小于0b00111010，右移31位之后得到的符号位是1；如果是等于或者大于符号位是0<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* </span><br><span class="hljs-comment"> * isAsciiDigit - return 1 if 0x30 &lt;= x &lt;= 0x39 (ASCII codes for characters &#x27;0&#x27; to &#x27;9&#x27;)</span><br><span class="hljs-comment"> *   Example: isAsciiDigit(0x35) = 1.</span><br><span class="hljs-comment"> *            isAsciiDigit(0x3a) = 0.</span><br><span class="hljs-comment"> *            isAsciiDigit(0x05) = 0.</span><br><span class="hljs-comment"> *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;</span><br><span class="hljs-comment"> *   Max ops: 15</span><br><span class="hljs-comment"> *   Rating: 3</span><br><span class="hljs-comment"> */</span><br><span class="hljs-comment">//0x30:0011 0000  </span><br><span class="hljs-comment">//0x3a:0011 1010 </span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">isAsciiDigit</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x)</span> </span>&#123;<br>  <span class="hljs-keyword">int</span> a=!((x&gt;&gt;<span class="hljs-number">4</span>)^<span class="hljs-number">3</span>);<span class="hljs-comment">//must be 0011</span><br>  <span class="hljs-keyword">int</span> b=(x&amp;<span class="hljs-number">0xf</span>)+(~<span class="hljs-number">0xa</span>+<span class="hljs-number">1</span>);<span class="hljs-comment">//get the first 4 bits and minus 0b1010</span><br>  <span class="hljs-keyword">int</span> c=b&gt;&gt;<span class="hljs-number">31</span>;<span class="hljs-comment">//get the last 1 bit is 0 or 1</span><br>  <span class="hljs-keyword">return</span> a&amp;(!!c);<br>&#125;<br></code></pre></td></tr></table></figure>
+<h1 id="conditional"><a href="#conditional" class="headerlink" title="conditional"></a>conditional</h1></li>
+<li>实现异或操作（x?y:z）</li>
+<li>如果x是1，那么返回y的值，如果x是0，返回z的值</li>
+<li>返回(x&amp;y)|(~x&amp;z)即可（x=！！x是为了得到x是0还是1）</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* </span><br><span class="hljs-comment"> * conditional - same as x ? y : z </span><br><span class="hljs-comment"> *   Example: conditional(2,4,5) = 4</span><br><span class="hljs-comment"> *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;</span><br><span class="hljs-comment"> *   Max ops: 16</span><br><span class="hljs-comment"> *   Rating: 3</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">conditional</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x, <span class="hljs-keyword">int</span> y, <span class="hljs-keyword">int</span> z)</span> </span>&#123;<br>  x=!!x;<span class="hljs-comment">//convert x to 0/1</span><br>  x=~x+<span class="hljs-number">1</span>;<span class="hljs-comment">//convert x to complement  0 to 0(0000000...00) ; 1 to -1(1111111....11111)</span><br>  <span class="hljs-keyword">return</span> (x&amp;y)|(~x&amp;z);<br>&#125;<br></code></pre></td></tr></table></figure>
+<h1 id="isLessOrEqual"><a href="#isLessOrEqual" class="headerlink" title="isLessOrEqual"></a>isLessOrEqual</h1><ul>
+<li>测试是否满足x&lt;=y</li>
+<li>有以下情况：<ul>
+<li>x等于y，此时异或得到0</li>
+<li><code>x&lt;y</code><ul>
+<li>如果x符号位为0y为1那么不满足x&lt;=y</li>
+<li>如果x符号位为1y为0那么满足x&lt;=y</li>
+<li>如果x符号位和y的符号位相同，那么：<ul>
+<li>将x减去y，判断结果的正负。在这里为了防止负数减去负数而溢出，使用x+（-y）的形式</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* </span><br><span class="hljs-comment"> * isLessOrEqual - if x &lt;= y  then return 1, else return 0 </span><br><span class="hljs-comment"> *   Example: isLessOrEqual(4,5) = 1.</span><br><span class="hljs-comment"> *   Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;</span><br><span class="hljs-comment"> *   Max ops: 24</span><br><span class="hljs-comment"> *   Rating: 3</span><br><span class="hljs-comment"> */</span><br><span class="hljs-comment">// 1:x==y 2:x is neg y is pos 3:x is pos and y is pos </span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">isLessOrEqual</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x, <span class="hljs-keyword">int</span> y)</span> </span>&#123;<br>  <span class="hljs-keyword">int</span> equal=!(x^y);<br>  <span class="hljs-keyword">int</span> x_flag=!!(x&gt;&gt;<span class="hljs-number">31</span>);<br>  <span class="hljs-keyword">int</span> y_flag=!!(y&gt;&gt;<span class="hljs-number">31</span>);<br>  <span class="hljs-keyword">int</span> minus=x+~y+<span class="hljs-number">1</span>;<span class="hljs-comment">//x-y</span><br>  <span class="hljs-keyword">int</span> minus_flag=!!(minus&gt;&gt;<span class="hljs-number">31</span>);<br>  <span class="hljs-keyword">int</span> not_same=!(x_flag^y_flag);<br>  <span class="hljs-keyword">return</span> equal | (x_flag&amp;!y_flag) | (not_same&amp;minus_flag);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="logicalNeg"><a href="#logicalNeg" class="headerlink" title="logicalNeg"></a>logicalNeg</h1><ul>
+<li>只有当x是0的时候返回1，x为负数或正数都返回0</li>
+<li>思路：<ul>
+<li>当x是0或者最小的负数的情况下，(x^(~x+1))&gt;&gt;31才为0b00…000，其余情况下皆为0b111111…1111，使用这个性质将范围缩小到0或者最小的负数</li>
+<li>在满足上面的前提下，排除掉最小负数的情况，即可得到答案</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* </span><br><span class="hljs-comment"> * logicalNeg - implement the ! operator, using all of </span><br><span class="hljs-comment"> *              the legal operators except !</span><br><span class="hljs-comment"> *   Examples: logicalNeg(3) = 0, logicalNeg(0) = 1</span><br><span class="hljs-comment"> *   Legal ops: ~ &amp; ^ | + &lt;&lt; &gt;&gt;</span><br><span class="hljs-comment"> *   Max ops: 12</span><br><span class="hljs-comment"> *   Rating: 4 </span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">logicalNeg</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x)</span> </span>&#123;<br>  <span class="hljs-keyword">int</span> y=x^(~x+<span class="hljs-number">1</span>);<span class="hljs-comment">//only if x=000...0000 or x=1000...0000 y=0</span><br>  y=(y&gt;&gt;<span class="hljs-number">31</span>)+<span class="hljs-number">1</span>;<span class="hljs-comment">//get the sign</span><br>  <span class="hljs-keyword">return</span> y&amp;((x&gt;&gt;<span class="hljs-number">31</span>)+<span class="hljs-number">1</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="howManybits"><a href="#howManybits" class="headerlink" title="howManybits"></a>howManybits</h1><ul>
+<li>题意：使用最少几位补码可以表示一个数字？比如传入一个int类型的x，值为-5，那么它的补码应该是11111111111111111111111111111011，因此最少使用四个bits可以表示也即是1011，1表示符号位。</li>
+<li>思路：<ul>
+<li>可以将负数的情况转化为整数的情况。将负数取反，最终结果不变</li>
+<li>找到第一个1出现的位置，然后+1即可。比如howManyBits(12)=howManyBits(01100),1第一次出现在从右往左第四位，加一即使5，也就是最少的可以表示的补码的位数<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* howManyBits - return the minimum number of bits required to represent x in</span><br><span class="hljs-comment"> *             two&#x27;s complement</span><br><span class="hljs-comment"> *  Examples: howManyBits(12) = 5           01100</span><br><span class="hljs-comment"> *            howManyBits(298) = 10         </span><br><span class="hljs-comment"> *            howManyBits(-5) = 4 </span><br><span class="hljs-comment"> *            howManyBits(0)  = 1</span><br><span class="hljs-comment"> *            howManyBits(-1) = 1</span><br><span class="hljs-comment"> *            howManyBits(0x80000000) = 32</span><br><span class="hljs-comment"> *  Legal ops: ! ~ &amp; ^ | + &lt;&lt; &gt;&gt;</span><br><span class="hljs-comment"> *  Max ops: 90</span><br><span class="hljs-comment"> *  Rating: 4</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">howManyBits</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x)</span> </span>&#123;<br>  <span class="hljs-keyword">int</span> b16,b8,b4,b2,b1,b0;<br>  <span class="hljs-keyword">int</span> musk=x&gt;&gt;<span class="hljs-number">31</span>;<span class="hljs-comment">//musk is all 1 or all 0</span><br>  x=(~musk&amp;x)|(musk&amp;~x);<span class="hljs-comment">//if x is negative ，turn x into ~x</span><br> <br>  b16=!!(x&gt;&gt;<span class="hljs-number">16</span>)&lt;&lt;<span class="hljs-number">4</span>;<span class="hljs-comment">//get the last 16 bits&#x27; sign ,and &lt;&lt; 4 turn x into 16 or 0,so if x is 16 means in the last 16 bits there is at least 1</span><br>  x=x&gt;&gt;b16;<span class="hljs-comment">//x&gt;&gt;16 or x&gt;&gt;0</span><br>  b8=!!(x&gt;&gt;<span class="hljs-number">8</span>)&lt;&lt;<span class="hljs-number">3</span>;<br>  x=x&gt;&gt;b8;<br>  b4=!!(x&gt;&gt;<span class="hljs-number">4</span>)&lt;&lt;<span class="hljs-number">2</span>;<br>  x=x&gt;&gt;b4;<br>  b2=!!(x&gt;&gt;<span class="hljs-number">2</span>)&lt;&lt;<span class="hljs-number">1</span>;<br>  x=x&gt;&gt;b2;<br>  b1=!!(x&gt;&gt;<span class="hljs-number">1</span>);<br>  x=x&gt;&gt;b1;<br>  b0=!!x;<br>  <span class="hljs-keyword">return</span> b16+b8+b4+b2+b1+b0+<span class="hljs-number">1</span>;<br>&#125;<br></code></pre></td></tr></table></figure></li>
+</ul>
+</li>
+</ul>
+<h1 id="TODO"><a href="#TODO" class="headerlink" title="TODO"></a>TODO</h1><p>浮点数部分</p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CSAPP/" class="category-chain-item">CSAPP</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>CSAPP-lab1：Data lab</div>
+      <div>http://gls.show/p/6d79108/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年9月4日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/93d200d8/" title="webbench源码学习">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">webbench源码学习</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/b163e116/" title="C语言：作用域规则">
+                        <span class="hidden-mobile">C语言：作用域规则</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

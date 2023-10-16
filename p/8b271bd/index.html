@@ -1,0 +1,874 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="计算机刚被加电的时候，RAM中空空如也，OS存储在磁盘中，CPU只能执行被加载到内存中的代码，那么操作系统的代码是如何被CPU执行的呢？ 1.BIOS阶段首先，CPU被设计为加电瞬间CS:IP指向0xF000:0xFFF0，也即是0xFFFF0的位置。此时是在实模式下，这个地址即是实际物理地址，ROM BIOS被设计为存储在这个位置，它的代码入口地址即是0xFFFF0。BIOS的代码地址范围：0x">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机加电后发生了什么？代码 &amp; 理论分析">
+<meta property="og:url" content="http://gls.show/p/8b271bd/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="计算机刚被加电的时候，RAM中空空如也，OS存储在磁盘中，CPU只能执行被加载到内存中的代码，那么操作系统的代码是如何被CPU执行的呢？ 1.BIOS阶段首先，CPU被设计为加电瞬间CS:IP指向0xF000:0xFFF0，也即是0xFFFF0的位置。此时是在实模式下，这个地址即是实际物理地址，ROM BIOS被设计为存储在这个位置，它的代码入口地址即是0xFFFF0。BIOS的代码地址范围：0x">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/default.png">
+<meta property="article:published_time" content="2022-09-14T14:31:57.826Z">
+<meta property="article:modified_time" content="2022-09-22T13:16:59.473Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/default.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>计算机加电后发生了什么？代码 &amp; 理论分析 - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="计算机加电后发生了什么？代码 &amp; 理论分析"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-09-14 22:31" pubdate>
+          2022年9月14日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          6.5k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          21 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">计算机加电后发生了什么？代码 &amp; 理论分析</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2022年9月22日 晚上
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <p>计算机刚被加电的时候，RAM中空空如也，OS存储在磁盘中，CPU只能执行被加载到内存中的代码，那么操作系统的代码是如何被CPU执行的呢？</p>
+<h1 id="1-BIOS阶段"><a href="#1-BIOS阶段" class="headerlink" title="1.BIOS阶段"></a>1.BIOS阶段</h1><p>首先，CPU被设计为加电瞬间CS:IP指向0xF000:0xFFF0，也即是0xFFFF0的位置。此时是在实模式下，这个地址即是实际物理地址，ROM BIOS被设计为存储在这个位置，它的代码入口地址即是0xFFFF0。BIOS的代码地址范围：0xFE000~0xFFFFF，这些代码的作用是：</p>
+<ul>
+<li>进行硬件自检，检测CPU、显卡、内存、硬盘的信息</li>
+<li>在内存最开始的区域构建中断向量表（0x00000~0x003FF，1KB内存空间）</li>
+<li>构建BIOS数据区（0x00400~0x004FF）</li>
+<li>在上述数据区后面约57KB的位置加载8KB左右的、与中断向量表对应的中断处理程序</li>
+</ul>
+<h1 id="2-引导扇区（bootsect-s）"><a href="#2-引导扇区（bootsect-s）" class="headerlink" title="2.引导扇区（bootsect.s）"></a>2.引导扇区（bootsect.s）</h1><p>bootsect也被称为MBR（master boot record）</p>
+<p>CPU收到int 0x19中断，在中断向量表中找到对应的中断服务程序的入口地址，并执行该<strong>中断服务程序对应的功能</strong>：将第一扇区（512个字节）的程序，也即是bootsect加载到内存中0x07C00地址处并跳转到此处</p>
+<p>接下来，bootsect本身512个字节会被从0x7C00复制到内存的0x90000处</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs x86asm"><span class="hljs-keyword">mov</span>	<span class="hljs-built_in">ax</span>,<span class="hljs-built_in">BYTE</span> <span class="hljs-built_in">PTR</span> BOOTSEG		<span class="hljs-comment">;// 将ds段寄存器置为7C0h</span><br><span class="hljs-keyword">mov</span>	<span class="hljs-built_in">ds</span>,<span class="hljs-built_in">ax</span><br><span class="hljs-keyword">mov</span>	<span class="hljs-built_in">ax</span>,<span class="hljs-built_in">BYTE</span> <span class="hljs-built_in">PTR</span> INITSEG		<span class="hljs-comment">;// 将es段寄存器置为9000h</span><br><span class="hljs-keyword">mov</span>	<span class="hljs-built_in">es</span>,<span class="hljs-built_in">ax</span><br><span class="hljs-keyword">mov</span>	<span class="hljs-built_in">cx</span>,<span class="hljs-number">256</span>			<span class="hljs-comment">;// 移动计数值 ＝ 256字 = 512 字节</span><br><span class="hljs-keyword">sub</span>	<span class="hljs-built_in">si</span>,<span class="hljs-built_in">si</span>			<span class="hljs-comment">;// 源地址   ds:si = 07C0h:0000h</span><br><span class="hljs-keyword">sub</span>	<span class="hljs-built_in">di</span>,<span class="hljs-built_in">di</span>			<span class="hljs-comment">;// 目的地址 es:di = 9000h:0000h</span><br><span class="hljs-keyword">rep</span> <span class="hljs-keyword">movsw</span>			<span class="hljs-comment">;// 重复执行，直到cx = 0;移动1个字</span><br></code></pre></td></tr></table></figure>
+
+
+
+<p>之后，bootsect触发0x13中断将setup.s程序加载到内存的0x90200处</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs awk">load_setup:<br>	;<span class="hljs-regexp">//</span> 以下<span class="hljs-number">10</span>行的用途是利用BIOS中断INT <span class="hljs-number">13</span>h将setup模块从磁盘第<span class="hljs-number">2</span>个扇区<br>	;<span class="hljs-regexp">//</span> 开始读到<span class="hljs-number">90200</span>h开始处，共读<span class="hljs-number">4</span>个扇区。如果读出错，则复位驱动器，并<br>	;<span class="hljs-regexp">//</span> 重试，没有退路。<br>	;<span class="hljs-regexp">//</span> INT <span class="hljs-number">13</span>h 的使用方法如下：<br>	;<span class="hljs-regexp">//</span> ah = <span class="hljs-number">02</span>h - 读磁盘扇区到内存；al = 需要读出的扇区数量；<br>	;<span class="hljs-regexp">//</span> ch = 磁道（柱面）号的低<span class="hljs-number">8</span>位；  cl = 开始扇区（<span class="hljs-number">0</span>－<span class="hljs-number">5</span>位），磁道号高<span class="hljs-number">2</span>位（<span class="hljs-number">6</span>－<span class="hljs-number">7</span>）；<br>	;<span class="hljs-regexp">//</span> dh = 磁头号；				  dl = 驱动器号（如果是硬盘则要置为<span class="hljs-number">7</span>）；<br>	;<span class="hljs-regexp">//</span> es:bx -&gt;指向数据缓冲区；  如果出错则CF标志置位。 <br>	mov	dx,<span class="hljs-number">0000</span>h				;<span class="hljs-regexp">//</span> drive <span class="hljs-number">0</span>, head <span class="hljs-number">0</span><br>	mov	cx,<span class="hljs-number">0002</span>h				;<span class="hljs-regexp">//</span> sector <span class="hljs-number">2</span>, track <span class="hljs-number">0</span><br>	mov	bx,<span class="hljs-number">0200</span>h				;<span class="hljs-regexp">//</span> address = <span class="hljs-number">512</span>, <span class="hljs-keyword">in</span> INITSEG<br>	mov	ax,<span class="hljs-number">0200</span>h+SETUPLEN		;<span class="hljs-regexp">//</span> service <span class="hljs-number">2</span>, nr of sectors<br>	int	<span class="hljs-number">13</span>h					;<span class="hljs-regexp">//</span> read it<br>	jnc	ok_load_setup			;<span class="hljs-regexp">//</span> ok - <span class="hljs-keyword">continue</span><br>	mov	dx,<span class="hljs-number">0000</span>h<br>	mov	ax,<span class="hljs-number">0000</span>h				;<span class="hljs-regexp">//</span> reset the diskette<br>	int	<span class="hljs-number">13</span>h<br>	jmp	load_setup<br></code></pre></td></tr></table></figure>
+
+<p>再往后，再次触发0x13中断将系统模块装载入内存0x10000地址处</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs x86asm"><span class="hljs-symbol">ok_load_setup:</span><br><span class="hljs-comment">;/* 取磁盘驱动器的参数，特别是每道的扇区数量。</span><br><span class="hljs-comment">;   取磁盘驱动器参数INT 13h调用格式和返回信息如下：</span><br><span class="hljs-comment">;   ah = 08h	dl = 驱动器号（如果是硬盘则要置位7为1）。</span><br><span class="hljs-comment">;   返回信息：</span><br><span class="hljs-comment">;   如果出错则CF置位，并且ah = 状态码。</span><br><span class="hljs-comment">;   ah = 0, al = 0,         bl = 驱动器类型（AT/PS2）</span><br><span class="hljs-comment">;   ch = 最大磁道号的低8位，cl = 每磁道最大扇区数（位0-5），最大磁道号高2位（位6-7）</span><br><span class="hljs-comment">;   dh = 最大磁头数，       电力＝ 驱动器数量，</span><br><span class="hljs-comment">;   es:di -&gt; 软驱磁盘参数表。 */</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">dl</span>,<span class="hljs-number">00h</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">ax</span>,<span class="hljs-number">0800h</span>		<span class="hljs-comment">;// AH=8 is get drive parameters</span><br>	<span class="hljs-keyword">int</span>	<span class="hljs-number">13h</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-number">ch</span>,<span class="hljs-number">00h</span><br><span class="hljs-comment">;//	seg cs				;// 表示下一条语句的操作数在cs段寄存器所指的段中。</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">cs</span>:sectors,<span class="hljs-built_in">cx</span>		<span class="hljs-comment">;// 保存每磁道扇区数。</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">ax</span>,INITSEG<br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">es</span>,<span class="hljs-built_in">ax</span>			<span class="hljs-comment">;// 因为上面取磁盘参数中断改掉了es的值，这里重新改回。</span><br></code></pre></td></tr></table></figure>
+
+<p>由于这部分代码比较长，因此时间也比较久，屏幕上会打印出“loading system”进行提醒</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs x86asm"><span class="hljs-comment">;// Print some inane message   在显示一些信息（&#x27;Loading system ... &#x27;回车换行，共24个字符）。</span><br><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-number">ah</span>,<span class="hljs-number">03h</span>		<span class="hljs-comment">;// read cursor pos</span><br>	<span class="hljs-keyword">xor</span>	<span class="hljs-number">bh</span>,<span class="hljs-number">bh</span>			<span class="hljs-comment">;// 读光标位置。</span><br>	<span class="hljs-keyword">int</span>	<span class="hljs-number">10h</span><br>	<br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">cx</span>,<span class="hljs-number">27</span>			<span class="hljs-comment">;// 共24个字符。</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">bx</span>,<span class="hljs-number">0007h</span>		<span class="hljs-comment">;// page 0, attribute 7 (normal)</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">bp</span>,offset msg1		<span class="hljs-comment">;// 指向要显示的字符串。</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">ax</span>,<span class="hljs-number">1301h</span>		<span class="hljs-comment">;// write string, move cursor</span><br>	<span class="hljs-keyword">int</span>	<span class="hljs-number">10h</span>			<span class="hljs-comment">;// 写字符串并移动光标。</span><br></code></pre></td></tr></table></figure>
+
+
+<p>最后，确认根文件系统的设备号，并跳转到setup函数的0x90200地址处</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs awk">;<span class="hljs-regexp">//</span> 此后，我们检查要使用哪个根文件系统设备（简称根设备）。如果已经指定了设备（!=<span class="hljs-number">0</span>）<br>;<span class="hljs-regexp">//</span> 就直接使用给定的设备。否则就需要根据BIOS报告的每磁道扇区数来<br>;<span class="hljs-regexp">//</span> 确定到底使用<span class="hljs-regexp">/dev/</span>PS0(<span class="hljs-number">2</span>,<span class="hljs-number">28</span>)还是<span class="hljs-regexp">/dev/</span>at0(<span class="hljs-number">2</span>,<span class="hljs-number">8</span>)。<br>;<span class="hljs-regexp">//</span>		上面一行中两个设备文件的含义：<br>;<span class="hljs-regexp">//</span>		在Linux中软驱的主设备号是<span class="hljs-number">2</span>（参加第<span class="hljs-number">43</span>行注释），次设备号 = type*<span class="hljs-number">4</span> + nr, 其中<br>;<span class="hljs-regexp">//</span>		nr为<span class="hljs-number">0</span>－<span class="hljs-number">3</span>分别对应软驱A、B、C或D；type是软驱的类型（<span class="hljs-number">2</span>-&gt;<span class="hljs-number">1.2</span>M或<span class="hljs-number">7</span>-&gt;<span class="hljs-number">1.44</span>M等）。<br>;<span class="hljs-regexp">//</span>		因为<span class="hljs-number">7</span>*<span class="hljs-number">4</span> + <span class="hljs-number">0</span> = <span class="hljs-number">28</span>，所以<span class="hljs-regexp">/dev/</span>PS0(<span class="hljs-number">2</span>,<span class="hljs-number">28</span>)指的是<span class="hljs-number">1.44</span>M A驱动器，其设备号是<span class="hljs-number">021</span>c<br>;<span class="hljs-regexp">//</span>		同理 <span class="hljs-regexp">/dev/</span>at0(<span class="hljs-number">2</span>,<span class="hljs-number">8</span>)指的是<span class="hljs-number">1.2</span>M A驱动器，其设备号是<span class="hljs-number">0208</span>。<br><br>;<span class="hljs-regexp">//</span>	seg cs<br>	mov	ax,cs:root_dev<br>	cmp	ax,<span class="hljs-number">0</span><br>	jne	root_defined	;<span class="hljs-regexp">//</span> 如果 ax != <span class="hljs-number">0</span>, 转到root_defined<br>;<span class="hljs-regexp">//</span>	seg cs<br>	mov	bx,cs:sectors		;<span class="hljs-regexp">//</span> 取上面保存的每磁道扇区数。如果sectors=<span class="hljs-number">15</span><br>						;<span class="hljs-regexp">//</span> 则说明是<span class="hljs-number">1.2</span>Mb的驱动器；如果sectors=<span class="hljs-number">18</span>，则说明是<br>						;<span class="hljs-regexp">//</span> <span class="hljs-number">1.44</span>Mb软驱。因为是可引导的驱动器，所以肯定是A驱。<br>	mov	ax,<span class="hljs-number">0208</span>h			;<span class="hljs-regexp">//</span> <span class="hljs-regexp">/dev/</span>ps0 - <span class="hljs-number">1.2</span>Mb<br>	cmp	bx,<span class="hljs-number">15</span>			;<span class="hljs-regexp">//</span> 判断每磁道扇区数是否=<span class="hljs-number">15</span><br>	je	root_defined	;<span class="hljs-regexp">//</span> 如果等于，则ax中就是引导驱动器的设备号。<br>	mov	ax,<span class="hljs-number">021</span>ch			;<span class="hljs-regexp">//</span> <span class="hljs-regexp">/dev/</span>PS0 - <span class="hljs-number">1.44</span>Mb<br>	cmp	bx,<span class="hljs-number">18</span><br>	je	root_defined<br>undef_root:				;<span class="hljs-regexp">//</span> 如果都不一样，则死循环（死机）。<br>	jmp undef_root<br>root_defined:<br>;<span class="hljs-regexp">//</span>	seg cs<br>	mov	cs:root_dev,ax		;<span class="hljs-regexp">//</span> 将检查过的设备号保存起来。<br><br>;<span class="hljs-regexp">//</span> 到此，所有程序都加载完毕，我们就跳转到被<br>;<span class="hljs-regexp">//</span> 加载在bootsect后面的setup程序去。<br><br>;	jmp	SETUPSEG:[<span class="hljs-number">0</span>]		;<span class="hljs-regexp">//</span> 跳转到<span class="hljs-number">9020</span>:<span class="hljs-number">0000</span>（setup程序的开始处）。<br>	db <span class="hljs-number">0</span>eah<br>	dw <span class="hljs-number">0</span><br>	dw SETUPSEG<br></code></pre></td></tr></table></figure>
+
+
+<h1 id="3-setup"><a href="#3-setup" class="headerlink" title="3.setup"></a>3.setup</h1><p>利用BIOS中断读取机器数据，将其保存到0x90000地址处（会覆盖掉bootsect代码），这些数据包括硬件参数表、光标位置、根设备号等等</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br></pre></td><td class="code"><pre><code class="hljs x86asm"><span class="hljs-comment">;// setup.s负责从BIOS 中获取系统数据，并将这些数据放到系统内存的适当地方。</span><br><span class="hljs-comment">;// 此时setup.s 和system 已经由bootsect 引导块加载到内存中。</span><br><span class="hljs-comment">;// 这段代码询问bios 有关内存/磁盘/其它参数，并将这些参数放到一个</span><br><span class="hljs-comment">;// “安全的”地方：90000-901FF，也即原来bootsect 代码块曾经在</span><br><span class="hljs-comment">;// 的地方，然后在被缓冲块覆盖掉之前由保护模式的system 读取。</span><br><br><span class="hljs-comment">;// 以下这些参数最好和bootsect.s 中的相同！</span><br> INITSEG  = <span class="hljs-number">9000h</span>	<span class="hljs-comment">;// 原来bootsect 所处的段</span><br> SYSSEG   = <span class="hljs-number">1000h</span>	<span class="hljs-comment">;// system 在10000(64k)处。</span><br> SETUPSEG = <span class="hljs-number">9020h</span>	<span class="hljs-comment">;// 本程序所在的段地址。</span><br><br><br>code <span class="hljs-meta">segment</span><br><span class="hljs-symbol">start:</span><br><br><span class="hljs-comment">;// ok, 整个读磁盘过程都正常，现在将光标位置保存以备今后使用。</span><br><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">ax</span>,INITSEG		<span class="hljs-comment">;// 将ds 置成INITSEG(9000)。这已经在bootsect 程序中</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">ds</span>,<span class="hljs-built_in">ax</span>			<span class="hljs-comment">;// 设置过，但是现在是setup 程序，Linus 觉得需要再重新</span><br>						<span class="hljs-comment">;// 设置一下。</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-number">ah</span>,<span class="hljs-number">03h</span>		<span class="hljs-comment">;// BIOS 中断10 的读光标功能号ah = 03</span><br>	<span class="hljs-keyword">xor</span>	<span class="hljs-number">bh</span>,<span class="hljs-number">bh</span>		<span class="hljs-comment">;// 输入：bh = 页号</span><br>	<span class="hljs-keyword">int</span>	<span class="hljs-number">10h</span>			<span class="hljs-comment">;// 返回：ch = 扫描开始线，cl = 扫描结束线，</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">ds</span>:[<span class="hljs-number">0</span>],<span class="hljs-built_in">dx</span>		<span class="hljs-comment">;// dh = 行号(00 是顶端)，dl = 列号(00 是左边)。</span><br>					<span class="hljs-comment">;// 将光标位置信息存放在90000 处，控制台初始化时会来取。</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-number">ah</span>,<span class="hljs-number">88h</span>		<span class="hljs-comment">;// 这3句取扩展内存的大小值（KB）。</span><br>	<span class="hljs-keyword">int</span>	<span class="hljs-number">15h</span>			<span class="hljs-comment">;// 是调用中断15，功能号ah = 88</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">ds</span>:[<span class="hljs-number">2</span>],<span class="hljs-built_in">ax</span>		<span class="hljs-comment">;// 返回：ax = 从100000（1M）处开始的扩展内存大小(KB)。</span><br>					<span class="hljs-comment">;// 若出错则CF 置位，ax = 出错码。</span><br><br><span class="hljs-comment">;// 下面这段用于取显示卡当前显示模式。</span><br><span class="hljs-comment">;// 调用BIOS 中断10，功能号ah = 0f</span><br><span class="hljs-comment">;// 返回：ah = 字符列数，al = 显示模式，bh = 当前显示页。</span><br><span class="hljs-comment">;// 90004(1 字)存放当前页，90006 显示模式，90007 字符列数。</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-number">ah</span>,<span class="hljs-number">0fh</span><br>	<span class="hljs-keyword">int</span>	<span class="hljs-number">10h</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">ds</span>:[<span class="hljs-number">4</span>],<span class="hljs-built_in">bx</span>		<span class="hljs-comment">;// bh = display page</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">ds</span>:[<span class="hljs-number">6</span>],<span class="hljs-built_in">ax</span>		<span class="hljs-comment">;// al = video mode, ah = window width</span><br><br><span class="hljs-comment">;// 检查显示方式（EGA/VGA）并取参数。</span><br><span class="hljs-comment">;// 调用BIOS 中断10，附加功能选择-取方式信息</span><br><span class="hljs-comment">;// 功能号：ah = 12，bl = 10</span><br><span class="hljs-comment">;// 返回：bh = 显示状态</span><br><span class="hljs-comment">;// (00 - 彩色模式，I/O 端口=3dX)</span><br><span class="hljs-comment">;// (01 - 单色模式，I/O 端口=3bX)</span><br><span class="hljs-comment">;// bl = 安装的显示内存</span><br><span class="hljs-comment">;// (00 - 64k, 01 - 128k, 02 - 192k, 03 = 256k)</span><br><span class="hljs-comment">;// cx = 显示卡特性参数(参见程序后的说明)。</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-number">ah</span>,<span class="hljs-number">12h</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">bl</span>,<span class="hljs-number">10h</span><br>	<span class="hljs-keyword">int</span>	<span class="hljs-number">10h</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">ds</span>:[<span class="hljs-number">8</span>],<span class="hljs-built_in">ax</span>		<span class="hljs-comment">;// 90008 = ??</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">ds</span>:[<span class="hljs-number">10</span>],<span class="hljs-built_in">bx</span>		<span class="hljs-comment">;// 9000A = 安装的显示内存，9000B = 显示状态(彩色/单色)</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">ds</span>:[<span class="hljs-number">12</span>],<span class="hljs-built_in">cx</span>		<span class="hljs-comment">;// 9000C = 显示卡特性参数。</span><br><br><span class="hljs-comment">;// 取第一个硬盘的信息（复制硬盘参数表）。</span><br><span class="hljs-comment">;// 第1 个硬盘参数表的首地址竟然是中断向量41 的向量值！而第2 个硬盘</span><br><span class="hljs-comment">;// 参数表紧接第1 个表的后面，中断向量46 的向量值也指向这第2 个硬盘</span><br><span class="hljs-comment">;// 的参数表首址。表的长度是16 个字节(10)。</span><br><span class="hljs-comment">;// 下面两段程序分别复制BIOS 有关两个硬盘的参数表，90080 处存放第1 个</span><br><span class="hljs-comment">;// 硬盘的表，90090 处存放第2 个硬盘的表。</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">ax</span>,<span class="hljs-number">0000h</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">ds</span>,<span class="hljs-built_in">ax</span><br>	<span class="hljs-keyword">lds</span>	<span class="hljs-built_in">si</span>,<span class="hljs-built_in">ds</span>:[<span class="hljs-number">4</span>*<span class="hljs-number">41h</span>]		<span class="hljs-comment">;// 取中断向量41 的值，也即hd0 参数表的地址 ds:si</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">ax</span>,INITSEG<br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">es</span>,<span class="hljs-built_in">ax</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">di</span>,<span class="hljs-number">0080h</span>		<span class="hljs-comment">;// 传输的目的地址: 9000:0080 -&gt; es:di</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">cx</span>,<span class="hljs-number">10h</span>			<span class="hljs-comment">;// 共传输10 字节。</span><br>	<span class="hljs-keyword">rep</span> <span class="hljs-keyword">movsb</span><br><br><span class="hljs-comment">;// Get hd1 data</span><br><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">ax</span>,<span class="hljs-number">0000h</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">ds</span>,<span class="hljs-built_in">ax</span><br>	<span class="hljs-keyword">lds</span>	<span class="hljs-built_in">si</span>,<span class="hljs-built_in">ds</span>:[<span class="hljs-number">4</span>*<span class="hljs-number">46h</span>]		<span class="hljs-comment">;// 取中断向量46 的值，也即hd1 参数表的地址 -&gt; ds:si</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">ax</span>,INITSEG<br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">es</span>,<span class="hljs-built_in">ax</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">di</span>,<span class="hljs-number">0090h</span>		<span class="hljs-comment">;// 传输的目的地址: 9000:0090 -&gt; es:di</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">cx</span>,<span class="hljs-number">10h</span><br>	<span class="hljs-keyword">rep</span> <span class="hljs-keyword">movsb</span><br>	<br><br><span class="hljs-comment">;// 检查系统是否存在第2 个硬盘，如果不存在则第2 个表清零。</span><br><span class="hljs-comment">;// 利用BIOS 中断调用13 的取盘类型功能。</span><br><span class="hljs-comment">;// 功能号ah = 15；</span><br><span class="hljs-comment">;// 输入：dl = 驱动器号（8X 是硬盘：80 指第1 个硬盘，81 第2 个硬盘）</span><br><span class="hljs-comment">;// 输出：ah = 类型码；00 --没有这个盘，CF 置位； 01 --是软驱，没有change-line 支持；</span><br><span class="hljs-comment">;//  02--是软驱(或其它可移动设备)，有change-line 支持； 03 --是硬盘。</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">ax</span>,<span class="hljs-number">1500h</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">dl</span>,<span class="hljs-number">81h</span><br>	<span class="hljs-keyword">int</span>	<span class="hljs-number">13h</span><br>	<span class="hljs-keyword">jc</span>	no_disk1<br>	<span class="hljs-keyword">cmp</span>	<span class="hljs-number">ah</span>,<span class="hljs-number">3</span>			<span class="hljs-comment">;// 是硬盘吗？(类型= 3 ？)。</span><br>	<span class="hljs-keyword">je</span>	is_disk1<br><span class="hljs-symbol">no_disk1:</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">ax</span>,INITSEG		<span class="hljs-comment">;// 第2个硬盘不存在，则对第2个硬盘表清零。</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">es</span>,<span class="hljs-built_in">ax</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">di</span>,<span class="hljs-number">0090h</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">cx</span>,<span class="hljs-number">10h</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">ax</span>,<span class="hljs-number">00h</span><br>	<span class="hljs-keyword">rep</span> <span class="hljs-keyword">stosb</span><br></code></pre></td></tr></table></figure>
+
+<p>将位于0x10000地址处的内核程序复制到0x00000地址处（会覆盖掉终端向量表和BIOS数据区）</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs x86asm"><span class="hljs-symbol">do_move:</span><br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">es</span>,<span class="hljs-built_in">ax</span>		<span class="hljs-comment">;// es:di -&gt; 目的地址(初始为0000:0)</span><br>	<span class="hljs-keyword">add</span>	<span class="hljs-built_in">ax</span>,<span class="hljs-number">1000h</span><br>	<span class="hljs-keyword">cmp</span>	<span class="hljs-built_in">ax</span>,<span class="hljs-number">9000h</span>	<span class="hljs-comment">;// 已经把从8000 段开始的64k 代码移动完？</span><br>	<span class="hljs-keyword">jz</span>	end_move<br>	<span class="hljs-keyword">mov</span>	<span class="hljs-built_in">ds</span>,<span class="hljs-built_in">ax</span>		<span class="hljs-comment">;// ds:si -&gt; 源地址(初始为1000:0)</span><br>	<span class="hljs-keyword">sub</span>	<span class="hljs-built_in">di</span>,<span class="hljs-built_in">di</span><br>	<span class="hljs-keyword">sub</span>	<span class="hljs-built_in">si</span>,<span class="hljs-built_in">si</span><br>	<span class="hljs-keyword">mov</span> <span class="hljs-built_in">cx</span>,<span class="hljs-number">8000h</span>	<span class="hljs-comment">;// 移动8000 字（64k 字节）。</span><br>	<span class="hljs-keyword">rep</span> <span class="hljs-keyword">movsw</span><br>	<span class="hljs-keyword">jmp</span>	do_move<br></code></pre></td></tr></table></figure>
+
+
+<p>为了给后面的保护模式做准备，setup程序还要对中断描述符表寄存器（IDTR）和全局描述符表寄存器（GDTR）进行初始化设置</p>
+<p>之后，设置 CPU 的控制寄存器 CR0（也称机器状态字），从而进入 32 位保护模式运行，并跳<br>转到位于 system 模块最前面部分的 head.s 程序继续运行</p>
+<ul>
+<li>打开A20，实现4GB寻址</li>
+<li>将CR0寄存器的第0位（PE）置零，将处理器工作方式设置为保护模式</li>
+</ul>
+<h1 id="4-head程序"><a href="#4-head程序" class="headerlink" title="4.head程序"></a>4.head程序</h1><p>之前提到system模块会被复制到0x00000开始的位置，head程序其实是system模块的一部分，而且是最开始的部分，0x00000其实也是head程序的起始地址。head.s 与前面bootsect.s和setup.s汇编不同，使用的是AT&amp;T格式的汇编</p>
+<ul>
+<li>加载各个数据段寄存器，重新设置中断描述符表 idt，共 256 项，并使各个表项均指向一个只报错误的哑中断程序</li>
+<li>重新设置全局描述符表 gdt</li>
+<li>使用物理地址 0 与 1M 开始处的内容相比较的方法，检测 A20 地址线是否已真的开启</li>
+<li>设置管理内存的分页处理机制，将页目录表放在绝对物理地址 0 开始处紧随后面放置共可寻址 16MB 内存的 4 个页表，并分别设置它们的表项</li>
+<li>最后利用返回指令将预先放置在堆栈中的/init/main.c 程序的入口地址弹出，去运行 main()程序</li>
+</ul>
+<h1 id="实模式与保护模式"><a href="#实模式与保护模式" class="headerlink" title="实模式与保护模式"></a>实模式与保护模式</h1><p>实模式：</p>
+<ul>
+<li>寻址<ul>
+<li>段寄存器存放段的基地址，和偏移值共同确定内存地址，此内存地址即是真实物理地址，最大寻址空间是20位，1MB</li>
+</ul>
+</li>
+<li>中断机制<ul>
+<li>使用中断向量表，其实位置在0x00000，位置固定</li>
+</ul>
+</li>
+</ul>
+<p>保护模式：</p>
+<ul>
+<li>寻址  <ul>
+<li>段寄存器存放段描述符表中某一项的索引，索引值所指向的段描述符项包含以下信息：<ul>
+<li>要寻址的内存段的基地址</li>
+<li>段的最大长度值</li>
+<li>段的访问级别等信息</li>
+</ul>
+</li>
+<li>最大寻址空间是32位，4GB</li>
+</ul>
+</li>
+<li>中断机制<ul>
+<li>使用中断描述符表（IDT），可以由操作系统灵活安排，通过IDTR寄存器定位位置</li>
+</ul>
+</li>
+</ul>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Linux%E5%86%85%E6%A0%B8/" class="category-chain-item">Linux内核</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>计算机加电后发生了什么？代码 &amp; 理论分析</div>
+      <div>http://gls.show/p/8b271bd/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年9月14日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/9e7f5052/" title="OSTEP NOTES &amp; HW：进程">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">OSTEP NOTES &amp; HW：进程</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/b7f87e4d/" title="Makefile：一个简单的入门">
+                        <span class="hidden-mobile">Makefile：一个简单的入门</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,936 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="先导知识 AT&amp;T格式的x86汇编 gdb调试工具的使用  函数参数的压栈顺序：  rdi rsi rdx rcx r8 r9  命令速记：  list，简写为l 输出源代码，默认为十行 l n ： 输出第n行前后的代码 l function ： 输出函数function前后的代码   break，简写为b b 行号：在某一行设置断点 b 函数：在函数入口设置断点   run运行程序并在断">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CSAPP-lab2：Bomb-lab">
+<meta property="og:url" content="http://gls.show/p/44962f68/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="先导知识 AT&amp;T格式的x86汇编 gdb调试工具的使用  函数参数的压栈顺序：  rdi rsi rdx rcx r8 r9  命令速记：  list，简写为l 输出源代码，默认为十行 l n ： 输出第n行前后的代码 l function ： 输出函数function前后的代码   break，简写为b b 行号：在某一行设置断点 b 函数：在函数入口设置断点   run运行程序并在断">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/csapp1.png">
+<meta property="article:published_time" content="2022-09-04T14:07:57.868Z">
+<meta property="article:modified_time" content="2022-10-04T11:19:28.056Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/csapp1.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>CSAPP-lab2：Bomb-lab - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="CSAPP-lab2：Bomb-lab"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-09-04 22:07" pubdate>
+          2022年9月4日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          13k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          41 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">CSAPP-lab2：Bomb-lab</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2022年10月4日 晚上
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <h1 id="先导知识"><a href="#先导知识" class="headerlink" title="先导知识"></a>先导知识</h1><ul>
+<li>AT&amp;T格式的x86汇编</li>
+<li>gdb调试工具的使用</li>
+</ul>
+<p>函数参数的压栈顺序：</p>
+<ul>
+<li>rdi</li>
+<li>rsi</li>
+<li>rdx</li>
+<li>rcx</li>
+<li>r8</li>
+<li>r9</li>
+</ul>
+<p>命令速记：</p>
+<ul>
+<li>list，简写为l<ul>
+<li>输出源代码，默认为十行</li>
+<li>l n ： 输出第n行前后的代码</li>
+<li>l function ： 输出函数function前后的代码</li>
+</ul>
+</li>
+<li>break，简写为b<ul>
+<li>b 行号：在某一行设置断点</li>
+<li>b 函数：在函数入口设置断点</li>
+</ul>
+</li>
+<li>run运行程序并在断点处停止</li>
+<li>next往后执行一行语句</li>
+<li>backtrace查看函数调用的栈帧</li>
+<li>p打印变量的值或者地址（print），类似的还有x命令（examine）</li>
+<li>info locals查看当前栈帧局部变量的值</li>
+<li>info registers可以查看当前寄存器的值</li>
+<li>打印单个寄存器的值<ul>
+<li>i registers eax</li>
+<li>p $eax</li>
+</ul>
+</li>
+<li>display + 变量名 可以每次停下来的时候自动打印变量的值</li>
+<li>直接敲回车键：重复上一条命令</li>
+<li>layout命令可以拆分窗口<ul>
+<li>layout regs显示寄存器的值的独立窗口</li>
+<li>layout asm显示汇编的独立窗口</li>
+<li>ctrl+x 1 单窗口模式</li>
+<li>ctrl+x 2 双窗口模式</li>
+<li>ctrl+x a回到默认的gdb模式</li>
+</ul>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://github.com/hellogcc/100-gdb-tips/blob/master/src/index.md">100个gdb小技巧</a></p>
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><ul>
+<li>得到汇编代码<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs mipsasm">objdump -d <span class="hljs-keyword">bomb </span>&gt;&gt; <span class="hljs-keyword">bomb.s</span><br><span class="hljs-keyword"></span><br>less <span class="hljs-keyword">bomb.s</span><br></code></pre></td></tr></table></figure></li>
+<li>ssh到服务器</li>
+<li>tmux进行分屏，一边是汇编代码一边是gdb调试</li>
+</ul>
+<h1 id="phase-1"><a href="#phase-1" class="headerlink" title="phase_1"></a>phase_1</h1><ul>
+<li>strings_not_equal有两个参数，第一个是你所输入的字符串的首地址(rdi)，第二个是正确的字符串的首地址(rsi)<ul>
+<li>strings_not_equal(input_string,correct_string)</li>
+<li>如果两个个字符串是相等的，那么eax作为函数的返回值将会是0</li>
+</ul>
+</li>
+<li>可以使用x/s 0x402400去观察这个地址的值是什么，可以看到是一个字符串</li>
+<li>得到答案：<code>Border relations with Canada have never been better.</code><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">0000000000400ee0</span> &lt;phase_<span class="hljs-number">1</span>&gt;:<br>  <span class="hljs-attribute">400ee0</span>:	<span class="hljs-number">48</span> <span class="hljs-number">83</span> ec <span class="hljs-number">08</span>          	sub    $<span class="hljs-number">0</span>x<span class="hljs-number">8</span>,%rsp  # 给栈分配空间<br>  <span class="hljs-attribute">400ee4</span>:	be <span class="hljs-number">00</span> <span class="hljs-number">24</span> <span class="hljs-number">40</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>x<span class="hljs-number">402400</span>,%esi # rdi保存第一个参数，rsi保存第二个参数，这里是为strings_not_equal函数准备参数<br>  <span class="hljs-attribute">400ee9</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">4</span>a <span class="hljs-number">04</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	callq  <span class="hljs-number">401338</span> &lt;strings_not_equal&gt;<br>  <span class="hljs-attribute">400eee</span>:	<span class="hljs-number">85</span> c<span class="hljs-number">0</span>                	test   %eax,%eax   # test a,b 是a与b做与运算的意思<br>  <span class="hljs-attribute">400ef0</span>:	<span class="hljs-number">74</span> <span class="hljs-number">05</span>                	je     <span class="hljs-number">400</span>ef<span class="hljs-number">7</span> &lt;phase_<span class="hljs-number">1</span>+<span class="hljs-number">0</span>x<span class="hljs-number">17</span>&gt; # je/jz 是当运算结果为<span class="hljs-number">0</span>（ZF标志为<span class="hljs-number">1</span>）时跳转。test和je一起使用是为了检测eax是不是<span class="hljs-number">0</span><br>  <span class="hljs-attribute">400ef2</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">43</span> <span class="hljs-number">05</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	callq  <span class="hljs-number">40143</span>a &lt;explode_bomb&gt;<br>  <span class="hljs-attribute">400ef7</span>:	<span class="hljs-number">48</span> <span class="hljs-number">83</span> c<span class="hljs-number">4</span> <span class="hljs-number">08</span>          	add    $<span class="hljs-number">0</span>x<span class="hljs-number">8</span>,%rsp<br>  <span class="hljs-attribute">400efb</span>:	c<span class="hljs-number">3</span>                   	retq   <br></code></pre></td></tr></table></figure>
+strings_not_equal函数的具体实现<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">0000000000401338</span> &lt;strings_not_equal&gt;: # %rdi保存第一个参数 %rsi保存第二个参数 %rdx保存第三个参数<br>  <span class="hljs-attribute">401338</span>:	<span class="hljs-number">41</span> <span class="hljs-number">54</span>                	push   %r<span class="hljs-number">12</span><br>  <span class="hljs-attribute">40133a</span>:	<span class="hljs-number">55</span>                   	push   %rbp<br>  <span class="hljs-attribute">40133b</span>:	<span class="hljs-number">53</span>                   	push   %rbx<br>  <span class="hljs-attribute">40133c</span>:	<span class="hljs-number">48</span> <span class="hljs-number">89</span> fb             	mov    %rdi,%rbx #将我们输入的字符串的地址赋给rbx，这里也是下面string_length函数的参数<br>  <span class="hljs-attribute">40133f</span>:	<span class="hljs-number">48</span> <span class="hljs-number">89</span> f<span class="hljs-number">5</span>             	mov    %rsi,%rbp #将答案的字符串的地址赋给rbp。这里赋值的目的是为了给下面的函数调用腾出寄存器<br>  <span class="hljs-attribute">401342</span>:	e<span class="hljs-number">8</span> d<span class="hljs-number">4</span> ff ff ff       	callq  <span class="hljs-number">40131</span>b &lt;string_length&gt;<br>  <span class="hljs-attribute">401347</span>:	<span class="hljs-number">41</span> <span class="hljs-number">89</span> c<span class="hljs-number">4</span>             	mov    %eax,%r<span class="hljs-number">12</span>d #将string_length函数的返回值赋给r<span class="hljs-number">12</span>d<br>  <span class="hljs-attribute">40134a</span>:	<span class="hljs-number">48</span> <span class="hljs-number">89</span> ef             	mov    %rbp,%rdi #桢指针赋给rdi，也即是答案的字符串的指针赋给rdi，这里是计算出答案的字符串的长度<br>  <span class="hljs-attribute">40134d</span>:	e<span class="hljs-number">8</span> c<span class="hljs-number">9</span> ff ff ff       	callq  <span class="hljs-number">40131</span>b &lt;string_length&gt;<br>  <span class="hljs-attribute">401352</span>:	ba <span class="hljs-number">01</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>x<span class="hljs-number">1</span>,%edx<br>  <span class="hljs-attribute">401357</span>:	<span class="hljs-number">41</span> <span class="hljs-number">39</span> c<span class="hljs-number">4</span>             	cmp    %eax,%r<span class="hljs-number">12</span>d#将答案的字符串的长度与我们的输入的字符串的长度进行比较<br>  <span class="hljs-attribute">40135a</span>:	<span class="hljs-number">75</span> <span class="hljs-number">3</span>f                	jne    <span class="hljs-number">40139</span>b &lt;strings_not_equal+<span class="hljs-number">0</span>x<span class="hljs-number">63</span>&gt;<br>  <span class="hljs-attribute">40135c</span>:	<span class="hljs-number">0</span>f b<span class="hljs-number">6</span> <span class="hljs-number">03</span>             	movzbl (%rbx),%eax #将我们输入的字符串的地址赋给eax<br>  <span class="hljs-attribute">40135f</span>:	<span class="hljs-number">84</span> c<span class="hljs-number">0</span>                	test   %al,%al#检测al的值是不是<span class="hljs-number">0</span><br>  <span class="hljs-attribute">401361</span>:	<span class="hljs-number">74</span> <span class="hljs-number">25</span>                	je     <span class="hljs-number">401388</span> &lt;strings_not_equal+<span class="hljs-number">0</span>x<span class="hljs-number">50</span>&gt;#是<span class="hljs-number">0</span>就跳到<span class="hljs-number">401388</span><br>  <span class="hljs-attribute">401363</span>:	<span class="hljs-number">3</span>a <span class="hljs-number">45</span> <span class="hljs-number">00</span>             	cmp    <span class="hljs-number">0</span>x<span class="hljs-number">0</span>(%rbp),%al#将答案字符串第一个字节与al进行比对<br>  <span class="hljs-attribute">401366</span>:	<span class="hljs-number">74</span> <span class="hljs-number">0</span>a                	je     <span class="hljs-number">401372</span> &lt;strings_not_equal+<span class="hljs-number">0</span>x<span class="hljs-number">3</span>a&gt;#如果相等就跳到<span class="hljs-number">401372</span><br>  <span class="hljs-attribute">401368</span>:	eb <span class="hljs-number">25</span>                	jmp    <span class="hljs-number">40138</span>f &lt;strings_not_equal+<span class="hljs-number">0</span>x<span class="hljs-number">57</span>&gt;<br>  <span class="hljs-attribute">40136a</span>:	<span class="hljs-number">3</span>a <span class="hljs-number">45</span> <span class="hljs-number">00</span>             	cmp    <span class="hljs-number">0</span>x<span class="hljs-number">0</span>(%rbp),%al<br>  <span class="hljs-attribute">40136d</span>:	<span class="hljs-number">0</span>f <span class="hljs-number">1</span>f <span class="hljs-number">00</span>             	nopl   (%rax)<br>  <span class="hljs-attribute">401370</span>:	<span class="hljs-number">75</span> <span class="hljs-number">24</span>                	jne    <span class="hljs-number">401396</span> &lt;strings_not_equal+<span class="hljs-number">0</span>x<span class="hljs-number">5</span>e&gt;<br>  <span class="hljs-attribute">401372</span>:	<span class="hljs-number">48</span> <span class="hljs-number">83</span> c<span class="hljs-number">3</span> <span class="hljs-number">01</span>          	add    $<span class="hljs-number">0</span>x<span class="hljs-number">1</span>,%rbx#rbx加到下一个字节<br>  <span class="hljs-attribute">401376</span>:	<span class="hljs-number">48</span> <span class="hljs-number">83</span> c<span class="hljs-number">5</span> <span class="hljs-number">01</span>          	add    $<span class="hljs-number">0</span>x<span class="hljs-number">1</span>,%rbp#rbp加到下一个字节<br>  <span class="hljs-attribute">40137a</span>:	<span class="hljs-number">0</span>f b<span class="hljs-number">6</span> <span class="hljs-number">03</span>             	movzbl (%rbx),%eax#把rbx对应内存的值赋给eax<br>  <span class="hljs-attribute">40137d</span>:	<span class="hljs-number">84</span> c<span class="hljs-number">0</span>                	test   %al,%al#看al是不是<span class="hljs-number">0</span>，<span class="hljs-number">0</span>说明到了字符串末尾处<br>  <span class="hljs-attribute">40137f</span>:	<span class="hljs-number">75</span> e<span class="hljs-number">9</span>                	jne    <span class="hljs-number">40136</span>a &lt;strings_not_equal+<span class="hljs-number">0</span>x<span class="hljs-number">32</span>&gt;<br>  <span class="hljs-attribute">401381</span>:	ba <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>x<span class="hljs-number">0</span>,%edx<br>  <span class="hljs-attribute">401386</span>:	eb <span class="hljs-number">13</span>                	jmp    <span class="hljs-number">40139</span>b &lt;strings_not_equal+<span class="hljs-number">0</span>x<span class="hljs-number">63</span>&gt;<br>  <span class="hljs-attribute">401388</span>:	ba <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>x<span class="hljs-number">0</span>,%edx<br>  <span class="hljs-attribute">40138d</span>:	eb <span class="hljs-number">0</span>c                	jmp    <span class="hljs-number">40139</span>b &lt;strings_not_equal+<span class="hljs-number">0</span>x<span class="hljs-number">63</span>&gt;<br>  <span class="hljs-attribute">40138f</span>:	ba <span class="hljs-number">01</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>x<span class="hljs-number">1</span>,%edx<br>  <span class="hljs-attribute">401394</span>:	eb <span class="hljs-number">05</span>                	jmp    <span class="hljs-number">40139</span>b &lt;strings_not_equal+<span class="hljs-number">0</span>x<span class="hljs-number">63</span>&gt;<br>  <span class="hljs-attribute">401396</span>:	ba <span class="hljs-number">01</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>x<span class="hljs-number">1</span>,%edx<br>  <span class="hljs-attribute">40139b</span>:	<span class="hljs-number">89</span> d<span class="hljs-number">0</span>                	mov    %edx,%eax #保存返回值<br>  <span class="hljs-attribute">40139d</span>:	<span class="hljs-number">5</span>b                   	pop    %rbx<br>  <span class="hljs-attribute">40139e</span>:	<span class="hljs-number">5</span>d                   	pop    %rbp<br>  <span class="hljs-attribute">40139f</span>:	<span class="hljs-number">41</span> <span class="hljs-number">5</span>c                	pop    %r<span class="hljs-number">12</span><br>  <span class="hljs-attribute">4013a1</span>:	c<span class="hljs-number">3</span>                   	retq   <br></code></pre></td></tr></table></figure></li>
+</ul>
+<h1 id="phase-2"><a href="#phase-2" class="headerlink" title="phase_2"></a>phase_2</h1><ul>
+<li>read_six_numbers(input_string,rsp)<ul>
+<li>第一个参数由rdi保存，也即是输入的字符串的地址</li>
+<li>第二个参数是rsi保存，也即是rsp的地址，本质上strings_not_equal函数是把字符串中的数字存到了rsp上</li>
+<li>调用了sscanf函数</li>
+</ul>
+</li>
+<li>读取了六个数字之后需要和正确答案比对，这里使用了循环进行流程控制<ul>
+<li>比如第一个数字必须是1，然后后面的数字可以陆续推导得出</li>
+</ul>
+</li>
+<li><code>1 2 4 8 16 32 </code></li>
+</ul>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">0000000000400efc</span> &lt;phase_<span class="hljs-number">2</span>&gt;:<br>  <span class="hljs-attribute">400efc</span>:	<span class="hljs-number">55</span>                   	push   %rbp<br>  <span class="hljs-attribute">400efd</span>:	<span class="hljs-number">53</span>                   	push   %rbx<br>  <span class="hljs-attribute">400efe</span>:	<span class="hljs-number">48</span> <span class="hljs-number">83</span> ec <span class="hljs-number">28</span>          	sub    $<span class="hljs-number">0</span>x<span class="hljs-number">28</span>,%rsp    #<span class="hljs-number">0</span>x<span class="hljs-number">28</span>=<span class="hljs-number">40</span>  十个int类型数<br>  <span class="hljs-attribute">400f02</span>:	<span class="hljs-number">48</span> <span class="hljs-number">89</span> e<span class="hljs-number">6</span>             	mov    %rsp,%rsi  <br>  <span class="hljs-attribute">400f05</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">52</span> <span class="hljs-number">05</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	callq  <span class="hljs-number">40145</span>c &lt;read_six_numbers&gt;#读取六个数字，第一个参数：rdi  第二个：rsp<br>  <span class="hljs-attribute">400f0a</span>:	<span class="hljs-number">83</span> <span class="hljs-number">3</span>c <span class="hljs-number">24</span> <span class="hljs-number">01</span>          	cmpl   $<span class="hljs-number">0</span>x<span class="hljs-number">1</span>,(%rsp)#比较<span class="hljs-number">1</span>和rsp对应内存的值，如果不相同就爆炸(第一个数字必须是<span class="hljs-number">1</span>)<br>  <span class="hljs-attribute">400f0e</span>:	<span class="hljs-number">74</span> <span class="hljs-number">20</span>                	je     <span class="hljs-number">400</span>f<span class="hljs-number">30</span> &lt;phase_<span class="hljs-number">2</span>+<span class="hljs-number">0</span>x<span class="hljs-number">34</span>&gt;<br>  <span class="hljs-attribute">400f10</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">25</span> <span class="hljs-number">05</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	callq  <span class="hljs-number">40143</span>a &lt;explode_bomb&gt;<br>  <span class="hljs-attribute">400f15</span>:	eb <span class="hljs-number">19</span>                	jmp    <span class="hljs-number">400</span>f<span class="hljs-number">30</span> &lt;phase_<span class="hljs-number">2</span>+<span class="hljs-number">0</span>x<span class="hljs-number">34</span>&gt;<br>  <span class="hljs-attribute">400f17</span>:	<span class="hljs-number">8</span>b <span class="hljs-number">43</span> fc             	mov    -<span class="hljs-number">0</span>x<span class="hljs-number">4</span>(%rbx),%eax  #把rbx-<span class="hljs-number">4</span>地址的值也即是第<span class="hljs-number">1</span>个输入的数字赋给eax，eax=<span class="hljs-number">1</span><br>  <span class="hljs-attribute">400f1a</span>:	<span class="hljs-number">01</span> c<span class="hljs-number">0</span>                	add    %eax,%eax #eax=<span class="hljs-number">2</span><br>  <span class="hljs-attribute">400f1c</span>:	<span class="hljs-number">39</span> <span class="hljs-number">03</span>                	cmp    %eax,(%rbx) #和rbx指向的内容进行对比如果不相同就爆炸，因此rbx指向内容必须为<span class="hljs-number">2</span><br>  <span class="hljs-attribute">400f1e</span>:	<span class="hljs-number">74</span> <span class="hljs-number">05</span>                	je     <span class="hljs-number">400</span>f<span class="hljs-number">25</span> &lt;phase_<span class="hljs-number">2</span>+<span class="hljs-number">0</span>x<span class="hljs-number">29</span>&gt;<br>  <span class="hljs-attribute">400f20</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">15</span> <span class="hljs-number">05</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	callq  <span class="hljs-number">40143</span>a &lt;explode_bomb&gt;<br>  <span class="hljs-attribute">400f25</span>:	<span class="hljs-number">48</span> <span class="hljs-number">83</span> c<span class="hljs-number">3</span> <span class="hljs-number">04</span>          	add    $<span class="hljs-number">0</span>x<span class="hljs-number">4</span>,%rbx #rbx+<span class="hljs-number">4</span>，移动到下一个int数字的地址<br>  <span class="hljs-attribute">400f29</span>:	<span class="hljs-number">48</span> <span class="hljs-number">39</span> eb             	cmp    %rbp,%rbx #和rbx对比，看是不是到达了第六个数字<br>  <span class="hljs-attribute">400f2c</span>:	<span class="hljs-number">75</span> e<span class="hljs-number">9</span>                	jne    <span class="hljs-number">400</span>f<span class="hljs-number">17</span> &lt;phase_<span class="hljs-number">2</span>+<span class="hljs-number">0</span>x<span class="hljs-number">1</span>b&gt;<br>  <span class="hljs-attribute">400f2e</span>:	eb <span class="hljs-number">0</span>c                	jmp    <span class="hljs-number">400</span>f<span class="hljs-number">3</span>c &lt;phase_<span class="hljs-number">2</span>+<span class="hljs-number">0</span>x<span class="hljs-number">40</span>&gt;<br>  <span class="hljs-attribute">400f30</span>:	<span class="hljs-number">48</span> <span class="hljs-number">8</span>d <span class="hljs-number">5</span>c <span class="hljs-number">24</span> <span class="hljs-number">04</span>       	lea    <span class="hljs-number">0</span>x<span class="hljs-number">4</span>(%rsp),%rbx #把第二个数字的地址赋给rbx<br>  <span class="hljs-attribute">400f35</span>:	<span class="hljs-number">48</span> <span class="hljs-number">8</span>d <span class="hljs-number">6</span>c <span class="hljs-number">24</span> <span class="hljs-number">18</span>       	lea    <span class="hljs-number">0</span>x<span class="hljs-number">18</span>(%rsp),%rbp #rbp是最后一个数字的地址 <span class="hljs-number">0</span>x<span class="hljs-number">18</span>=<span class="hljs-number">16</span>+<span class="hljs-number">8</span>=<span class="hljs-number">24</span> <span class="hljs-number">24</span>/<span class="hljs-number">4</span>=<span class="hljs-number">6</span><br>  <span class="hljs-attribute">400f3a</span>:	eb db                	jmp    <span class="hljs-number">400</span>f<span class="hljs-number">17</span> &lt;phase_<span class="hljs-number">2</span>+<span class="hljs-number">0</span>x<span class="hljs-number">1</span>b&gt;<br>  <span class="hljs-attribute">400f3c</span>:	<span class="hljs-number">48</span> <span class="hljs-number">83</span> c<span class="hljs-number">4</span> <span class="hljs-number">28</span>          	add    $<span class="hljs-number">0</span>x<span class="hljs-number">28</span>,%rsp<br>  <span class="hljs-attribute">400f40</span>:	<span class="hljs-number">5</span>b                   	pop    %rbx<br>  <span class="hljs-attribute">400f41</span>:	<span class="hljs-number">5</span>d                   	pop    %rbp<br>  <span class="hljs-attribute">400f42</span>:	c<span class="hljs-number">3</span>                   	retq   <br></code></pre></td></tr></table></figure>
+<p>关于sscanf函数的具体实现：</p>
+<p>关于sscanf函数的用法可以在<a target="_blank" rel="noopener" href="https://cplusplus.com/reference/cstdio/sscanf/">C++ reference</a>上找到，理解该函数的调用和传参可以帮助理解汇编代码</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* sscanf example */</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdio.h&gt;</span></span><br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span> <span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-keyword">char</span> sentence []=<span class="hljs-string">&quot;Rudolph is 12 years old&quot;</span>;<br>  <span class="hljs-keyword">char</span> str [<span class="hljs-number">20</span>];<br>  <span class="hljs-keyword">int</span> i;<br><span class="hljs-comment">//这里有四个参数，分别是sentence：字符串的地址；&quot;%s %*s %d&quot;字符串，str，&amp;i</span><br>  <span class="hljs-built_in">sscanf</span> (sentence,<span class="hljs-string">&quot;%s %*s %d&quot;</span>,str,&amp;i);<br>  <span class="hljs-built_in">printf</span> (<span class="hljs-string">&quot;%s -&gt; %d\n&quot;</span>,str,i);<br>  <br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>汇编代码：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">000000000040145c</span> &lt;read_six_numbers&gt;: # 参数：rdi（输入的数字字符串） rsi（） rdx rcx r<span class="hljs-number">8</span> r<span class="hljs-number">9</span><br>  <span class="hljs-attribute">40145c</span>:	<span class="hljs-number">48</span> <span class="hljs-number">83</span> ec <span class="hljs-number">18</span>          	sub    $<span class="hljs-number">0</span>x<span class="hljs-number">18</span>,%rsp #<span class="hljs-number">0</span>x<span class="hljs-number">18</span>==<span class="hljs-number">24</span>byte，也即是六个int类型的数字<br>  <span class="hljs-attribute">401460</span>:	<span class="hljs-number">48</span> <span class="hljs-number">89</span> f<span class="hljs-number">2</span>             	mov    %rsi,%rdx # rsi是第一个数字的地址，赋给rdx<br>  <span class="hljs-attribute">401463</span>:	<span class="hljs-number">48</span> <span class="hljs-number">8</span>d <span class="hljs-number">4</span>e <span class="hljs-number">04</span>          	lea    <span class="hljs-number">0</span>x<span class="hljs-number">4</span>(%rsi),%rcx #rcx是第二个数字的地址 <br>  <span class="hljs-attribute">401467</span>:	<span class="hljs-number">48</span> <span class="hljs-number">8</span>d <span class="hljs-number">46</span> <span class="hljs-number">14</span>          	lea    <span class="hljs-number">0</span>x<span class="hljs-number">14</span>(%rsi),%rax # rax是第<span class="hljs-number">5</span>个数字的地址<br>  <span class="hljs-attribute">40146b</span>:	<span class="hljs-number">48</span> <span class="hljs-number">89</span> <span class="hljs-number">44</span> <span class="hljs-number">24</span> <span class="hljs-number">08</span>       	mov    %rax,<span class="hljs-number">0</span>x<span class="hljs-number">8</span>(%rsp) # rax<br>  <span class="hljs-attribute">401470</span>:	<span class="hljs-number">48</span> <span class="hljs-number">8</span>d <span class="hljs-number">46</span> <span class="hljs-number">10</span>          	lea    <span class="hljs-number">0</span>x<span class="hljs-number">10</span>(%rsi),%rax<br>  <span class="hljs-attribute">401474</span>:	<span class="hljs-number">48</span> <span class="hljs-number">89</span> <span class="hljs-number">04</span> <span class="hljs-number">24</span>          	mov    %rax,(%rsp)<br>  <span class="hljs-attribute">401478</span>:	<span class="hljs-number">4</span>c <span class="hljs-number">8</span>d <span class="hljs-number">4</span>e <span class="hljs-number">0</span>c          	lea    <span class="hljs-number">0</span>xc(%rsi),%r<span class="hljs-number">9</span><br>  <span class="hljs-attribute">40147c</span>:	<span class="hljs-number">4</span>c <span class="hljs-number">8</span>d <span class="hljs-number">46</span> <span class="hljs-number">08</span>          	lea    <span class="hljs-number">0</span>x<span class="hljs-number">8</span>(%rsi),%r<span class="hljs-number">8</span><br>  <span class="hljs-attribute">401480</span>:	be c<span class="hljs-number">3</span> <span class="hljs-number">25</span> <span class="hljs-number">40</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>x<span class="hljs-number">4025</span>c<span class="hljs-number">3</span>,%esi<br>  <span class="hljs-attribute">401485</span>:	b<span class="hljs-number">8</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>x<span class="hljs-number">0</span>,%eax<br>  <span class="hljs-attribute">40148a</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">61</span> f<span class="hljs-number">7</span> ff ff       	callq  <span class="hljs-number">400</span>bf<span class="hljs-number">0</span> &lt;__isoc<span class="hljs-number">99</span>_sscanf@plt&gt;<br>  <span class="hljs-attribute">40148f</span>:	<span class="hljs-number">83</span> f<span class="hljs-number">8</span> <span class="hljs-number">05</span>             	cmp    $<span class="hljs-number">0</span>x<span class="hljs-number">5</span>,%eax<br>  <span class="hljs-attribute">401492</span>:	<span class="hljs-number">7</span>f <span class="hljs-number">05</span>                	jg     <span class="hljs-number">401499</span> &lt;read_six_numbers+<span class="hljs-number">0</span>x<span class="hljs-number">3</span>d&gt;<br>  <span class="hljs-attribute">401494</span>:	e<span class="hljs-number">8</span> a<span class="hljs-number">1</span> ff ff ff       	callq  <span class="hljs-number">40143</span>a &lt;explode_bomb&gt;<br>  <span class="hljs-attribute">401499</span>:	<span class="hljs-number">48</span> <span class="hljs-number">83</span> c<span class="hljs-number">4</span> <span class="hljs-number">18</span>          	add    $<span class="hljs-number">0</span>x<span class="hljs-number">18</span>,%rsp<br>  <span class="hljs-attribute">40149d</span>:	c<span class="hljs-number">3</span>                   	retq   <br></code></pre></td></tr></table></figure>
+
+<h1 id="phase-3"><a href="#phase-3" class="headerlink" title="phase_3"></a>phase_3</h1><ul>
+<li>刚进入phase_3这个函数就调用了sscanf函数，因此需要准备参数<ul>
+<li>sscanf(input_string,”%d %d”,rdx,rcx)</li>
+<li>sscanf函数返回读取的数字的数量，如果不是大于等于2会爆炸</li>
+</ul>
+</li>
+<li>输入的第一个数字和7进行比较，如果大于就爆炸，因此只能大于等于0小于等于7</li>
+<li>重点是jmpq   *0x402470(,%rax,8)语句，这里可以查看*0x402470的值从而确定要跳转的地方</li>
+<li>如果输入的第一个数字是0，那么就会跳转到下面的第一个分支语句，从而确定第二个值</li>
+<li>这里有很多个答案，其中一个是<code>0 207</code><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">0000000000400f43</span> &lt;phase_<span class="hljs-number">3</span>&gt;:# 参数顺序：rdi（输入的数字字符串） rsi（） rdx rcx r<span class="hljs-number">8</span> r<span class="hljs-number">9</span> <br>  <span class="hljs-attribute">400f43</span>:	<span class="hljs-number">48</span> <span class="hljs-number">83</span> ec <span class="hljs-number">18</span>          	sub    $<span class="hljs-number">0</span>x<span class="hljs-number">18</span>,%rsp<br>  <span class="hljs-attribute">400f47</span>:	<span class="hljs-number">48</span> <span class="hljs-number">8</span>d <span class="hljs-number">4</span>c <span class="hljs-number">24</span> <span class="hljs-number">0</span>c       	lea    <span class="hljs-number">0</span>xc(%rsp),%rcx #第四个参数<br>  <span class="hljs-attribute">400f4c</span>:	<span class="hljs-number">48</span> <span class="hljs-number">8</span>d <span class="hljs-number">54</span> <span class="hljs-number">24</span> <span class="hljs-number">08</span>       	lea    <span class="hljs-number">0</span>x<span class="hljs-number">8</span>(%rsp),%rdx #第三个参数<br>  <span class="hljs-attribute">400f51</span>:	be cf <span class="hljs-number">25</span> <span class="hljs-number">40</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>x<span class="hljs-number">4025</span>cf,%esi #gdb查看发现是 “%d %d”，第二个参数<br>  <span class="hljs-attribute">400f56</span>:	b<span class="hljs-number">8</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>x<span class="hljs-number">0</span>,%eax<br>  <span class="hljs-attribute">400f5b</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">90</span> fc ff ff       	callq  <span class="hljs-number">400</span>bf<span class="hljs-number">0</span> &lt;__isoc<span class="hljs-number">99</span>_sscanf@plt&gt;<br>  <span class="hljs-attribute">400f60</span>:	<span class="hljs-number">83</span> f<span class="hljs-number">8</span> <span class="hljs-number">01</span>             	cmp    $<span class="hljs-number">0</span>x<span class="hljs-number">1</span>,%eax<br>  <span class="hljs-attribute">400f63</span>:	<span class="hljs-number">7</span>f <span class="hljs-number">05</span>                	jg     <span class="hljs-number">400</span>f<span class="hljs-number">6</span>a &lt;phase_<span class="hljs-number">3</span>+<span class="hljs-number">0</span>x<span class="hljs-number">27</span>&gt;<br>  <span class="hljs-attribute">400f65</span>:	e<span class="hljs-number">8</span> d<span class="hljs-number">0</span> <span class="hljs-number">04</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	callq  <span class="hljs-number">40143</span>a &lt;explode_bomb&gt;<br>  <span class="hljs-attribute">400f6a</span>:	<span class="hljs-number">83</span> <span class="hljs-number">7</span>c <span class="hljs-number">24</span> <span class="hljs-number">08</span> <span class="hljs-number">07</span>       	cmpl   $<span class="hljs-number">0</span>x<span class="hljs-number">7</span>,<span class="hljs-number">0</span>x<span class="hljs-number">8</span>(%rsp)<br>  <span class="hljs-attribute">400f6f</span>:	<span class="hljs-number">77</span> <span class="hljs-number">3</span>c                	ja     <span class="hljs-number">400</span>fad &lt;phase_<span class="hljs-number">3</span>+<span class="hljs-number">0</span>x<span class="hljs-number">6</span>a&gt;<br>  <span class="hljs-attribute">400f71</span>:	<span class="hljs-number">8</span>b <span class="hljs-number">44</span> <span class="hljs-number">24</span> <span class="hljs-number">08</span>          	mov    <span class="hljs-number">0</span>x<span class="hljs-number">8</span>(%rsp),%eax#eax是输入的第一个数字<br>  <span class="hljs-attribute">400f75</span>:	ff <span class="hljs-number">24</span> c<span class="hljs-number">5</span> <span class="hljs-number">70</span> <span class="hljs-number">24</span> <span class="hljs-number">40</span> <span class="hljs-number">00</span> 	jmpq   *<span class="hljs-number">0</span>x<span class="hljs-number">402470</span>(,%rax,<span class="hljs-number">8</span>)#<span class="hljs-number">8</span>*rax+*<span class="hljs-number">0</span>x<span class="hljs-number">402470</span>，跳转到下面语句的其中之一<br>  <span class="hljs-attribute">400f7c</span>:	b<span class="hljs-number">8</span> cf <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>xcf,%eax#如果输入的第一个数字是<span class="hljs-number">0</span>那么就会跳到这里<br>  <span class="hljs-attribute">400f81</span>:	eb <span class="hljs-number">3</span>b                	jmp    <span class="hljs-number">400</span>fbe &lt;phase_<span class="hljs-number">3</span>+<span class="hljs-number">0</span>x<span class="hljs-number">7</span>b&gt;<br>  <span class="hljs-attribute">400f83</span>:	b<span class="hljs-number">8</span> c<span class="hljs-number">3</span> <span class="hljs-number">02</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>x<span class="hljs-number">2</span>c<span class="hljs-number">3</span>,%eax<br>  <span class="hljs-attribute">400f88</span>:	eb <span class="hljs-number">34</span>                	jmp    <span class="hljs-number">400</span>fbe &lt;phase_<span class="hljs-number">3</span>+<span class="hljs-number">0</span>x<span class="hljs-number">7</span>b&gt;<br>  <span class="hljs-attribute">400f8a</span>:	b<span class="hljs-number">8</span> <span class="hljs-number">00</span> <span class="hljs-number">01</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>x<span class="hljs-number">100</span>,%eax<br>  <span class="hljs-attribute">400f8f</span>:	eb <span class="hljs-number">2</span>d                	jmp    <span class="hljs-number">400</span>fbe &lt;phase_<span class="hljs-number">3</span>+<span class="hljs-number">0</span>x<span class="hljs-number">7</span>b&gt;<br>  <span class="hljs-attribute">400f91</span>:	b<span class="hljs-number">8</span> <span class="hljs-number">85</span> <span class="hljs-number">01</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>x<span class="hljs-number">185</span>,%eax<br>  <span class="hljs-attribute">400f96</span>:	eb <span class="hljs-number">26</span>                	jmp    <span class="hljs-number">400</span>fbe &lt;phase_<span class="hljs-number">3</span>+<span class="hljs-number">0</span>x<span class="hljs-number">7</span>b&gt;<br>  <span class="hljs-attribute">400f98</span>:	b<span class="hljs-number">8</span> ce <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>xce,%eax<br>  <span class="hljs-attribute">400f9d</span>:	eb <span class="hljs-number">1</span>f                	jmp    <span class="hljs-number">400</span>fbe &lt;phase_<span class="hljs-number">3</span>+<span class="hljs-number">0</span>x<span class="hljs-number">7</span>b&gt;<br>  <span class="hljs-attribute">400f9f</span>:	b<span class="hljs-number">8</span> aa <span class="hljs-number">02</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>x<span class="hljs-number">2</span>aa,%eax<br>  <span class="hljs-attribute">400fa4</span>:	eb <span class="hljs-number">18</span>                	jmp    <span class="hljs-number">400</span>fbe &lt;phase_<span class="hljs-number">3</span>+<span class="hljs-number">0</span>x<span class="hljs-number">7</span>b&gt;<br>  <span class="hljs-attribute">400fa6</span>:	b<span class="hljs-number">8</span> <span class="hljs-number">47</span> <span class="hljs-number">01</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>x<span class="hljs-number">147</span>,%eax<br>  <span class="hljs-attribute">400fab</span>:	eb <span class="hljs-number">11</span>                	jmp    <span class="hljs-number">400</span>fbe &lt;phase_<span class="hljs-number">3</span>+<span class="hljs-number">0</span>x<span class="hljs-number">7</span>b&gt;<br>  <span class="hljs-attribute">400fad</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">88</span> <span class="hljs-number">04</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	callq  <span class="hljs-number">40143</span>a &lt;explode_bomb&gt;<br>  <span class="hljs-attribute">400fb2</span>:	b<span class="hljs-number">8</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>x<span class="hljs-number">0</span>,%eax<br>  <span class="hljs-attribute">400fb7</span>:	eb <span class="hljs-number">05</span>                	jmp    <span class="hljs-number">400</span>fbe &lt;phase_<span class="hljs-number">3</span>+<span class="hljs-number">0</span>x<span class="hljs-number">7</span>b&gt;<br>  <span class="hljs-attribute">400fb9</span>:	b<span class="hljs-number">8</span> <span class="hljs-number">37</span> <span class="hljs-number">01</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>x<span class="hljs-number">137</span>,%eax<br>  <span class="hljs-attribute">400fbe</span>:	<span class="hljs-number">3</span>b <span class="hljs-number">44</span> <span class="hljs-number">24</span> <span class="hljs-number">0</span>c          	cmp    <span class="hljs-number">0</span>xc(%rsp),%eax#得到第二个值<span class="hljs-number">0</span>xc(%rsp)<br>  <span class="hljs-attribute">400fc2</span>:	<span class="hljs-number">74</span> <span class="hljs-number">05</span>                	je     <span class="hljs-number">400</span>fc<span class="hljs-number">9</span> &lt;phase_<span class="hljs-number">3</span>+<span class="hljs-number">0</span>x<span class="hljs-number">86</span>&gt;<br>  <span class="hljs-attribute">400fc4</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">71</span> <span class="hljs-number">04</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	callq  <span class="hljs-number">40143</span>a &lt;explode_bomb&gt;<br>  <span class="hljs-attribute">400fc9</span>:	<span class="hljs-number">48</span> <span class="hljs-number">83</span> c<span class="hljs-number">4</span> <span class="hljs-number">18</span>          	add    $<span class="hljs-number">0</span>x<span class="hljs-number">18</span>,%rsp<br>  <span class="hljs-attribute">400fcd</span>:	c<span class="hljs-number">3</span>                   	retq   <br><br></code></pre></td></tr></table></figure></li>
+</ul>
+<h1 id="phase-4"><a href="#phase-4" class="headerlink" title="phase_4"></a>phase_4</h1><ul>
+<li>这个和上一个类似，都是输入两个值判断是不是满足要求</li>
+<li>函数内又调用了func4函数，所以是一个递归。func4函数是一个有三个参数的递归函数，如果一直手动分析递归的过程会把自己绕晕，所以执行jle直接跳出递归，最后发现解题确实用不着递归，直接跳出去就好了</li>
+<li>第一个参数需要满足&lt;=7又要满足&gt;=7因此就是7</li>
+<li>第二个参数需要满足是0<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">000000000040100c</span> &lt;phase_<span class="hljs-number">4</span>&gt;:# 参数顺序：rdi（输入的字符串） rsi（） rdx rcx r<span class="hljs-number">8</span> r<span class="hljs-number">9</span> <br>  <span class="hljs-attribute">40100c</span>:	<span class="hljs-number">48</span> <span class="hljs-number">83</span> ec <span class="hljs-number">18</span>          	sub    $<span class="hljs-number">0</span>x<span class="hljs-number">18</span>,%rsp<br>  <span class="hljs-attribute">401010</span>:	<span class="hljs-number">48</span> <span class="hljs-number">8</span>d <span class="hljs-number">4</span>c <span class="hljs-number">24</span> <span class="hljs-number">0</span>c       	lea    <span class="hljs-number">0</span>xc(%rsp),%rcx #输入的第二个数字，也即是sscanf的第三个参数<br>  <span class="hljs-attribute">401015</span>:	<span class="hljs-number">48</span> <span class="hljs-number">8</span>d <span class="hljs-number">54</span> <span class="hljs-number">24</span> <span class="hljs-number">08</span>       	lea    <span class="hljs-number">0</span>x<span class="hljs-number">8</span>(%rsp),%rdx #输入的第一个数字<br>  <span class="hljs-attribute">40101a</span>:	be cf <span class="hljs-number">25</span> <span class="hljs-number">40</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>x<span class="hljs-number">4025</span>cf,%esi #字符串“%d %d”的首地址<br>  <span class="hljs-attribute">40101f</span>:	b<span class="hljs-number">8</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>x<span class="hljs-number">0</span>,%eax<br>  <span class="hljs-attribute">401024</span>:	e<span class="hljs-number">8</span> c<span class="hljs-number">7</span> fb ff ff       	callq  <span class="hljs-number">400</span>bf<span class="hljs-number">0</span> &lt;__isoc<span class="hljs-number">99</span>_sscanf@plt&gt;<br>  <span class="hljs-attribute">401029</span>:	<span class="hljs-number">83</span> f<span class="hljs-number">8</span> <span class="hljs-number">02</span>             	cmp    $<span class="hljs-number">0</span>x<span class="hljs-number">2</span>,%eax #eax是sscanf函数的返回值，这里必须是<span class="hljs-number">2</span><br>  <span class="hljs-attribute">40102c</span>:	<span class="hljs-number">75</span> <span class="hljs-number">07</span>                	jne    <span class="hljs-number">401035</span> &lt;phase_<span class="hljs-number">4</span>+<span class="hljs-number">0</span>x<span class="hljs-number">29</span>&gt;<br>  <span class="hljs-attribute">40102e</span>:	<span class="hljs-number">83</span> <span class="hljs-number">7</span>c <span class="hljs-number">24</span> <span class="hljs-number">08</span> <span class="hljs-number">0</span>e       	cmpl   $<span class="hljs-number">0</span>xe,<span class="hljs-number">0</span>x<span class="hljs-number">8</span>(%rsp)#<span class="hljs-number">0</span>xe=<span class="hljs-number">14</span> (rsp+<span class="hljs-number">8</span>)&lt;=<span class="hljs-number">14</span><br>  <span class="hljs-attribute">401033</span>:	<span class="hljs-number">76</span> <span class="hljs-number">05</span>                	jbe    <span class="hljs-number">40103</span>a &lt;phase_<span class="hljs-number">4</span>+<span class="hljs-number">0</span>x<span class="hljs-number">2</span>e&gt;<br>  <span class="hljs-attribute">401035</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">00</span> <span class="hljs-number">04</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	callq  <span class="hljs-number">40143</span>a &lt;explode_bomb&gt;<br>  <span class="hljs-attribute">40103a</span>:	ba <span class="hljs-number">0</span>e <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>xe,%edx#edx=<span class="hljs-number">14</span><br>  <span class="hljs-attribute">40103f</span>:	be <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>x<span class="hljs-number">0</span>,%esi#esi=<span class="hljs-number">0</span><br>  <span class="hljs-attribute">401044</span>:	<span class="hljs-number">8</span>b <span class="hljs-number">7</span>c <span class="hljs-number">24</span> <span class="hljs-number">08</span>          	mov    <span class="hljs-number">0</span>x<span class="hljs-number">8</span>(%rsp),%edi#输入的第一个数字=edi,edi&lt;=<span class="hljs-number">8</span><br>  <span class="hljs-attribute">401048</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">81</span> ff ff ff       	callq  <span class="hljs-number">400</span>fce &lt;func<span class="hljs-number">4</span>&gt;<br>  <span class="hljs-attribute">40104d</span>:	<span class="hljs-number">85</span> c<span class="hljs-number">0</span>                	test   %eax,%eax<br>  <span class="hljs-attribute">40104f</span>:	<span class="hljs-number">75</span> <span class="hljs-number">07</span>                	jne    <span class="hljs-number">401058</span> &lt;phase_<span class="hljs-number">4</span>+<span class="hljs-number">0</span>x<span class="hljs-number">4</span>c&gt;<br>  <span class="hljs-attribute">401051</span>:	<span class="hljs-number">83</span> <span class="hljs-number">7</span>c <span class="hljs-number">24</span> <span class="hljs-number">0</span>c <span class="hljs-number">00</span>       	cmpl   $<span class="hljs-number">0</span>x<span class="hljs-number">0</span>,<span class="hljs-number">0</span>xc(%rsp)#第二个参数<br>  <span class="hljs-attribute">401056</span>:	<span class="hljs-number">74</span> <span class="hljs-number">05</span>                	je     <span class="hljs-number">40105</span>d &lt;phase_<span class="hljs-number">4</span>+<span class="hljs-number">0</span>x<span class="hljs-number">51</span>&gt;<br>  <span class="hljs-attribute">401058</span>:	e<span class="hljs-number">8</span> dd <span class="hljs-number">03</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	callq  <span class="hljs-number">40143</span>a &lt;explode_bomb&gt;<br>  <span class="hljs-attribute">40105d</span>:	<span class="hljs-number">48</span> <span class="hljs-number">83</span> c<span class="hljs-number">4</span> <span class="hljs-number">18</span>          	add    $<span class="hljs-number">0</span>x<span class="hljs-number">18</span>,%rsp<br>  <span class="hljs-attribute">401061</span>:	c<span class="hljs-number">3</span>                   	retq   <br><br><span class="hljs-attribute">0000000000400fce</span> &lt;func<span class="hljs-number">4</span>&gt;:#edi：输入的第一个数字 esi：<span class="hljs-number">0</span><br>  <span class="hljs-attribute">400fce</span>:	<span class="hljs-number">48</span> <span class="hljs-number">83</span> ec <span class="hljs-number">08</span>          	sub    $<span class="hljs-number">0</span>x<span class="hljs-number">8</span>,%rsp<br>  <span class="hljs-attribute">400fd2</span>:	<span class="hljs-number">89</span> d<span class="hljs-number">0</span>                	mov    %edx,%eax#eax=<span class="hljs-number">14</span><br>  <span class="hljs-attribute">400fd4</span>:	<span class="hljs-number">29</span> f<span class="hljs-number">0</span>                	sub    %esi,%eax#eax=eax-esi=<span class="hljs-number">14</span>-<span class="hljs-number">0</span>=<span class="hljs-number">14</span><br>  <span class="hljs-attribute">400fd6</span>:	<span class="hljs-number">89</span> c<span class="hljs-number">1</span>                	mov    %eax,%ecx#ecx=<span class="hljs-number">14</span><br>  <span class="hljs-attribute">400fd8</span>:	c<span class="hljs-number">1</span> e<span class="hljs-number">9</span> <span class="hljs-number">1</span>f             	shr    $<span class="hljs-number">0</span>x<span class="hljs-number">1</span>f,%ecx#logic shift right <span class="hljs-number">31</span> bits ecx=<span class="hljs-number">0</span><br>  <span class="hljs-attribute">400fdb</span>:	<span class="hljs-number">01</span> c<span class="hljs-number">8</span>                	add    %ecx,%eax#eax=<span class="hljs-number">14</span><br>  <span class="hljs-attribute">400fdd</span>:	d<span class="hljs-number">1</span> f<span class="hljs-number">8</span>                	sar    %eax #mathematical shift right <span class="hljs-number">1</span> bit,rax=<span class="hljs-number">14</span>&gt;&gt;<span class="hljs-number">1</span>=<span class="hljs-number">7</span> <br>  <span class="hljs-attribute">400fdf</span>:	<span class="hljs-number">8</span>d <span class="hljs-number">0</span>c <span class="hljs-number">30</span>             	lea    (%rax,%rsi,<span class="hljs-number">1</span>),%ecx #ecx=rax+rsi=<span class="hljs-number">7</span>+<span class="hljs-number">0</span>=<span class="hljs-number">7</span><br>  <span class="hljs-attribute">400fe2</span>:	<span class="hljs-number">39</span> f<span class="hljs-number">9</span>                	cmp    %edi,%ecx #edi&lt;=ecx<br>  <span class="hljs-attribute">400fe4</span>:	<span class="hljs-number">7</span>e <span class="hljs-number">0</span>c                	jle    <span class="hljs-number">400</span>ff<span class="hljs-number">2</span> &lt;func<span class="hljs-number">4</span>+<span class="hljs-number">0</span>x<span class="hljs-number">24</span>&gt;<br>  <span class="hljs-attribute">400fe6</span>:	<span class="hljs-number">8</span>d <span class="hljs-number">51</span> ff             	lea    -<span class="hljs-number">0</span>x<span class="hljs-number">1</span>(%rcx),%edx<br>  <span class="hljs-attribute">400fe9</span>:	e<span class="hljs-number">8</span> e<span class="hljs-number">0</span> ff ff ff       	callq  <span class="hljs-number">400</span>fce &lt;func<span class="hljs-number">4</span>&gt;<br>  <span class="hljs-attribute">400fee</span>:	<span class="hljs-number">01</span> c<span class="hljs-number">0</span>                	add    %eax,%eax<br>  <span class="hljs-attribute">400ff0</span>:	eb <span class="hljs-number">15</span>                	jmp    <span class="hljs-number">401007</span> &lt;func<span class="hljs-number">4</span>+<span class="hljs-number">0</span>x<span class="hljs-number">39</span>&gt;<br>  <span class="hljs-attribute">400ff2</span>:	b<span class="hljs-number">8</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>x<span class="hljs-number">0</span>,%eax<br>  <span class="hljs-attribute">400ff7</span>:	<span class="hljs-number">39</span> f<span class="hljs-number">9</span>                	cmp    %edi,%ecx<br>  <span class="hljs-attribute">400ff9</span>:	<span class="hljs-number">7</span>d <span class="hljs-number">0</span>c                	jge    <span class="hljs-number">401007</span> &lt;func<span class="hljs-number">4</span>+<span class="hljs-number">0</span>x<span class="hljs-number">39</span>&gt;<br>  <span class="hljs-attribute">400ffb</span>:	<span class="hljs-number">8</span>d <span class="hljs-number">71</span> <span class="hljs-number">01</span>             	lea    <span class="hljs-number">0</span>x<span class="hljs-number">1</span>(%rcx),%esi<br>  <span class="hljs-attribute">400ffe</span>:	e<span class="hljs-number">8</span> cb ff ff ff       	callq  <span class="hljs-number">400</span>fce &lt;func<span class="hljs-number">4</span>&gt;<br>  <span class="hljs-attribute">401003</span>:	<span class="hljs-number">8</span>d <span class="hljs-number">44</span> <span class="hljs-number">00</span> <span class="hljs-number">01</span>          	lea    <span class="hljs-number">0</span>x<span class="hljs-number">1</span>(%rax,%rax,<span class="hljs-number">1</span>),%eax<br>  <span class="hljs-attribute">401007</span>:	<span class="hljs-number">48</span> <span class="hljs-number">83</span> c<span class="hljs-number">4</span> <span class="hljs-number">08</span>          	add    $<span class="hljs-number">0</span>x<span class="hljs-number">8</span>,%rsp<br>  <span class="hljs-attribute">40100b</span>:	c<span class="hljs-number">3</span>                   	retq   <br></code></pre></td></tr></table></figure></li>
+</ul>
+<h1 id="phase-5"><a href="#phase-5" class="headerlink" title="phase_5"></a>phase_5</h1><p>输入一个字符串，长度为6，对于每个字符，取低四位，然后加上0x4024b0进行偏移，这样操作得到的字符串与地址为0x40245e的字符串进行比较（x/s查看可以得到是“flyer”）</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">0000000000401062</span> &lt;phase_<span class="hljs-number">5</span>&gt;:#rdi保存输入的字符串<br>  <span class="hljs-attribute">401062</span>:	<span class="hljs-number">53</span>                   	push   %rbx<br>  <span class="hljs-attribute">401063</span>:	<span class="hljs-number">48</span> <span class="hljs-number">83</span> ec <span class="hljs-number">20</span>          	sub    $<span class="hljs-number">0</span>x<span class="hljs-number">20</span>,%rsp #<span class="hljs-number">2</span>*<span class="hljs-number">16</span>=<span class="hljs-number">32</span> bytes<br>  <span class="hljs-attribute">401067</span>:	<span class="hljs-number">48</span> <span class="hljs-number">89</span> fb             	mov    %rdi,%rbx #rbx保存输入的字符串<br>  <span class="hljs-attribute">40106a</span>:	<span class="hljs-number">64</span> <span class="hljs-number">48</span> <span class="hljs-number">8</span>b <span class="hljs-number">04</span> <span class="hljs-number">25</span> <span class="hljs-number">28</span> <span class="hljs-number">00</span> 	mov    %fs:<span class="hljs-number">0</span>x<span class="hljs-number">28</span>,%rax #堆栈金丝雀<br>  <span class="hljs-attribute">401071</span>:	<span class="hljs-number">00</span> <span class="hljs-number">00</span> <br>  <span class="hljs-attribute">401073</span>:	<span class="hljs-number">48</span> <span class="hljs-number">89</span> <span class="hljs-number">44</span> <span class="hljs-number">24</span> <span class="hljs-number">18</span>       	mov    %rax,<span class="hljs-number">0</span>x<span class="hljs-number">18</span>(%rsp)#放在rsp+<span class="hljs-number">0</span>x<span class="hljs-number">18</span>位置<br>  <span class="hljs-attribute">401078</span>:	<span class="hljs-number">31</span> c<span class="hljs-number">0</span>                	xor    %eax,%eax #eax清零<br>  <span class="hljs-attribute">40107a</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">9</span>c <span class="hljs-number">02</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	callq  <span class="hljs-number">40131</span>b &lt;string_length&gt;<br>  <span class="hljs-attribute">40107f</span>:	<span class="hljs-number">83</span> f<span class="hljs-number">8</span> <span class="hljs-number">06</span>             	cmp    $<span class="hljs-number">0</span>x<span class="hljs-number">6</span>,%eax#这里输入的字符串的长度必须是<span class="hljs-number">6</span><br>  <span class="hljs-attribute">401082</span>:	<span class="hljs-number">74</span> <span class="hljs-number">4</span>e                	je     <span class="hljs-number">4010</span>d<span class="hljs-number">2</span> &lt;phase_<span class="hljs-number">5</span>+<span class="hljs-number">0</span>x<span class="hljs-number">70</span>&gt;<br>  <span class="hljs-attribute">401084</span>:	e<span class="hljs-number">8</span> b<span class="hljs-number">1</span> <span class="hljs-number">03</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	callq  <span class="hljs-number">40143</span>a &lt;explode_bomb&gt;<br>  <span class="hljs-attribute">401089</span>:	eb <span class="hljs-number">47</span>                	jmp    <span class="hljs-number">4010</span>d<span class="hljs-number">2</span> &lt;phase_<span class="hljs-number">5</span>+<span class="hljs-number">0</span>x<span class="hljs-number">70</span>&gt;<br>  <span class="hljs-attribute">40108b</span>:	<span class="hljs-number">0</span>f b<span class="hljs-number">6</span> <span class="hljs-number">0</span>c <span class="hljs-number">03</span>          	movzbl (%rbx,%rax,<span class="hljs-number">1</span>),%ecx#ecx=rbx+rax=rbx，也即是输入的字符串的位置<br>  <span class="hljs-attribute">40108f</span>:	<span class="hljs-number">88</span> <span class="hljs-number">0</span>c <span class="hljs-number">24</span>             	mov    %cl,(%rsp)#cl是ecx的低<span class="hljs-number">8</span>位，也即是第一个字符<br>  <span class="hljs-attribute">401092</span>:	<span class="hljs-number">48</span> <span class="hljs-number">8</span>b <span class="hljs-number">14</span> <span class="hljs-number">24</span>          	mov    (%rsp),%rdx#把第一个字符赋给rdx<br>  <span class="hljs-attribute">401096</span>:	<span class="hljs-number">83</span> e<span class="hljs-number">2</span> <span class="hljs-number">0</span>f             	and    $<span class="hljs-number">0</span>xf,%edx#与运算 f=<span class="hljs-number">1111</span> 这里是只取低<span class="hljs-number">4</span>位<br>  <span class="hljs-comment"># 使用x/16xb 0x4024b0查看数组内的值，这里相当于把输入的字符取低四位，加上0x4024b0进行偏移得到flyers相同的字符串</span><br>  <span class="hljs-attribute">401099</span>:	<span class="hljs-number">0</span>f b<span class="hljs-number">6</span> <span class="hljs-number">92</span> b<span class="hljs-number">0</span> <span class="hljs-number">24</span> <span class="hljs-number">40</span> <span class="hljs-number">00</span> 	movzbl <span class="hljs-number">0</span>x<span class="hljs-number">4024</span>b<span class="hljs-number">0</span>(%rdx),%edx #edx=<span class="hljs-number">0</span>x<span class="hljs-number">73</span><br>  <span class="hljs-attribute">4010a0</span>:	<span class="hljs-number">88</span> <span class="hljs-number">54</span> <span class="hljs-number">04</span> <span class="hljs-number">10</span>          	mov    %dl,<span class="hljs-number">0</span>x<span class="hljs-number">10</span>(%rsp,%rax,<span class="hljs-number">1</span>)#dl=<span class="hljs-number">0</span>x<span class="hljs-number">73</span> -&gt; (rsp+rax+<span class="hljs-number">0</span>x<span class="hljs-number">10</span>)<br>  <span class="hljs-attribute">4010a4</span>:	<span class="hljs-number">48</span> <span class="hljs-number">83</span> c<span class="hljs-number">0</span> <span class="hljs-number">01</span>          	add    $<span class="hljs-number">0</span>x<span class="hljs-number">1</span>,%rax # rax : <span class="hljs-number">0</span>-&gt;<span class="hljs-number">1</span><br>  <span class="hljs-attribute">4010a8</span>:	<span class="hljs-number">48</span> <span class="hljs-number">83</span> f<span class="hljs-number">8</span> <span class="hljs-number">06</span>          	cmp    $<span class="hljs-number">0</span>x<span class="hljs-number">6</span>,%rax <br>  <span class="hljs-attribute">4010ac</span>:	<span class="hljs-number">75</span> dd                	jne    <span class="hljs-number">40108</span>b &lt;phase_<span class="hljs-number">5</span>+<span class="hljs-number">0</span>x<span class="hljs-number">29</span>&gt;<br>  <span class="hljs-attribute">4010ae</span>:	c<span class="hljs-number">6</span> <span class="hljs-number">44</span> <span class="hljs-number">24</span> <span class="hljs-number">16</span> <span class="hljs-number">00</span>       	movb   $<span class="hljs-number">0</span>x<span class="hljs-number">0</span>,<span class="hljs-number">0</span>x<span class="hljs-number">16</span>(%rsp)<br>  <span class="hljs-attribute">4010b3</span>:	be <span class="hljs-number">5</span>e <span class="hljs-number">24</span> <span class="hljs-number">40</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>x<span class="hljs-number">40245</span>e,%esi<br>  <span class="hljs-attribute">4010b8</span>:	<span class="hljs-number">48</span> <span class="hljs-number">8</span>d <span class="hljs-number">7</span>c <span class="hljs-number">24</span> <span class="hljs-number">10</span>       	lea    <span class="hljs-number">0</span>x<span class="hljs-number">10</span>(%rsp),%rdi<br>  <span class="hljs-attribute">4010bd</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">76</span> <span class="hljs-number">02</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	callq  <span class="hljs-number">401338</span> &lt;strings_not_equal&gt;<br>  <span class="hljs-attribute">4010c2</span>:	<span class="hljs-number">85</span> c<span class="hljs-number">0</span>                	test   %eax,%eax<br>  <span class="hljs-attribute">4010c4</span>:	<span class="hljs-number">74</span> <span class="hljs-number">13</span>                	je     <span class="hljs-number">4010</span>d<span class="hljs-number">9</span> &lt;phase_<span class="hljs-number">5</span>+<span class="hljs-number">0</span>x<span class="hljs-number">77</span>&gt;<br>  <span class="hljs-attribute">4010c6</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">6</span>f <span class="hljs-number">03</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	callq  <span class="hljs-number">40143</span>a &lt;explode_bomb&gt;<br>  <span class="hljs-attribute">4010cb</span>:	<span class="hljs-number">0</span>f <span class="hljs-number">1</span>f <span class="hljs-number">44</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	nopl   <span class="hljs-number">0</span>x<span class="hljs-number">0</span>(%rax,%rax,<span class="hljs-number">1</span>)<br>  <span class="hljs-attribute">4010d0</span>:	eb <span class="hljs-number">07</span>                	jmp    <span class="hljs-number">4010</span>d<span class="hljs-number">9</span> &lt;phase_<span class="hljs-number">5</span>+<span class="hljs-number">0</span>x<span class="hljs-number">77</span>&gt;<br>  <span class="hljs-attribute">4010d2</span>:	b<span class="hljs-number">8</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>x<span class="hljs-number">0</span>,%eax#eax置为<span class="hljs-number">0</span><br>  <span class="hljs-attribute">4010d7</span>:	eb b<span class="hljs-number">2</span>                	jmp    <span class="hljs-number">40108</span>b &lt;phase_<span class="hljs-number">5</span>+<span class="hljs-number">0</span>x<span class="hljs-number">29</span>&gt;<br>  <span class="hljs-attribute">4010d9</span>:	<span class="hljs-number">48</span> <span class="hljs-number">8</span>b <span class="hljs-number">44</span> <span class="hljs-number">24</span> <span class="hljs-number">18</span>       	mov    <span class="hljs-number">0</span>x<span class="hljs-number">18</span>(%rsp),%rax<br>  <span class="hljs-attribute">4010de</span>:	<span class="hljs-number">64</span> <span class="hljs-number">48</span> <span class="hljs-number">33</span> <span class="hljs-number">04</span> <span class="hljs-number">25</span> <span class="hljs-number">28</span> <span class="hljs-number">00</span> 	xor    %fs:<span class="hljs-number">0</span>x<span class="hljs-number">28</span>,%rax<br>  <span class="hljs-attribute">4010e5</span>:	<span class="hljs-number">00</span> <span class="hljs-number">00</span> <br>  <span class="hljs-attribute">4010e7</span>:	<span class="hljs-number">74</span> <span class="hljs-number">05</span>                	je     <span class="hljs-number">4010</span>ee &lt;phase_<span class="hljs-number">5</span>+<span class="hljs-number">0</span>x<span class="hljs-number">8</span>c&gt;<br>  <span class="hljs-attribute">4010e9</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">42</span> fa ff ff       	callq  <span class="hljs-number">400</span>b<span class="hljs-number">30</span> &lt;__stack_chk_fail@plt&gt;<br>  <span class="hljs-attribute">4010ee</span>:	<span class="hljs-number">48</span> <span class="hljs-number">83</span> c<span class="hljs-number">4</span> <span class="hljs-number">20</span>          	add    $<span class="hljs-number">0</span>x<span class="hljs-number">20</span>,%rsp<br>  <span class="hljs-attribute">4010f2</span>:	<span class="hljs-number">5</span>b                   	pop    %rbx<br>  <span class="hljs-attribute">4010f3</span>:	c<span class="hljs-number">3</span>                   	retq   <br></code></pre></td></tr></table></figure>
+<h1 id="phase-6"><a href="#phase-6" class="headerlink" title="phase_6"></a>phase_6</h1><p>拖进ida F5得到C语言代码，下面是我加了注释的版本：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">int</span> __cdecl <span class="hljs-title">phase_6</span><span class="hljs-params">(<span class="hljs-keyword">char</span> *s)</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-keyword">signed</span> <span class="hljs-keyword">int</span> v1; <span class="hljs-comment">// edi</span><br>  <span class="hljs-keyword">int</span> i; <span class="hljs-comment">// ebx</span><br>  <span class="hljs-keyword">signed</span> <span class="hljs-keyword">int</span> v3; <span class="hljs-comment">// edi</span><br>  _DWORD *v4; <span class="hljs-comment">// esi</span><br>  <span class="hljs-keyword">int</span> j; <span class="hljs-comment">// ebx</span><br>  <span class="hljs-keyword">int</span> v6; <span class="hljs-comment">// esi</span><br>  <span class="hljs-keyword">signed</span> <span class="hljs-keyword">int</span> v7; <span class="hljs-comment">// edi</span><br>  <span class="hljs-keyword">int</span> v8; <span class="hljs-comment">// eax</span><br>  <span class="hljs-keyword">int</span> v9; <span class="hljs-comment">// esi</span><br>  <span class="hljs-keyword">signed</span> <span class="hljs-keyword">int</span> v10; <span class="hljs-comment">// edi</span><br>  <span class="hljs-keyword">int</span> result; <span class="hljs-comment">// eax</span><br>  <span class="hljs-keyword">int</span> v12; <span class="hljs-comment">// [esp+0h] [ebp-58h]</span><br>  <span class="hljs-keyword">int</span> v13; <span class="hljs-comment">// [esp+4h] [ebp-54h]</span><br>  <span class="hljs-keyword">int</span> v14; <span class="hljs-comment">// [esp+8h] [ebp-50h]</span><br>  <span class="hljs-keyword">int</span> v15; <span class="hljs-comment">// [esp+Ch] [ebp-4Ch]</span><br>  <span class="hljs-keyword">int</span> v16; <span class="hljs-comment">// [esp+24h] [ebp-34h]</span><br>  <span class="hljs-keyword">int</span> v17[<span class="hljs-number">6</span>]; <span class="hljs-comment">// [esp+28h] [ebp-30h]</span><br>  <span class="hljs-keyword">int</span> v18[<span class="hljs-number">6</span>]; <span class="hljs-comment">// [esp+40h] [ebp-18h]</span><br><br>  read_six_numbers(s, (<span class="hljs-keyword">int</span>)v18);<span class="hljs-comment">//读入六个数字</span><br>  v1 = <span class="hljs-number">0</span>;<br><br>  <span class="hljs-keyword">do</span><br>  &#123;<br>    <span class="hljs-keyword">if</span> ( (<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span>)(v18[v1] - <span class="hljs-number">1</span>) &gt; <span class="hljs-number">5</span> ) <span class="hljs-comment">//这六个数字必须都是小于等于6</span><br>      explode_bomb(v12, v13, v14, v15);<br>    <span class="hljs-keyword">for</span> ( i = v1 + <span class="hljs-number">1</span>; i &lt;= <span class="hljs-number">5</span>; ++i )<br>    &#123;<br>      <span class="hljs-keyword">if</span> ( v18[v1] == v18[i] )<span class="hljs-comment">//两两不相等，也即是1~6各出现一个</span><br>        explode_bomb(v12, v13, v14, v15);<br>    &#125;<br>    ++v1;<br>  &#125;<br>  <span class="hljs-keyword">while</span> ( v1 &lt;= <span class="hljs-number">5</span> );<br>  <span class="hljs-comment">// 六个数字都是小于等于6且互不相等</span><br>  v3 = <span class="hljs-number">0</span>;<br>  <span class="hljs-keyword">do</span><br>  &#123;<br>    v4 = &amp;node1;<span class="hljs-comment">//v4是一个node1结构体的地址</span><br>    <span class="hljs-keyword">for</span> ( j = <span class="hljs-number">1</span>; j &lt; v18[v3]; ++j )<br>      v4 = (_DWORD *)v4[<span class="hljs-number">2</span>];<span class="hljs-comment">//v4[2]存储的是指向下一个结构体的指针</span><br>    v17[v3++] = (<span class="hljs-keyword">int</span>)v4;<span class="hljs-comment">//v17存储排序后的结构体链表的地址</span><br>  &#125;<br>  <span class="hljs-keyword">while</span> ( v3 &lt;= <span class="hljs-number">5</span> );<br><br>  v6 = v17[<span class="hljs-number">0</span>];<br>  v16 = v17[<span class="hljs-number">0</span>];<br>  v7 = <span class="hljs-number">1</span>;<br>  <span class="hljs-keyword">do</span><br>  &#123;<br>    v8 = v17[v7];<br>    *(_DWORD *)(v6 + <span class="hljs-number">8</span>) = v8;<span class="hljs-comment">// +0  +4  +8分别对应：储存的值     序号     下一个结构体的地址，这里是把排序后的结构体链接起来</span><br>    v6 = v8;<br>    ++v7;<br>  &#125;<br>  <span class="hljs-keyword">while</span> ( v7 &lt;= <span class="hljs-number">5</span> );<br><br>  *(_DWORD *)(v8 + <span class="hljs-number">8</span>) = <span class="hljs-number">0</span>;<span class="hljs-comment">//最后一个节点，指向的地址是0</span><br>  v9 = v16;<br>  v10 = <span class="hljs-number">0</span>;<br>  <span class="hljs-keyword">do</span><br>  &#123;<br>    result = *(_DWORD *)v9;<br>    <span class="hljs-keyword">if</span> ( *(_DWORD *)v9 &lt; **(_DWORD **)(v9 + <span class="hljs-number">8</span>) )<span class="hljs-comment">//排序后的结构体链表需要满足：存储的值是从大到小排序</span><br>      explode_bomb(v12, v13, v14, v15);<br>    v9 = *(_DWORD *)(v9 + <span class="hljs-number">8</span>);<br>    ++v10;<br>  &#125;<br>  <span class="hljs-keyword">while</span> ( v10 &lt;= <span class="hljs-number">4</span> );<br><br>  <span class="hljs-keyword">return</span> result;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>观察node结构体的特点，发现node[0]表示存储的值，node[1]表示node编号，node[2] 存储下一个node的地址</p>
+<figure class="highlight maxima"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs maxima">.data:<span class="hljs-number">0804B254</span> node3           db  2Dh ; -<br>.data:<span class="hljs-number">0804B255</span>                 db    <span class="hljs-number">1</span><br>.data:<span class="hljs-number">0804B256</span>                 db    <span class="hljs-number">0</span><br>.data:<span class="hljs-number">0804B257</span>                 db    <span class="hljs-number">0</span><br>.data:<span class="hljs-number">0804B258</span>                 db    <span class="hljs-number">3</span><br>.data:<span class="hljs-number">0804B259</span>                 db    <span class="hljs-number">0</span><br>.data:<span class="hljs-number">0804B25A</span>                 db    <span class="hljs-number">0</span><br>.data:<span class="hljs-number">0804B25B</span>                 db    <span class="hljs-number">0</span><br>.data:<span class="hljs-number">0804B25C</span>                 db  48h ; H<br>.data:<span class="hljs-number">0804B25D</span>                 db <span class="hljs-number">0B2h</span><br>.data:<span class="hljs-number">0804B25E</span>                 db    <span class="hljs-number">4</span><br>.data:<span class="hljs-number">0804B25F</span>                 db    <span class="hljs-number">8</span><br>.data:<span class="hljs-number">0804B260</span>                 public node2<br>.data:<span class="hljs-number">0804B260</span> node2           db <span class="hljs-number">0D5h</span><br>.data:<span class="hljs-number">0804B261</span>                 db    <span class="hljs-number">2</span><br>.data:<span class="hljs-number">0804B262</span>                 db    <span class="hljs-number">0</span><br>.data:<span class="hljs-number">0804B263</span>                 db    <span class="hljs-number">0</span><br>.data:<span class="hljs-number">0804B264</span>                 db    <span class="hljs-number">2</span><br>.data:<span class="hljs-number">0804B265</span>                 db    <span class="hljs-number">0</span><br>.data:<span class="hljs-number">0804B266</span>                 db    <span class="hljs-number">0</span><br>.data:<span class="hljs-number">0804B267</span>                 db    <span class="hljs-number">0</span><br>.data:<span class="hljs-number">0804B268</span>                 db  54h ; T<br>.data:<span class="hljs-number">0804B269</span>                 db <span class="hljs-number">0B2h</span><br>.data:<span class="hljs-number">0804B26A</span>                 db    <span class="hljs-number">4</span><br>.data:<span class="hljs-number">0804B26B</span>                 db    <span class="hljs-number">8</span><br></code></pre></td></tr></table></figure>
+<p>我们输入的数字将会把结构体进行排序，排序结果最终需要满足的要求是，结构体存储的值必须要从大到小排列，因此我们找出所有的node存储的值即可</p>
+<table>
+<thead>
+<tr>
+<th>结构体编号</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>储存值</td>
+<td>0xFD</td>
+<td>0x2D5</td>
+<td>0x12D</td>
+<td>0x3E5</td>
+<td>0xD4</td>
+<td>0x1B0</td>
+</tr>
+<tr>
+<td>排序后编号</td>
+<td>5</td>
+<td>2</td>
+<td>4</td>
+<td>1</td>
+<td>6</td>
+<td>3</td>
+</tr>
+</tbody></table>
+<p>4 2 6 3 1 5</p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CSAPP/" class="category-chain-item">CSAPP</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>CSAPP-lab2：Bomb-lab</div>
+      <div>http://gls.show/p/44962f68/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年9月4日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/b7f87e4d/" title="Makefile：一个简单的入门">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Makefile：一个简单的入门</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/beacb7b3/" title="装机记录">
+                        <span class="hidden-mobile">装机记录</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

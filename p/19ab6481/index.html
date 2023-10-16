@@ -1,0 +1,941 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="本文记录了我基于hexo构建的博客的一些配置 编辑器typora  设置font matter，也即是两行---框起来的代码12345678---title: hexo博客配置tags: [hexo]typora-root-url: ..&#x2F;abbrlink: 19ab6481index_img: &#x2F;image&#x2F;hexo.jpegcategories: --- 设置picgo上传图片  obsid">
+<meta property="og:type" content="article">
+<meta property="og:title" content="hexo博客配置 all in one">
+<meta property="og:url" content="http://gls.show/p/19ab6481/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="本文记录了我基于hexo构建的博客的一些配置 编辑器typora  设置font matter，也即是两行---框起来的代码12345678---title: hexo博客配置tags: [hexo]typora-root-url: ..&#x2F;abbrlink: 19ab6481index_img: &#x2F;image&#x2F;hexo.jpegcategories: --- 设置picgo上传图片  obsid">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/hexo.jpeg">
+<meta property="article:published_time" content="2023-07-26T02:09:09.981Z">
+<meta property="article:modified_time" content="2023-10-16T04:55:02.157Z">
+<meta property="article:author" content="郭佳明">
+<meta property="article:tag" content="hexo">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/hexo.jpeg">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>hexo博客配置 all in one - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="hexo博客配置 all in one"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-07-26 10:09" pubdate>
+          2023年7月26日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          4.6k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          15 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">hexo博客配置 all in one</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2023年10月16日 下午
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <p><img src="/image/hexo.jpeg" srcset="/img/loading.gif" lazyload></p>
+<p>本文记录了我基于hexo构建的博客的一些配置</p>
+<h1 id="编辑器"><a href="#编辑器" class="headerlink" title="编辑器"></a>编辑器</h1><p>typora</p>
+<ul>
+<li>设置font matter，也即是两行<code>---</code>框起来的代码<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs c">---<br>title: hexo博客配置<br>tags: [hexo]<br>typora-root-url: ../<br>abbrlink: <span class="hljs-number">19</span>ab6481<br>index_img: /image/hexo.jpeg<br>categories: <br>---<br></code></pre></td></tr></table></figure></li>
+<li>设置picgo上传图片</li>
+</ul>
+<p>obsidian</p>
+<ul>
+<li>配置主题（默认主题实在是太丑了）<ul>
+<li>推荐minimal和Blue Topaz</li>
+<li>搭配style setting插件可以定制一下主题</li>
+</ul>
+</li>
+<li>配置图片路径</li>
+<li>设置-》新建笔记的存放位置-》当前文件所在的文件夹</li>
+<li>设置-》核心插件-》打开工作区、斜杠命令</li>
+<li>open 已存在的文件夹(也即是_post文件夹)，如果打开的是hexo根文件夹那么图片无法正常显示</li>
+<li>模板功能：在_post文件夹下新建一个template文件夹，创建文件并在其中写入你想快速插入的内容，这样在新建文件之后可以快速生成模板内容，从而避免命令行运行hexo n “title”命令</li>
+</ul>
+<p>我的ob的效果：<br><img src="https://img.gls.show/img/20230810160851.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="评论功能"><a href="#评论功能" class="headerlink" title="评论功能"></a>评论功能</h1><p>可以使用多种插件支持博客评论功能，比如：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://valine.js.org/configuration.html">Valine (opens new window)</a>:基于 LeanCloud</li>
+<li><a target="_blank" rel="noopener" href="https://waline.js.org/">Waline (opens new window)</a>: 从 Valine 衍生而来，额外增加了服务端和多种功能</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/gitalk/gitalk">Gitalk (opens new window)</a>: 基于 GitHub Issues</li>
+<li><a target="_blank" rel="noopener" href="https://utteranc.es/">Utterances (opens new window)</a>: 基于 GitHub Issues</li>
+</ul>
+<p>我选择了utterances<del>因为比较简单</del></p>
+<h2 id="部署步骤"><a href="#部署步骤" class="headerlink" title="部署步骤"></a>部署步骤</h2><ol>
+<li>安装utterances<br>安装页面：<a target="_blank" rel="noopener" href="https://github.com/apps/utterances">GitHub Apps - utterances · GitHub</a>，选择你的github仓库即可</li>
+</ol>
+<p>2.更改fluid配置</p>
+<p><a target="_blank" rel="noopener" href="https://hexo.fluid-dev.com/docs/guide/#%E5%8D%9A%E5%AE%A2%E6%A0%87%E9%A2%98">配置指南 | Hexo Fluid 用户手册</a></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs yaml">  <span class="hljs-comment"># 评论插件</span><br>  <span class="hljs-comment"># Comment plugin</span><br>  <span class="hljs-attr">comments:</span><br>    <span class="hljs-attr">enable:</span> <span class="hljs-literal">true</span> <span class="hljs-comment"># change into true</span><br>    <span class="hljs-comment"># 指定的插件，需要同时设置对应插件的必要参数</span><br>    <span class="hljs-comment"># The specified plugin needs to set the necessary parameters at the same time</span><br>    <span class="hljs-comment"># Options: utterances | disqus | gitalk | valine | waline | changyan | livere | remark42 | twikoo | cusdis</span><br>    <span class="hljs-attr">type:</span> <span class="hljs-string">utterances</span><br><br><br><span class="hljs-comment">#---------------------------</span><br><span class="hljs-comment"># 评论插件</span><br><span class="hljs-comment"># Comment plugins</span><br><span class="hljs-comment">#</span><br><span class="hljs-comment"># 开启评论需要先设置上方 `post: comments: enable: true`，然后根据 `type` 设置下方对应的评论插件参数</span><br><span class="hljs-comment"># Enable comments need to be set `post: comments: enable: true`, then set the corresponding comment plugin parameters below according to `type`</span><br><span class="hljs-comment">#---------------------------</span><br><br><span class="hljs-comment"># Utterances</span><br><span class="hljs-comment"># 基于 GitHub Issues</span><br><span class="hljs-comment"># Based on GitHub Issues</span><br><span class="hljs-comment"># See: https://utteranc.es</span><br><span class="hljs-attr">utterances:</span><br>  <span class="hljs-attr">repo:</span> <span class="hljs-string">LaPhilosophie/gls.show</span> <span class="hljs-comment"># add repo info</span><br>  <span class="hljs-attr">issue_term:</span> <span class="hljs-string">pathname</span><br>  <span class="hljs-attr">label:</span> <span class="hljs-string">utterances</span><br>  <span class="hljs-attr">theme:</span> <span class="hljs-string">github-light</span><br>  <span class="hljs-attr">theme_dark:</span> <span class="hljs-string">github-dark</span><br>  <span class="hljs-attr">crossorigin:</span> <span class="hljs-string">anonymous</span><br><br></code></pre></td></tr></table></figure>
+
+<h1 id="图片外链"><a href="#图片外链" class="headerlink" title="图片外链"></a>图片外链</h1><p>给博客生成图片外链是一个比较头疼的事情，一般的常规做法是部署一个图床服务，把图片上床到图床，然后将图片链接复制到博客中</p>
+<p>比如：</p>
+<ul>
+<li>使用七牛云+picgo的组合</li>
+<li>使用lychee等图床部署在自己的服务器上，生成外链</li>
+</ul>
+<p>但是一旦迁移服务器或者更换域名，外链都会挂掉</p>
+<p>我的个人配置是，在每个md文件开头写上：</p>
+<figure class="highlight arcade"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs arcade">typora-root-url: ../<br><br>index_img: <span class="hljs-regexp">/image/</span>wdnmd.jpg<br></code></pre></td></tr></table></figure>
+
+<p>这样就可以使用上一个目录的文件夹/image下的wdnmd.jpg的图片</p>
+<p>2023-6-13图片外链更新：</p>
+<p>使用腾讯云对象存储+PicGo+typora</p>
+<ul>
+<li>腾讯云：配置cdn、ssl、证书、域名、存储桶等，按照腾讯云官网的文档即可（这个证书认证和cdn还是比较蛋疼的）</li>
+<li>PicGo：安装并配置客户端</li>
+<li>typora：插入图片时上传图片</li>
+</ul>
+<p><img src="https://img.gls.show/img/20230816112629.png" srcset="/img/loading.gif" lazyload></p>
+<p>相关的id和key信息可以在控制台看到：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://console.cloud.tencent.com/cam/capi">https://console.cloud.tencent.com/cam/capi</a></li>
+<li><a target="_blank" rel="noopener" href="https://console.cloud.tencent.com/cos/bucket">https://console.cloud.tencent.com/cos/bucket</a></li>
+</ul>
+<h1 id="迁移博客到新电脑"><a href="#迁移博客到新电脑" class="headerlink" title="迁移博客到新电脑"></a>迁移博客到新电脑</h1><p>将原先电脑的hexo文件夹打成压缩包，然后复制到新电脑，解压（我选择C:\hexo目录）</p>
+<blockquote>
+<p>这里不直接复制的原因是，会改变博客文件的最近修改时间，从而导致顺序混乱</p>
+</blockquote>
+<ul>
+<li>下载nodejs<ul>
+<li>建议使用scoop下载</li>
+</ul>
+</li>
+<li>使用npm下载hexo<ul>
+<li><code>npm install -g hexo-cli</code></li>
+</ul>
+</li>
+</ul>
+<p>命令行进入到C:\hexo目录</p>
+<figure class="highlight excel"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs excel">hexo <span class="hljs-built_in">n</span> <span class="hljs-string">&quot;&quot;</span><br>hexo d -g<br></code></pre></td></tr></table></figure>
+
+<h1 id="文章外链优化"><a href="#文章外链优化" class="headerlink" title="文章外链优化"></a>文章外链优化</h1><p>hexo默认的文章链接是域名/年/月/日，复制之后由于汉字转义会有很长的乱码出现，不利于阅读</p>
+<p>可以使用<a target="_blank" rel="noopener" href="https://github.com/Rozbo/hexo-abbrlink">插件</a>解决</p>
+<p>修改<code>_config.yml</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs c">permalink: p/:abbrlink/<br><br>abbrlink:<br>  alg: crc32  #算法: crc16(<span class="hljs-keyword">default</span>) <span class="hljs-keyword">and</span> crc32<br>  rep: hex    #进制: dec(<span class="hljs-keyword">default</span>) <span class="hljs-keyword">and</span> hex<br></code></pre></td></tr></table></figure>
+
+<p>优化后的博客链接：<a href="https://gls.show/p/f9220a0b/">https://gls.show/p/f9220a0b/</a></p>
+<h1 id="配置网站ssl"><a href="#配置网站ssl" class="headerlink" title="配置网站ssl"></a>配置网站ssl</h1><p>腾讯云控制台-》申请免费证书-》我的证书-》下载-》选择nginx-》将gls.show.key和gls.show_bundle.crt文件通过scp或者filezilla复制到/etc/nginx目录下-》sudo nginx -s reload或者sudo service nginx restart</p>
+<h1 id="seo优化"><a href="#seo优化" class="headerlink" title="seo优化"></a>seo优化</h1><p>生成sitemap</p>
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs mipsasm">npm <span class="hljs-keyword">install </span>hexo-generator-sitemap --save<br>npm <span class="hljs-keyword">install </span>hexo-generator-<span class="hljs-keyword">baidu-sitemap </span>--save<br></code></pre></td></tr></table></figure>
+
+
+<h1 id="将博客同时推送到两个git"><a href="#将博客同时推送到两个git" class="headerlink" title="将博客同时推送到两个git"></a>将博客同时推送到两个git</h1><p>可参考官方手册：<a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment">https://hexo.io/docs/one-command-deployment</a></p>
+<p>You can use multiple deployers. Hexo will execute each deployer in order.</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-bullet">-</span> <span class="hljs-attr">type:</span> <span class="hljs-string">git</span><br>  <span class="hljs-attr">repository :</span> <span class="hljs-string">git@gls.show:xx/hexo.git</span><br>  <span class="hljs-attr">branch:</span> <span class="hljs-string">master</span><br><span class="hljs-bullet">-</span> <span class="hljs-attr">type:</span> <span class="hljs-string">git</span><br>  <span class="hljs-attr">repository :</span> <span class="hljs-string">git@github.com:LaPhilosophie/blog.git</span><br>  <span class="hljs-attr">branch:</span> <span class="hljs-string">master</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="发表博客"><a href="#发表博客" class="headerlink" title="发表博客"></a>发表博客</h1><p>新建博客</p>
+<figure class="highlight excel"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs excel">hexo <span class="hljs-built_in">n</span> <span class="hljs-string">&quot;My New Post&quot;</span><br></code></pre></td></tr></table></figure>
+
+<p>本地测试</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">hexo s</span><br></code></pre></td></tr></table></figure>
+
+<p>创建静态页面</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">hexo g</span><br></code></pre></td></tr></table></figure>
+
+<p>部署页面</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">hexo d</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="设置文章属性"><a href="#设置文章属性" class="headerlink" title="设置文章属性"></a>设置文章属性</h1><p>是否可见：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs dart"><span class="hljs-keyword">hide</span>: <span class="hljs-keyword">false</span>/<span class="hljs-keyword">true</span><br></code></pre></td></tr></table></figure>
+
+<p>设置置顶：<br>可以在文章开头 Front-matter (opens new window)中配置 sticky 属性。sticky 数值越大，该文章越靠前，达到类似于置顶的效果，其他未设置的文章依然按默认排序</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">sticky</span>: <span class="hljs-number">100</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="免密部署"><a href="#免密部署" class="headerlink" title="免密部署"></a>免密部署</h1><p>将<code>wdnmd.pub</code>放在git用户的.ssh文件夹下的authorized_keys中</p>
+<p>本地：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-built_in">eval</span> $(ssh-agent)<br><br>ssh-add ~<span class="hljs-regexp">/.ssh/</span>wdnmd<br></code></pre></td></tr></table></figure>
+
+
+
+<h1 id="emoji"><a href="#emoji" class="headerlink" title="emoji"></a>emoji</h1><ul>
+<li><p>想要在博客中插入emoji，可以使用网站<a target="_blank" rel="noopener" href="https://emoji.muan.co/">https://emoji.muan.co/</a></p>
+<ul>
+<li>该网站已被墙😅</li>
+</ul>
+</li>
+<li><p>曾尝试过Markdown自带的emoji，在你本地的md文件中是可以看到的，但是在网页中无法显示</p>
+</li>
+</ul>
+<p>emoji.muan.co 效果测试：</p>
+<p>🚠🚅✈️🚒</p>
+<h1 id="增加网页js"><a href="#增加网页js" class="headerlink" title="增加网页js"></a>增加网页js</h1><p>比如增加动态彩带效果：</p>
+<p>在_config.fluid中添加</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;/js/caidai.js&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>在<code>Hexo\source\js</code>文件夹中增加<code>caidai.js</code>文件，写入<a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/bynotes/texiao/source/js/caidai.js">网址中内容</a></p>
+<h1 id="使用-vscode-写Markdown"><a href="#使用-vscode-写Markdown" class="headerlink" title="使用 vscode 写Markdown"></a>使用 vscode 写Markdown</h1><ul>
+<li>安装插件：Markdown image 、Markdown preview</li>
+<li>更改图片目录为../image</li>
+<li>在hexo/source目录打开vscode，不可以在_post目录打开vscode，否则无法显示图片</li>
+</ul>
+<h1 id="写文章原则"><a href="#写文章原则" class="headerlink" title="写文章原则"></a>写文章原则</h1><ul>
+<li>多文字、少图</li>
+<li>用ASCII替代图<ul>
+<li><a target="_blank" rel="noopener" href="https://asciiflow.com/">https://asciiflow.com/</a></li>
+<li><a target="_blank" rel="noopener" href="https://textik.com/">https://textik.com/</a></li>
+</ul>
+</li>
+</ul>
+<h1 id="踩到的坑"><a href="#踩到的坑" class="headerlink" title="踩到的坑"></a>踩到的坑</h1><ul>
+<li>报错：<code>fatal: not a git repository (or any of the parent directories): .git</code>。解决方案：删除hexo目录下的.deploy_git文件夹</li>
+<li>md文件开头的几个选项，比如<code>tags:</code>后面要留一个空格才可以正确解析，不然会导致无法部署</li>
+<li>出现如下报错：<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs c">kex_exchange_identification: Connection closed by remote host<br>Connection closed by <span class="hljs-number">20.205</span><span class="hljs-number">.243</span><span class="hljs-number">.166</span> port <span class="hljs-number">22</span><br>fatal: Could <span class="hljs-keyword">not</span> read from remote repository.<br>Please make sure you have the correct access rights<br><span class="hljs-keyword">and</span> the repository exists.<br><br>FATAL &#123;<br>  err: Error: Spawn failed<br>      at ChildProcess.&lt;anonymous&gt; (C:\Hexo\node_modules\hexo-util\lib\spawn.js:<span class="hljs-number">51</span>:<span class="hljs-number">21</span>)<br>      at ChildProcess.emit (node:events:<span class="hljs-number">390</span>:<span class="hljs-number">28</span>)<br>      at ChildProcess.cp.emit (C:\Hexo\node_modules\cross-spawn\lib\enoent.js:<span class="hljs-number">34</span>:<span class="hljs-number">29</span>)<br>      at Process.ChildProcess._handle.onexit (node:internal/child_process:<span class="hljs-number">290</span>:<span class="hljs-number">12</span>) &#123;<br>    code: <span class="hljs-number">128</span><br>  &#125;<br>&#125; Something<span class="hljs-number">&#x27;</span>s wrong. Maybe you can find the solution here: %s https:<span class="hljs-comment">//hexo.io/docs/troubleshooting.html</span><br></code></pre></td></tr></table></figure>
+<ul>
+<li>解决：在<code>~/.ssh/config</code>中如下配置：<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs c">Host github.com<br>Hostname ssh.github.com<br>IdentityFile <span class="hljs-string">&quot;C:\Users\GuoJiaming\.ssh\wdnmd&quot;</span><br>Port <span class="hljs-number">443</span><br></code></pre></td></tr></table></figure>
+<h1 id="导航栏颜色"><a href="#导航栏颜色" class="headerlink" title="导航栏颜色"></a>导航栏颜色</h1></li>
+</ul>
+</li>
+</ul>
+<p> navbar_bg_color: “#153b6e”</p>
+<h1 id="博客留言板"><a href="#博客留言板" class="headerlink" title="博客留言板"></a>博客留言板</h1><p>//todo</p>
+<h1 id="一些参考"><a href="#一些参考" class="headerlink" title="一些参考"></a>一些参考</h1><p><a target="_blank" rel="noopener" href="https://bbs.huaweicloud.com/blogs/226867">https://bbs.huaweicloud.com/blogs/226867</a><br><a target="_blank" rel="noopener" href="https://emoryhuang.cn/blog/1729600336.html">https://emoryhuang.cn/blog/1729600336.html</a></p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/hexo/">#hexo</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>hexo博客配置 all in one</div>
+      <div>http://gls.show/p/19ab6481/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年7月26日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/e32f19d0/" title="hvv面试知识点扫盲">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">hvv面试知识点扫盲</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/135735d/" title="SEED-lab：Public-Key Infrastructure (PKI) Lab">
+                        <span class="hidden-mobile">SEED-lab：Public-Key Infrastructure (PKI) Lab</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
