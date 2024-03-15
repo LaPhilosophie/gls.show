@@ -16,16 +16,16 @@
   <meta name="author" content="郭佳明">
   <meta name="keywords" content="">
   
-    <meta name="description" content="FundamentalsProgram Misuse环境配置 题目在dojos里面 workspace提供一个容器内的vscode  通过执行&#x2F;challenge&#x2F;babysuid程序，我们可以将某一命令设置为setuid程序。比如在level1中，你运行&#x2F;challenge&#x2F;babysuid程序后，就会将cat设置为setuid程序（每个官卡将不同的二进制文件设置为setuid程序），这样的话">
+    <meta name="description" content="总结在做完本节后，你将会：  熟悉linux命令的使用 知晓假设某命令对应的二进制文件是suid程序的情况下，可以如何得到flag。这些命令包括但是不限于： ssh-keygen（怪起来了） Makefile这个或许有用：GTFOBinsGitHub - GTFOBins&#x2F;GTFOBins.github.io: GTFOBins is a curated list of Unix binarie">
 <meta property="og:type" content="article">
-<meta property="og:title" content="pwn college 刷题记录">
+<meta property="og:title" content="pwn college 刷题记录：fundamental-program misuse">
 <meta property="og:url" content="http://gls.show/p/7b0851b2/index.html">
 <meta property="og:site_name" content="郭佳明的博客">
-<meta property="og:description" content="FundamentalsProgram Misuse环境配置 题目在dojos里面 workspace提供一个容器内的vscode  通过执行&#x2F;challenge&#x2F;babysuid程序，我们可以将某一命令设置为setuid程序。比如在level1中，你运行&#x2F;challenge&#x2F;babysuid程序后，就会将cat设置为setuid程序（每个官卡将不同的二进制文件设置为setuid程序），这样的话">
+<meta property="og:description" content="总结在做完本节后，你将会：  熟悉linux命令的使用 知晓假设某命令对应的二进制文件是suid程序的情况下，可以如何得到flag。这些命令包括但是不限于： ssh-keygen（怪起来了） Makefile这个或许有用：GTFOBinsGitHub - GTFOBins&#x2F;GTFOBins.github.io: GTFOBins is a curated list of Unix binarie">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://gls.show/image/pwn-college.png">
-<meta property="article:published_time" content="2023-04-19T15:45:47.291Z">
-<meta property="article:modified_time" content="2023-04-28T12:48:04.020Z">
+<meta property="article:published_time" content="2023-07-26T02:09:10.005Z">
+<meta property="article:modified_time" content="2024-03-07T10:11:59.973Z">
 <meta property="article:author" content="郭佳明">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://gls.show/image/pwn-college.png">
@@ -34,7 +34,7 @@
     <meta name="referrer" content="no-referrer-when-downgrade">
   
   
-  <title>pwn college 刷题记录 - 郭佳明的博客</title>
+  <title>pwn college 刷题记录：fundamental-program misuse - 郭佳明的博客</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -185,7 +185,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="pwn college 刷题记录"></span>
+            <span id="subtitle" data-typed-text="pwn college 刷题记录：fundamental-program misuse"></span>
           
         </div>
 
@@ -196,8 +196,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2023-04-19 23:45" pubdate>
-          2023年4月19日 晚上
+        <time datetime="2023-07-26 10:09" pubdate>
+          2023年7月26日 上午
         </time>
       </span>
     
@@ -209,7 +209,7 @@
         <i class="iconfont icon-chart"></i>
         
           <!-- compatible with older versions-->
-          5.7k 字
+          6.3k 字
         
       </span>
     
@@ -221,7 +221,7 @@
         
         
           <!-- compatible with older versions-->
-          18 分钟
+          20 分钟
         
       </span>
     
@@ -267,13 +267,13 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">pwn college 刷题记录</h1>
+            <h1 style="display: none">pwn college 刷题记录：fundamental-program misuse</h1>
             
               <p class="note note-info">
                 
                   
                     <!-- compatible with older versions-->
-                    本文最后更新于：2023年4月28日 晚上
+                    本文最后更新于：2024年3月7日 晚上
                   
                 
               </p>
@@ -281,23 +281,48 @@
             <div class="markdown-body">
               
               <p><img src="/image/pwn-college.png" srcset="/img/loading.gif" lazyload></p>
-<h1 id="Fundamentals"><a href="#Fundamentals" class="headerlink" title="Fundamentals"></a>Fundamentals</h1><h2 id="Program-Misuse"><a href="#Program-Misuse" class="headerlink" title="Program Misuse"></a><a target="_blank" rel="noopener" href="https://dojo.pwn.college/fundamentals/program-misuse">Program Misuse</a></h2><h3 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h3><ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>在做完本节后，你将会：</p>
+<ul>
+<li>熟悉linux命令的使用</li>
+<li>知晓假设<strong>某命令对应的二进制文件是suid程序的情况下</strong>，可以如何得到flag。这些命令包括但是不限于：<ul>
+<li>ssh-keygen（怪起来了）</li>
+<li>Makefile<br>这个或许有用：<a target="_blank" rel="noopener" href="https://gtfobins.github.io/">GTFOBins</a><br><a target="_blank" rel="noopener" href="https://github.com/GTFOBins/GTFOBins.github.io">GitHub - GTFOBins/GTFOBins.github.io: GTFOBins is a curated list of Unix binaries that can be used to bypass local security restrictions in misconfigured systems</a><h2 id="Lectures-and-Reading"><a href="#Lectures-and-Reading" class="headerlink" title="Lectures and Reading"></a>Lectures and Reading</h2></li>
+</ul>
+</li>
+</ul>
+<p>通过YouTube视频和slides的方式，讲解了</p>
+<ul>
+<li>linux命令行</li>
+<li>文件、进程</li>
+<li>软硬链接、管道</li>
+<li>suid的基本原理</li>
+<li>suid攻击的缓解措施</li>
+</ul>
+<h3 id="mitigation"><a href="#mitigation" class="headerlink" title="mitigation"></a>mitigation</h3><ul>
+<li>eUID（Effective User ID）：表示正在执行命令的进程的有效用户ID。</li>
+<li>rUID（Real User ID）：表示正在执行命令的进程的真实用户ID。</li>
+</ul>
+<p>在这种情况下，如果<code>/bin/sh</code>被设置为SUID权限（suid标志被设置，即eUID为0但rUID不为0），它将降低权限到rUID。也就是说，eUID将被设置为rUID的值，而rUID不为0。</p>
+<p>为了禁用这种行为，可以使用<code>sh -p</code>命令来执行<code>/bin/sh</code>。<code>-p</code>选项将使<code>/bin/sh</code>保持SUID权限，而不会降低为rUID。</p>
+<h2 id="Program-Misuse"><a href="#Program-Misuse" class="headerlink" title="Program Misuse"></a><a target="_blank" rel="noopener" href="https://dojo.pwn.college/fundamentals/program-misuse">Program Misuse</a></h2><h3 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h3><ul>
 <li>题目在dojos里面</li>
 <li>workspace提供一个容器内的vscode</li>
 </ul>
-<p>通过执行/challenge/babysuid程序，我们可以将某一命令设置为setuid程序。比如在level1中，你运行/challenge/babysuid程序后，就会将cat设置为setuid程序（每个官卡将不同的二进制文件设置为setuid程序），这样的话你在运行cat的时候会得到root的权限，从而得到/flag的内容</p>
+<p>通过执行提供的/challenge/babysuid程序，我们可以将某一命令设置为setuid程序（尽管它之前不是）。比如，在level1中，在你运行/challenge/babysuid程序后，就会将cat设置为setuid程序（每个官卡将不同的二进制文件设置为setuid程序），这样的话你在运行cat的时候会得到root的权限，从而得到/flag的内容</p>
 <p>我们可以把babysuid程序放到ida看一下，它本质上是执行了chmod函数</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">int</span> __cdecl <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-keyword">int</span> argc, <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> **argv, <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> **envp)</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Welcome to %s!\n\n&quot;</span>, *argv);<br>  <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;This challenge is part of a series of programs that&quot;</span>);<br>  <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;exposes you to very simple programs that let you directly read the flag.&quot;</span>);<br>  <span class="hljs-keyword">if</span> ( chmod(<span class="hljs-string">&quot;/usr/bin/head&quot;</span>, <span class="hljs-number">04755u</span>) )<br>    __assert_fail(<span class="hljs-string">&quot;chmod(\&quot;/usr/bin/head\&quot;, 04755) == 0&quot;</span>, <span class="hljs-string">&quot;&lt;stdin&gt;&quot;</span>, <span class="hljs-number">0xD</span>u, <span class="hljs-string">&quot;main&quot;</span>);<br>  <span class="hljs-built_in">puts</span>(byte_20DB);<br>  <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;I just set the SUID bit on /usr/bin/head.&quot;</span>);<br>  <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;Try to use it to read the flag!&quot;</span>);<br>  <span class="hljs-built_in">puts</span>(byte_20DB);<br>  <span class="hljs-built_in">printf</span>(<br>    <span class="hljs-string">&quot;IMPORTANT: make sure to run me (%s) every time that you restart\n&quot;</span><br>    <span class="hljs-string">&quot;this challenge container to make sure that I set the SUID bit on /usr/bin/head!\n&quot;</span>,<br>    *argv);<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
 
-<h3 id="略"><a href="#略" class="headerlink" title="略"></a>略</h3><ul>
+
+
+<h2 id="略"><a href="#略" class="headerlink" title="略"></a>略</h2><ul>
 <li>emacs的退出命令：c-x，c-c</li>
 <li>od（octal dump）</li>
 <li>hd（hex dump）</li>
 <li>xxd</li>
 </ul>
-<h3 id="level6"><a href="#level6" class="headerlink" title="level6"></a>level6</h3><p>sort将文件的每一行作为一个单位，相互比较，比较原则是从首字符向后，依次按ASCII码值进行比较，最后将他们按升序输出</p>
+<h2 id="level6"><a href="#level6" class="headerlink" title="level6"></a>level6</h2><p>sort将文件的每一行作为一个单位，相互比较，比较原则是从首字符向后，依次按ASCII码值进行比较，最后将他们按升序输出</p>
 <p>由于flag只有一行，因此直接sort即可</p>
-<h3 id="level7"><a href="#level7" class="headerlink" title="level7"></a>level7</h3><figure class="highlight gauss"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs gauss"><span class="hljs-built_in">rev</span> /flag | <span class="hljs-built_in">rev</span><br></code></pre></td></tr></table></figure>
+<h2 id="level7"><a href="#level7" class="headerlink" title="level7"></a>level7</h2><figure class="highlight gauss"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs gauss"><span class="hljs-built_in">rev</span> /flag | <span class="hljs-built_in">rev</span><br></code></pre></td></tr></table></figure>
 
 <h2 id="level14"><a href="#level14" class="headerlink" title="level14"></a>level14</h2><p>base64同理</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">base32 /flag | base32 -d <br>pwn.college&#123;gxSMD4Ps0hot1Rq1Zs1MNCY9f51.0lN1EDL1cTMzEzW&#125;<br></code></pre></td></tr></table></figure>
@@ -356,10 +381,7 @@
 <h2 id="level26"><a href="#level26" class="headerlink" title="level26"></a>level26</h2><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs powershell"><span class="hljs-variable">$</span> <span class="hljs-built_in">cat</span> Makefile <br>read_flag:<br>        <span class="hljs-built_in">cat</span> /flag<br><br><span class="hljs-variable">$</span> make read_flag <br><span class="hljs-built_in">cat</span> /flag<br>pwn.college&#123;MG<span class="hljs-literal">-nUq6j7A43o21RPF_4o7wfED8</span>.<span class="hljs-number">0</span>FO2EDL1cTMzEzW&#125;<br></code></pre></td></tr></table></figure>
 
 
-
-
-
-<h2 id="level-51"><a href="#level-51" class="headerlink" title="level-51"></a>level-51</h2><p>ssh-keygen -D选项可以加载指定的动态链接库</p>
+<h2 id="略-1"><a href="#略-1" class="headerlink" title="略"></a>略</h2><h2 id="level-51"><a href="#level-51" class="headerlink" title="level-51"></a>level-51</h2><p>ssh-keygen -D选项可以加载指定的动态链接库</p>
 <figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs jboss-cli">ssh-keygen -D <span class="hljs-string">./lib_inje.so</span><br></code></pre></td></tr></table></figure>
 
 <p>我们需要编译出一个动态链接库，其中的函数需要加上<code>__attribute__((constructor))</code>关键字，这样的话，加载库的时候就会自动运行该函数，从而获取setuid的值</p>
@@ -405,7 +427,7 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>pwn college 刷题记录</div>
+      <div>pwn college 刷题记录：fundamental-program misuse</div>
       <div>http://gls.show/p/7b0851b2/</div>
     </div>
     <div class="license-meta">
@@ -418,7 +440,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2023年4月19日</div>
+          <div>2023年7月26日</div>
         </div>
       
       
@@ -448,9 +470,9 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/p/2c54864f/" title="CSAPP-lab：malloc lab">
+                      <a href="/p/f57f952b/" title="pwnable.kr 刷题记录">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">CSAPP-lab：malloc lab</span>
+                        <span class="hidden-mobile">pwnable.kr 刷题记录</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
@@ -458,8 +480,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/p/f57f952b/" title="pwnable.kr 刷题记录">
-                        <span class="hidden-mobile">pwnable.kr 刷题记录</span>
+                      <a href="/p/5bb7293b/" title="PhD之路">
+                        <span class="hidden-mobile">PhD之路</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

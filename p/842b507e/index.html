@@ -16,16 +16,16 @@
   <meta name="author" content="郭佳明">
   <meta name="keywords" content="">
   
-    <meta name="description" content="tldr 太长不看版本  下载zip文件： 1wget https:&#x2F;&#x2F;github.com&#x2F;p4gefau1t&#x2F;trojan-go&#x2F;releases&#x2F;download&#x2F;v0.10.6&#x2F;trojan-go-linux-amd64.zip  解压： 123mkdir trojan-gounzip *.zip -d trojan-go  编辑yaml文件： 1cd trojan-go&#x2F; &amp;&amp;a">
+    <meta name="description" content="为什么使用这种方案 Trojan的好处  Trojan不使用自定义的加密协议来隐藏自身，而是使用特征明显的TLS协议(TLS&#x2F;SSL)，使得流量看起来与正常的HTTPS网站相同。也就是说，如果别的梯子是加密（让别人看不出你的流量内容），那么Trojan就是伪装（看起来和普通的HTTPS流量一样） 对于被动检测，Trojan协议的流量与HTTPS流量的特征和行为完全一致。而HTTPS流量占据了目前互">
 <meta property="og:type" content="article">
 <meta property="og:title" content="使用traojan-go和proxychans实现服务器代理">
 <meta property="og:url" content="http://gls.show/p/842b507e/index.html">
 <meta property="og:site_name" content="郭佳明的博客">
-<meta property="og:description" content="tldr 太长不看版本  下载zip文件： 1wget https:&#x2F;&#x2F;github.com&#x2F;p4gefau1t&#x2F;trojan-go&#x2F;releases&#x2F;download&#x2F;v0.10.6&#x2F;trojan-go-linux-amd64.zip  解压： 123mkdir trojan-gounzip *.zip -d trojan-go  编辑yaml文件： 1cd trojan-go&#x2F; &amp;&amp;a">
+<meta property="og:description" content="为什么使用这种方案 Trojan的好处  Trojan不使用自定义的加密协议来隐藏自身，而是使用特征明显的TLS协议(TLS&#x2F;SSL)，使得流量看起来与正常的HTTPS网站相同。也就是说，如果别的梯子是加密（让别人看不出你的流量内容），那么Trojan就是伪装（看起来和普通的HTTPS流量一样） 对于被动检测，Trojan协议的流量与HTTPS流量的特征和行为完全一致。而HTTPS流量占据了目前互">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://gls.show/image/default.png">
-<meta property="article:published_time" content="2022-09-04T06:32:56.812Z">
-<meta property="article:modified_time" content="2022-11-06T15:18:58.094Z">
+<meta property="article:published_time" content="2023-07-26T02:09:10.037Z">
+<meta property="article:modified_time" content="2024-01-17T07:12:30.870Z">
 <meta property="article:author" content="郭佳明">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://gls.show/image/default.png">
@@ -196,8 +196,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2022-09-04 14:32" pubdate>
-          2022年9月4日 下午
+        <time datetime="2023-07-26 10:09" pubdate>
+          2023年7月26日 上午
         </time>
       </span>
     
@@ -209,7 +209,7 @@
         <i class="iconfont icon-chart"></i>
         
           <!-- compatible with older versions-->
-          1.7k 字
+          1.8k 字
         
       </span>
     
@@ -273,17 +273,35 @@
                 
                   
                     <!-- compatible with older versions-->
-                    本文最后更新于：2022年11月6日 晚上
+                    本文最后更新于：2024年1月17日 下午
                   
                 
               </p>
             
             <div class="markdown-body">
               
-              <h1 id="tldr"><a href="#tldr" class="headerlink" title="tldr"></a>tldr</h1><blockquote>
+              <h1 id="为什么使用这种方案"><a href="#为什么使用这种方案" class="headerlink" title="为什么使用这种方案"></a>为什么使用这种方案</h1><ul>
+<li><p>Trojan的好处</p>
+<ul>
+<li>Trojan不使用自定义的加密协议来隐藏自身，而是使用特征明显的TLS协议(TLS/SSL)，使得流量看起来与正常的HTTPS网站相同。也就是说，如果别的梯子是加密（让别人看不出你的流量内容），那么Trojan就是伪装（看起来和普通的HTTPS流量一样）</li>
+<li>对于被动检测，Trojan协议的流量与HTTPS流量的特征和行为完全一致。而HTTPS流量占据了目前互联网流量的一半以上，且TLS握手成功后流量均为密文，几乎不存在可行方法从其中分辨出Trojan协议流量。</li>
+</ul>
+</li>
+<li><p>proxychains的好处</p>
+<ul>
+<li>proxychains可以指定一些shell命令是否走代理。一般情况下运行代理后会把HTTPS的代理服务器以环境变量的形式写到系统配置文件中，但是这样的话无法对所有的命令行命令进行代理，比如ssh、git等命令可能会无法使用代理。安装了proxychains之后就可以使用<code>proxychains git clone xxx</code>指定git命令走代理</li>
+<li>要注意到proxychains只能允许tcp和dns协议通过代理隧道，因此ping命令作为不使用应用层协议而是直接使用ip协议的命令，使用proxychains是无效的</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs markdown">About proxychains tool:<br><span class="hljs-bullet">   *</span> It&#x27;s a proxifier.<br><span class="hljs-bullet">   *</span> Latest version: 3.1<br><span class="hljs-bullet">   *</span> Dedicated OS: Linux and other Unices.<br><span class="hljs-bullet">   *</span> Allows TCP and DNS tunneling through proxies.<br><span class="hljs-bullet">   *</span> Supports HTTP, SOCKS4 and SOCKS5 proxy servers.<br><span class="hljs-bullet">   *</span> Different proxy types can be mixed in the same chain.<br><span class="hljs-bullet">   *</span> Proxy chain: user-defined list of proxies chained together.<br>  Usability :<br><span class="hljs-bullet">      *</span> Run any program through proxy server.<br><span class="hljs-bullet">      *</span> Access the Internet from behind a restrictive firewall.<br><span class="hljs-bullet">      *</span> Hide your IP<br><span class="hljs-bullet">      *</span> Run SSH, telnet, wget, ftp, apt, vnc, nmap through proxy servers.<br><span class="hljs-bullet">      *</span> Access Intranets (192.168.<span class="hljs-emphasis">*.*</span>/10.<span class="hljs-emphasis">*.*</span>.<span class="hljs-emphasis">*) from outside through reverse proxy.</span><br></code></pre></td></tr></table></figure>
+
+
+<h1 id="tldr"><a href="#tldr" class="headerlink" title="tldr"></a>tldr</h1><blockquote>
 <p>太长不看版本</p>
 </blockquote>
-<p>下载zip文件：</p>
+<p><strong>安装Trojan</strong></p>
+<p>下载Trojan zip文件：</p>
 <figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs awk">wget https:<span class="hljs-regexp">//gi</span>thub.com<span class="hljs-regexp">/p4gefau1t/</span>trojan-go<span class="hljs-regexp">/releases/</span>download<span class="hljs-regexp">/v0.10.6/</span>trojan-go-linux-amd64.zip<br></code></pre></td></tr></table></figure>
 
 <p>解压：</p>
@@ -311,21 +329,8 @@
 <p>检测ip</p>
 <figure class="highlight dos"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs dos">proxychains4 curl myip.ipip.<span class="hljs-built_in">net</span><br></code></pre></td></tr></table></figure>
 
-<h1 id="为什么使用这种方案"><a href="#为什么使用这种方案" class="headerlink" title="为什么使用这种方案"></a>为什么使用这种方案</h1><ul>
-<li><p>Trojan的好处</p>
-<ul>
-<li>Trojan不使用自定义的加密协议来隐藏自身，而是使用特征明显的TLS协议(TLS/SSL)，使得流量看起来与正常的HTTPS网站相同。也就是说，如果别的梯子是加密（让别人看不出你的流量内容），那么Trojan就是伪装（看起来和普通的HTTPS流量一样）</li>
-<li>对于被动检测，Trojan协议的流量与HTTPS流量的特征和行为完全一致。而HTTPS流量占据了目前互联网流量的一半以上，且TLS握手成功后流量均为密文，几乎不存在可行方法从其中分辨出Trojan协议流量。</li>
-</ul>
-</li>
-<li><p>proxychains的好处</p>
-<ul>
-<li>proxychains可以指定一些shell命令是否走代理。一般情况下运行代理后会把HTTPS的代理服务器以环境变量的形式写到系统配置文件中，但是这样的话无法对所有的命令行命令进行代理，比如ssh、git等命令可能会无法使用代理。安装了proxychains之后就可以使用<code>proxychains git clone xxx</code>指定git命令走代理</li>
-<li>要注意到proxychains只能允许tcp和dns协议通过代理隧道，因此ping命令作为不使用应用层协议而是直接使用ip协议的命令，使用proxychains是无效的</li>
-</ul>
-</li>
-</ul>
-<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs markdown">About proxychains tool:<br><span class="hljs-bullet">   *</span> It&#x27;s a proxifier.<br><span class="hljs-bullet">   *</span> Latest version: 3.1<br><span class="hljs-bullet">   *</span> Dedicated OS: Linux and other Unices.<br><span class="hljs-bullet">   *</span> Allows TCP and DNS tunneling through proxies.<br><span class="hljs-bullet">   *</span> Supports HTTP, SOCKS4 and SOCKS5 proxy servers.<br><span class="hljs-bullet">   *</span> Different proxy types can be mixed in the same chain.<br><span class="hljs-bullet">   *</span> Proxy chain: user-defined list of proxies chained together.<br>  Usability :<br><span class="hljs-bullet">      *</span> Run any program through proxy server.<br><span class="hljs-bullet">      *</span> Access the Internet from behind a restrictive firewall.<br><span class="hljs-bullet">      *</span> Hide your IP<br><span class="hljs-bullet">      *</span> Run SSH, telnet, wget, ftp, apt, vnc, nmap through proxy servers.<br><span class="hljs-bullet">      *</span> Access Intranets (192.168.<span class="hljs-emphasis">*.*</span>/10.<span class="hljs-emphasis">*.*</span>.<span class="hljs-emphasis">*) from outside through reverse proxy.</span><br></code></pre></td></tr></table></figure>
+<p><strong>安装proxychains</strong></p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs awk">sudo apt install proxychains4<br>sudo vim <span class="hljs-regexp">/etc/</span>proxychains4.conf <span class="hljs-comment"># 在最后一行按照格式写入ip与端口</span><br></code></pre></td></tr></table></figure>
 
 <h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
 <li><a target="_blank" rel="noopener" href="https://trojan-gfw.github.io/trojan/">https://trojan-gfw.github.io/trojan/</a></li>
@@ -382,7 +387,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2022年9月4日</div>
+          <div>2023年7月26日</div>
         </div>
       
       
@@ -412,9 +417,9 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/p/f1bb17a0/" title="linux文件描述符与inode的关系">
+                      <a href="/p/b8f95159/" title="使用邮箱客户端配置中科院邮箱">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">linux文件描述符与inode的关系</span>
+                        <span class="hidden-mobile">使用邮箱客户端配置中科院邮箱</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
@@ -422,8 +427,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/p/f2031cbb/" title="Linux tty&amp;pty">
-                        <span class="hidden-mobile">Linux tty&amp;pty</span>
+                      <a href="/p/4f2baa62/" title="计算机教育中缺失的一课——Vim">
+                        <span class="hidden-mobile">计算机教育中缺失的一课——Vim</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
