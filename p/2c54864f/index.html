@@ -1,0 +1,987 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="lab说明 下面是对lab说明文档的总结  评测在malloclab-handout.tar发行版中的驱动程序mdriver.c将测试mm.c包的正确性、空间利用率和吞吐量。驱动程序由一组跟踪文件控制，这些文件包含在malloclab-handout.tar分发版中。每个跟踪文件都包含一系列分配、重新分配和释放指令，指示驱动程序以某种顺序调用您的mm_malloc、mm_realloc和mm_fr">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CSAPP-lab：malloc lab">
+<meta property="og:url" content="http://gls.show/p/2c54864f/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="lab说明 下面是对lab说明文档的总结  评测在malloclab-handout.tar发行版中的驱动程序mdriver.c将测试mm.c包的正确性、空间利用率和吞吐量。驱动程序由一组跟踪文件控制，这些文件包含在malloclab-handout.tar分发版中。每个跟踪文件都包含一系列分配、重新分配和释放指令，指示驱动程序以某种顺序调用您的mm_malloc、mm_realloc和mm_fr">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/csapp1.png">
+<meta property="article:published_time" content="2023-06-01T14:22:24.533Z">
+<meta property="article:modified_time" content="2023-06-11T10:49:01.567Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/csapp1.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>CSAPP-lab：malloc lab - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="CSAPP-lab：malloc lab"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-06-01 22:22" pubdate>
+          2023年6月1日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          11k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          36 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">CSAPP-lab：malloc lab</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2023年6月11日 晚上
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <h1 id="lab说明"><a href="#lab说明" class="headerlink" title="lab说明"></a>lab说明</h1><blockquote>
+<p>下面是对lab说明文档的总结</p>
+</blockquote>
+<h2 id="评测"><a href="#评测" class="headerlink" title="评测"></a>评测</h2><p>在<code>malloclab-handout.tar</code>发行版中的驱动程序<code>mdriver.c</code>将测试<code>mm.c</code>包的正确性、空间利用率和吞吐量。驱动程序由一组跟踪文件控制，这些文件包含在<code>malloclab-handout.tar</code>分发版中。每个跟踪文件都包含一系列分配、重新分配和释放指令，指示驱动程序以某种顺序调用您的<code>mm_malloc</code>、<code>mm_realloc</code>和<code>mm_free</code>例程。驱动程序和跟踪文件与我们为您的提交<code>mm.c</code>文件评分时将使用的相同。</p>
+<p>驱动程序<code>mdriver.c</code>接受以下命令行参数：</p>
+<ul>
+<li><code>-t &lt;tracedir&gt;</code>：在目录<code>tracedir</code>而不是<code>config.h</code>中定义的默认目录中查找默认跟踪文件。</li>
+<li><code>-f &lt;tracefile&gt;</code>：使用一个特定的跟踪文件代替默认的跟踪文件集进行测试。</li>
+<li><code>-h</code>：打印命令行参数的摘要。</li>
+<li><code>-l</code>：除了学生的<code>malloc</code>包之外，还运行和测量<code>libc malloc</code>。</li>
+<li><code>-v</code>：详细输出。在紧凑表中打印每个跟踪文件的性能分解。</li>
+<li><code>-V</code>：更详细的输出。在处理每个跟踪文件时打印附加诊断信息。对于确定哪个跟踪文件导致您的<code>malloc</code>包失败很有用。</li>
+</ul>
+<p>运行<code>./mdriver -t ./traces -v</code>，即可使用指定的trace文件夹下的文件进行评测，-v打印性能输出</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs shell">make clean<br><br>make <br><br>./mdriver -t ./traces -v<br></code></pre></td></tr></table></figure>
+
+
+
+<p>原始代码的评测输出：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs c">$ ./mdriver -t ./traces -v<br>Team Name:ateam<br>Member <span class="hljs-number">1</span> :Harry Bovik:bovik@cs.cmu.edu<br>Using <span class="hljs-keyword">default</span> tracefiles in ./traces/<br><span class="hljs-function">Measuring performance with <span class="hljs-title">gettimeofday</span><span class="hljs-params">()</span>.</span><br><span class="hljs-function">ERROR: mem_sbrk failed. Ran out of memory...</span><br><span class="hljs-function">ERROR [trace 4, line 7673]: mm_malloc failed.</span><br><span class="hljs-function">ERROR: mem_sbrk failed. Ran out of memory...</span><br><span class="hljs-function">ERROR [trace 5, line 1662]: mm_malloc failed.</span><br><span class="hljs-function">ERROR: mem_sbrk failed. Ran out of memory...</span><br><span class="hljs-function">ERROR [trace 6, line 1780]: mm_malloc failed.</span><br><span class="hljs-function">ERROR: mem_sbrk failed. Ran out of memory...</span><br><span class="hljs-function">ERROR [trace 9, line 1705]: mm_realloc failed.</span><br><span class="hljs-function">ERROR: mem_sbrk failed. Ran out of memory...</span><br><span class="hljs-function">ERROR [trace 10, line 6562]: mm_realloc failed.</span><br><span class="hljs-function"></span><br><span class="hljs-function">Results <span class="hljs-keyword">for</span> mm <span class="hljs-built_in">malloc</span>:</span><br><span class="hljs-function">trace  valid  util     ops      secs  Kops</span><br><span class="hljs-function"> 0       yes   23%    5694  0.000021268585</span><br><span class="hljs-function"> 1       yes   19%    5848  0.000018332273</span><br><span class="hljs-function"> 2       yes   30%    6648  0.000020339184</span><br><span class="hljs-function"> 3       yes   40%    5380  0.000015349351</span><br><span class="hljs-function"> 4        no     -       -         -     -</span><br><span class="hljs-function"> 5        no     -       -         -     -</span><br><span class="hljs-function"> 6        no     -       -         -     -</span><br><span class="hljs-function"> 7       yes   55%   12000  0.000031382166</span><br><span class="hljs-function"> 8       yes   51%   24000  0.000070340909</span><br><span class="hljs-function"> 9        no     -       -         -     -</span><br><span class="hljs-function">10        no     -       -         -     -</span><br><span class="hljs-function">Total            -       -         -     -</span><br></code></pre></td></tr></table></figure>
+
+<p>看一下short1-bal.rep文件的内容：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">20000</span><br><span class="hljs-attribute">6</span><br><span class="hljs-attribute">12</span><br><span class="hljs-attribute">1</span><br><span class="hljs-attribute">a</span> <span class="hljs-number">0</span> <span class="hljs-number">2040</span><br><span class="hljs-attribute">a</span> <span class="hljs-number">1</span> <span class="hljs-number">2040</span><br><span class="hljs-attribute">f</span> <span class="hljs-number">1</span><br><span class="hljs-attribute">a</span> <span class="hljs-number">2</span> <span class="hljs-number">48</span><br><span class="hljs-attribute">a</span> <span class="hljs-number">3</span> <span class="hljs-number">4072</span><br><span class="hljs-attribute">f</span> <span class="hljs-number">3</span><br><span class="hljs-attribute">a</span> <span class="hljs-number">4</span> <span class="hljs-number">4072</span><br><span class="hljs-attribute">f</span> <span class="hljs-number">0</span><br><span class="hljs-attribute">f</span> <span class="hljs-number">2</span><br><span class="hljs-attribute">a</span> <span class="hljs-number">5</span> <span class="hljs-number">4072</span><br><span class="hljs-attribute">f</span> <span class="hljs-number">4</span><br><span class="hljs-attribute">f</span> <span class="hljs-number">5</span><br><br></code></pre></td></tr></table></figure>
+
+<h2 id="函数说明"><a href="#函数说明" class="headerlink" title="函数说明"></a>函数说明</h2><p>mm.c中有下面几个函数：</p>
+<p>mm_init：执行任何必要的初始化</p>
+<p>mm_malloc：mm_malloc 例程返回指向至少 size 个字节的已分配块有效载荷的指针。整个分配的块应该位于堆区域内并且不应该与任何其他分配的块重叠。由于 libc malloc 始终返回与 8 字节对齐的有效负载指针，因此您的 malloc 实现也应该这样做并始终返回 8 字节对齐的指针。</p>
+<p>mm_free：mm_free 例程释放 ptr 指向的块。它什么都不返回。只有在先前调用 mm_malloc 或 mm_realloc 返回传递的指针 (ptr) 且尚未释放时，此例程才能保证工作。</p>
+<p>mm_realloc：mm_realloc(void *ptr, size_t size) 例程返回一个指向至少 size 个字节的已分配区域的指针</p>
+<p>memlib.c中有我们可以使用的函数</p>
+<ul>
+<li><code>void *mem_sbrk(int incr)</code>: 将堆扩展<code>incr</code>字节，其中<code>incr</code>是正非零整数，并返回指向新分配的堆区域的第一个字节的通用指针。语义与Unix’sbrk函数相同，除了<code>mem_sbrk</code>只接受正的非零整数参数。</li>
+<li><code>void *mem_heap_lo(void)</code>: 返回指向堆中第一个字节的通用指针。</li>
+<li><code>void *mem_heap_hi(void)</code>: 返回指向堆中最后一个字节的通用指针。</li>
+<li><code>size_t mem_heapsize(void)</code>: 返回堆的当前大小(以字节为单位)。</li>
+<li><code>size_t mem_pagesize(void)</code>: 返回系统的页面大小(以字节为单位)(Linux系统为4K)。</li>
+</ul>
+<h2 id="编程规则"><a href="#编程规则" class="headerlink" title="编程规则"></a>编程规则</h2><ul>
+<li>您不应更改<code>mm.c</code>中的任何接口。</li>
+<li>您不应调用任何与内存管理相关的库调用或系统调用。这不包括在您的代码中使用<code>malloc</code>、<code>calloc</code>、<code>free</code>、<code>realloc</code>、<code>sbrk</code>、<code>brk</code>或这些调用的任何变体。</li>
+<li>您不得在<code>mm.c</code>程序中定义任何全局或静态复合数据结构，例如数组、结构、树或列表。但是，您可以在<code>mm.c</code>中声明全局标量变量，例如整数、浮点数和指针。</li>
+<li>为了与返回8字节边界对齐的块的<code>libc malloc</code>包保持一致，您的分配器必须始终返回与8字节边界对齐的指针。驱动程序会为您强制执行此要求。</li>
+</ul>
+<blockquote>
+<p>在实施时，建议分阶段进行。前9个跟踪包含对<code>malloc</code>和<code>free</code>的请求。最后2个跟踪包含对<code>realloc</code>、<code>malloc</code>和<code>free</code>的请求。我们建议您首先让您的<code>malloc</code>和<code>free</code>例程在前9个跟踪上正确有效地工作。只有这样，您才应该将注意力转移到<code>realloc</code>实现上。初学者可以在现有的<code>malloc</code>和<code>free</code>实现之上构建<code>realloc</code>。但是，要获得真正好的性能，您需要构建一个独立的<code>realloc</code>。最后，使用分析器(如gprof)可以帮助您优化性能。</p>
+</blockquote>
+<h1 id="隐式空闲链表实现"><a href="#隐式空闲链表实现" class="headerlink" title="隐式空闲链表实现"></a>隐式空闲链表实现</h1><h2 id="宏"><a href="#宏" class="headerlink" title="宏"></a>宏</h2><p>为了降低复杂性并减少可能的错误，建议将指针算法封装在C预处理器宏中。正如书中提到的，内存管理器中的指针算法令人困惑且容易出错，可以通过为指针操作编写宏来显着降低复杂性</p>
+<table>
+<thead>
+<tr>
+<th>宏名称</th>
+<th>宏定义</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>(*(unsigned int *)(p))</code></td>
+<td>读取地址p处的unsigned int类型的值</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td><code>(*(unsigned int *)(p) = (val))</code></td>
+<td>将unsigned int类型的值val存储到地址p处</td>
+</tr>
+<tr>
+<td>GET_SIZE</td>
+<td><code>(GET(p) &amp; ~0x7)</code></td>
+<td>从地址p处读取unsigned int类型的值，并忽略最后三位，得到块的大小</td>
+</tr>
+<tr>
+<td>GET_ALLOC</td>
+<td><code>(GET(p) &amp; 0x1)</code></td>
+<td>从地址p处读取unsigned int类型的值，并获取最后一位，判断该块是否已分配</td>
+</tr>
+<tr>
+<td>HDRP</td>
+<td><code>((char *)(bp) - WSIZE)</code></td>
+<td>给定块指针bp，计算出该块的头部地址</td>
+</tr>
+<tr>
+<td>FTRP</td>
+<td><code>((char *)(bp) + GET_SIZE(HDRP(bp)) - DSIZE)</code></td>
+<td>给定块指针bp，计算出该块的脚部地址</td>
+</tr>
+<tr>
+<td>NEXT_BLKP</td>
+<td><code>((char *)(bp) + GET_SIZE(((char *)(bp) - WSIZE)))</code></td>
+<td>给定块指针bp，计算出下一个块的地址</td>
+</tr>
+<tr>
+<td>PREV_BLKP</td>
+<td><code>((char *)(bp) - GET_SIZE(((char *)(bp) - DSIZE)))</code></td>
+<td>给定块指针bp，计算出前一个块的地址</td>
+</tr>
+</tbody></table>
+<p>理解上面的宏的前提是理解分配的堆的内存块的结构</p>
+<p><img src="https://cdn.jsdelivr.net/gh/LaPhilosophie/image/img/202305312110226.png" srcset="/img/loading.gif" lazyload></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* single word (4) or double word (8) alignment */</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> ALIGNMENT 8</span><br><br><span class="hljs-comment">/* rounds up to the nearest multiple of ALIGNMENT */</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> ALIGN(size) (((size) + (ALIGNMENT - 1)) &amp; ~0x7) <span class="hljs-comment">// ~0x7是0xFFFFFFF8，这里向上舍入到 8 的倍数</span></span><br><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> SIZE_T_SIZE (ALIGN(sizeof(size_t)))</span><br><br><span class="hljs-comment">/* Basic constants and macros */</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> WSIZE 4             <span class="hljs-comment">/* Word and header/footer size (bytes) */</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> DSIZE 8             <span class="hljs-comment">/* Double word size (bytes) 或者，header+footer的大小*/</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> CHUNKSIZE (1 &lt;&lt; 12) <span class="hljs-comment">/* Extend heap by this amount (bytes) 4096字节*/</span></span><br><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> MAX(x, y) ((x) &gt; (y) ? (x) : (y))</span><br><br><span class="hljs-comment">/* Pack a size and allocated bit into a word */</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> PACK(size, alloc) ((size) | (alloc))</span><br><br><span class="hljs-comment">/* 获取p地址处保存的unsigned int的值 Read and write a word at address p */</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> GET(p) (*(unsigned int *)(p))</span><br><span class="hljs-comment">/* 将val的值以unsigned int存储到p地址处*/</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> PUT(p, val) (*(unsigned int *)(p) = (val))</span><br><br><span class="hljs-comment">/* 读取p地址处保存的unsigned int的值，忽略最后三位 Read the size and allocated fields from address p */</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> GET_SIZE(p) (GET(p) &amp; ~0x7)</span><br><span class="hljs-comment">/* 获取p地址处保存的unsigned int的值的最后一位，也即该块是否分配*/</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> GET_ALLOC(p) (GET(p) &amp; 0x1)</span><br><br><span class="hljs-comment">/* 获取bp地址处对应的块的头部的指针，char *类型，bp：块指针  减：往头部走 加：往脚部走 Given block ptr bp, compute address of its header and footer */</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> HDRP(bp) ((char *)(bp) - WSIZE)</span><br><span class="hljs-comment">/* 获取bp地址处对应的块的脚部的指针，char *类型，要注意，头/脚部保存的大小是一整个块，包含头脚部和payload的所有的大小 */</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> FTRP(bp) ((char *)(bp) + GET_SIZE(HDRP(bp)) - DSIZE)</span><br><br><span class="hljs-comment">/* 获取bp地址处对应的块的下一个块的块指针 Given block ptr bp, compute address of next and previous blocks */</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> NEXT_BLKP(bp) ((char *)(bp) + GET_SIZE(((char *)(bp) - WSIZE)))</span><br><span class="hljs-comment">/* 获取bp地址处对应的块的前一个块的块指针 */</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> PREV_BLKP(bp) ((char *)(bp) - GET_SIZE(((char *)(bp) - DSIZE)))</span><br><br></code></pre></td></tr></table></figure>
+
+<h2 id="mm-init"><a href="#mm-init" class="headerlink" title="mm_init"></a>mm_init</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* </span><br><span class="hljs-comment"> * mm_init - initialize the malloc package.</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">mm_init</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span><br><span class="hljs-function"></span>&#123;<br>        <span class="hljs-comment">/* Create the initial empty heap */</span><br>    <span class="hljs-keyword">if</span> ((heap_listp = mem_sbrk(<span class="hljs-number">4</span> * WSIZE)) == (<span class="hljs-keyword">void</span> *)<span class="hljs-number">-1</span>) &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;<br>    &#125;<br>    PUT(heap_listp, <span class="hljs-number">0</span>);                            <span class="hljs-comment">/* Alignment padding */</span><br>    PUT(heap_listp + (<span class="hljs-number">1</span> * WSIZE), PACK(DSIZE, <span class="hljs-number">1</span>)); <span class="hljs-comment">/* 序言块 头部 8/1 Prologue header */</span><br>    PUT(heap_listp + (<span class="hljs-number">2</span> * WSIZE), PACK(DSIZE, <span class="hljs-number">1</span>)); <span class="hljs-comment">/* 序言块 脚部 8/1 Prologue footer */</span><br>    PUT(heap_listp + (<span class="hljs-number">3</span> * WSIZE), PACK(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>));     <span class="hljs-comment">/* 尾声块 头部 0/1 Epilogue header */</span><br>    heap_listp += (<span class="hljs-number">2</span> * WSIZE);<br><br>    <span class="hljs-comment">/* Extend the empty heap with a free block of CHUNKSIZE bytes */</span><br>    <span class="hljs-keyword">if</span> (extend_heap(CHUNKSIZE / WSIZE) == <span class="hljs-literal">NULL</span>) &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;<br>    &#125;<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>mm_init函数负责堆的初始化工作</p>
+<p>mm_init函数先调用mem_sbrk函数分配堆的初始空间，大小为4个字，依次是</p>
+<ul>
+<li>padding</li>
+<li>序言块 头部 8/1 Prologue header</li>
+<li>序言块 脚部 8/1 Prologue footer</li>
+<li>尾声块 头部 0/1 Epilogue header</li>
+</ul>
+<p>下面看一下mem_sbrk函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* </span><br><span class="hljs-comment"> * mem_sbrk - simple model of the sbrk function. Extends the heap </span><br><span class="hljs-comment"> *    by incr bytes and returns the start address of the new area. In</span><br><span class="hljs-comment"> *    this model, the heap cannot be shrunk.</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> *<span class="hljs-title">mem_sbrk</span><span class="hljs-params">(<span class="hljs-keyword">int</span> incr)</span> </span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">char</span> *old_brk = mem_brk;<br><br>    <span class="hljs-keyword">if</span> ( (incr &lt; <span class="hljs-number">0</span>) || ((mem_brk + incr) &gt; mem_max_addr)) &#123;<br>	errno = ENOMEM;<br>	<span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;ERROR: mem_sbrk failed. Ran out of memory...\n&quot;</span>);<br>	<span class="hljs-keyword">return</span> (<span class="hljs-keyword">void</span> *)<span class="hljs-number">-1</span>;<br>    &#125;<br>    mem_brk += incr;<br>    <span class="hljs-keyword">return</span> (<span class="hljs-keyword">void</span> *)old_brk;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>可以看出，堆的范围是通过mem_brk限制的，堆的增长本质上是将全局变量mem_sbrk增加incr个字节</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">static</span> <span class="hljs-keyword">char</span> *mem_brk;        <span class="hljs-comment">/* points to last byte of heap */</span><br></code></pre></td></tr></table></figure>
+
+<p>mem_sbrk函数返回old_brk，old_brk是堆增长前的的最后一个字节的指针</p>
+<p>之后，在mm_init函数中，使用了四个PUT，对堆的初始空间的四个字进行了初始化工作</p>
+<p>对空堆的初始化完成之后，使用extend_heap函数拓展堆的大小</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> *<span class="hljs-title">extend_heap</span><span class="hljs-params">(<span class="hljs-keyword">size_t</span> words)</span> </span>&#123;<br>    <span class="hljs-keyword">char</span> *bp;<br>    <span class="hljs-keyword">size_t</span> size;<br><br>    <span class="hljs-comment">/* 为了8字节对齐，传入的words应该是2的整数倍，比如2,4,8 以满足8字节倍数的要求 Allocate an even number of words to maintain alignment */</span><br>    size = (words % <span class="hljs-number">2</span>) ? (words + <span class="hljs-number">1</span>) * WSIZE : words * WSIZE;<br>    <span class="hljs-comment">// 调用mem_sbrk 申请size字节的内存，如果失败，返回NULL，bp是指向新申请的内存的底部的指针</span><br>    <span class="hljs-keyword">if</span> ((<span class="hljs-keyword">long</span>)(bp = mem_sbrk(size)) == <span class="hljs-number">-1</span>) <span class="hljs-keyword">return</span> <span class="hljs-literal">NULL</span>;<br><br>    <span class="hljs-comment">/* Initialize free block header/footer and the epilogue header */</span><br>    <span class="hljs-comment">/* 这里bp被当做指向块的指针，put宏将会覆盖尾声块*/</span><br>    <span class="hljs-comment">/* 给新开辟的空间设置头部和脚部，并标记为未分配状态*/</span><br>    PUT(HDRP(bp), PACK(size, <span class="hljs-number">0</span>));         <span class="hljs-comment">/* Free block header */</span><br>    PUT(FTRP(bp), PACK(size, <span class="hljs-number">0</span>));         <span class="hljs-comment">/* Free block footer */</span><br>    <span class="hljs-comment">/* 由于尾声块被覆盖，这里将尾声块放到新开辟空间的后面，作为结束标志*/</span><br>    PUT(HDRP(NEXT_BLKP(bp)), PACK(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>)); <span class="hljs-comment">/* New epilogue header*/</span><br>    <span class="hljs-comment">/* 这里分配了一个新的块，假设前一个块是未分配状态，那么前后两个块需要进行合并 */</span><br>    <span class="hljs-comment">/* coalesce函数返回合并后的空闲块的指针*/</span><br>    <span class="hljs-keyword">return</span> coalesce(bp);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>首先对传入的字进行处理，为了保持8字节对齐，传入的words应该是2的整数倍</li>
+<li>调用mem_sbrk进行堆空间的申请</li>
+<li>给新分配的大小为size的空间进行初始化，将头部和足部设置为size大小，未分配<ul>
+<li>注意到，这里分配新块时将原先的尾声块覆盖了</li>
+</ul>
+</li>
+<li>设置新的尾声块</li>
+<li>调用coalesce函数</li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/LaPhilosophie/image/img/202305312011844.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="mm-free"><a href="#mm-free" class="headerlink" title="mm_free"></a>mm_free</h2><p>该函数释放ptr指向的块的空间</p>
+<ul>
+<li>获取块的大小</li>
+<li>将块的头脚部的标志位都改为0，也即标记为未分配</li>
+<li>将这个块置为空闲，可能会导致合并操作，因此需要调用coalesce函数</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*</span><br><span class="hljs-comment"> * mm_free - Freeing a block does nothing.</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">mm_free</span><span class="hljs-params">(<span class="hljs-keyword">void</span> *ptr)</span></span><br><span class="hljs-function"></span>&#123;   <span class="hljs-comment">/*获取ptr指向的块的大小*/</span><br>    <span class="hljs-keyword">size_t</span> size = GET_SIZE(HDRP(ptr));<br>    <span class="hljs-comment">/*将块的头脚部的标志位都改为0，也即标记为未分配*/</span><br>    PUT(HDRP(ptr), PACK(size, <span class="hljs-number">0</span>));<br>    PUT(FTRP(ptr), PACK(size, <span class="hljs-number">0</span>));<br>    <span class="hljs-comment">/*free操作伴随着四种合并的可能*/</span><br>    coalesce(ptr);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h2 id="coalesce"><a href="#coalesce" class="headerlink" title="coalesce"></a>coalesce</h2><p>块的合并操作，建议配合书上的四个合并情况的配图观赏</p>
+<ul>
+<li>前后块都已分配</li>
+<li>前块已分配，后块未分配</li>
+<li>前块未分配，后块已分配</li>
+<li>前后块都未分配</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* 块的合并操作 */</span><br><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> *<span class="hljs-title">coalesce</span><span class="hljs-params">(<span class="hljs-keyword">void</span> *ptr)</span> </span>&#123;<br>    <span class="hljs-keyword">size_t</span> prev_alloc = GET_ALLOC(FTRP(PREV_BLKP(ptr)));<span class="hljs-comment">//获取前一个块的分配状态</span><br>    <span class="hljs-keyword">size_t</span> next_alloc = GET_ALLOC(HDRP(NEXT_BLKP(ptr)));<span class="hljs-comment">// 获取后一个块的分配状态</span><br>    <span class="hljs-keyword">size_t</span> size = GET_SIZE(HDRP(ptr));<span class="hljs-comment">//获取当前块的大小</span><br>    <br>    <span class="hljs-comment">// 根据前后块的分配状态，进行四种合并操作</span><br>    <span class="hljs-comment">// 1.前后块都已分配</span><br>    <span class="hljs-keyword">if</span> (prev_alloc &amp;&amp; next_alloc) &#123;<br>        <span class="hljs-keyword">return</span> ptr;<br>    &#125;<br>    <span class="hljs-comment">// 2.前块已分配，后块未分配</span><br>    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (prev_alloc &amp;&amp; !next_alloc) &#123;<br>        size += GET_SIZE(HDRP(NEXT_BLKP(ptr)));<span class="hljs-comment">// 当前块的大小+后块的大小</span><br>        PUT(HDRP(ptr), PACK(size, <span class="hljs-number">0</span>));<br>        PUT(FTRP(ptr), PACK(size, <span class="hljs-number">0</span>));<br>    &#125;<br>    <span class="hljs-comment">// 3.前块未分配，后块已分配</span><br>    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (!prev_alloc &amp;&amp; next_alloc) &#123;<br>        size += GET_SIZE(HDRP(PREV_BLKP(ptr)));<span class="hljs-comment">// 当前块的大小+前块的大小</span><br>        PUT(FTRP(ptr), PACK(size, <span class="hljs-number">0</span>));        <span class="hljs-comment">// 合并当前块+前块，更新当前块的头部、脚部、分配状态</span><br>        PUT(HDRP(PREV_BLKP(ptr)),PACK(size, <span class="hljs-number">0</span>));<br>        ptr = PREV_BLKP(ptr);<br>    &#125;<br>    <span class="hljs-comment">// 4.前后块都未分配</span><br>    <span class="hljs-keyword">else</span> &#123;<br>        size += GET_SIZE(HDRP(PREV_BLKP(ptr))) + GET_SIZE(FTRP(NEXT_BLKP(ptr)));<br>        PUT(HDRP(PREV_BLKP(ptr)), PACK(size, <span class="hljs-number">0</span>));<br>        PUT(FTRP(NEXT_BLKP(ptr)), PACK(size, <span class="hljs-number">0</span>));<br>        ptr = PREV_BLKP(ptr);<br>    &#125;<br>    <span class="hljs-keyword">return</span> ptr;<span class="hljs-comment">//返回合并后的块的指针</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+<h2 id="mm-malloc"><a href="#mm-malloc" class="headerlink" title="mm_malloc"></a>mm_malloc</h2><p>看一下lab提供的原始版本的mm_malloc函数，<del>发现这个实现不就是扯淡吗</del>。mm_malloc函数仅仅使用mem_sbrk函数申请对齐后的size大小的堆空间，然后对块写入size值</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* </span><br><span class="hljs-comment"> * mm_malloc - Allocate a block by incrementing the brk pointer.</span><br><span class="hljs-comment"> *     Always allocate a block whose size is a multiple of the alignment.</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> *<span class="hljs-title">mm_malloc</span><span class="hljs-params">(<span class="hljs-keyword">size_t</span> size)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">int</span> newsize = ALIGN(size + SIZE_T_SIZE);<br>    <span class="hljs-keyword">void</span> *p = mem_sbrk(newsize);<br>    <span class="hljs-keyword">if</span> (p == (<span class="hljs-keyword">void</span> *)<span class="hljs-number">-1</span>)<br>	<span class="hljs-keyword">return</span> <span class="hljs-literal">NULL</span>;<br>    <span class="hljs-keyword">else</span> &#123;<br>        *(<span class="hljs-keyword">size_t</span> *)p = size;<br>        <span class="hljs-keyword">return</span> (<span class="hljs-keyword">void</span> *)((<span class="hljs-keyword">char</span> *)p + SIZE_T_SIZE);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>下面的mm_malloc实现增加了：</p>
+<ul>
+<li>特殊size值（0）的处理</li>
+<li>使用find函数在空闲链表中查找合适大小的空闲块</li>
+<li>使用place函数将空闲块分配给请求</li>
+<li>如果没有找到合适大小的空闲块，则需要使用extend_heap函数扩展堆的大小</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* </span><br><span class="hljs-comment"> * mm_malloc - Allocate a block by incrementing the brk pointer.</span><br><span class="hljs-comment"> *     Always allocate a block whose size is a multiple of the alignment.</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> *<span class="hljs-title">mm_malloc</span><span class="hljs-params">(<span class="hljs-keyword">size_t</span> size)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">size_t</span> asize; <span class="hljs-comment">/* Adjust block size */</span>  <span class="hljs-comment">// 调整后的块大小</span><br>    <span class="hljs-keyword">size_t</span> extendsize; <span class="hljs-comment">/* Amount to extend heap if no fit */</span>  <span class="hljs-comment">// 如果没有合适的块，则需要扩展堆的大小</span><br>    <span class="hljs-keyword">char</span> *ptr;<br><br>    <span class="hljs-comment">/* Ignore spurious requests */</span><br>    <span class="hljs-keyword">if</span>(size == <span class="hljs-number">0</span>)&#123;  <span class="hljs-comment">// 如果请求的大小为0，则返回NULL</span><br>        <span class="hljs-keyword">return</span> <span class="hljs-literal">NULL</span>;<br>    &#125;<br><br>    <span class="hljs-comment">/* Adjust block size to include overhead and alignment reqs. */</span><br>    <span class="hljs-keyword">if</span>(size &lt;= DSIZE)&#123;  <span class="hljs-comment">// 如果请求的大小小于等于DSIZE，则将块大小设置为2 * DSIZE</span><br>        asize = <span class="hljs-number">2</span> * DSIZE; <br>    &#125; <span class="hljs-keyword">else</span> &#123;  <span class="hljs-comment">// 否则，将块大小设置为DSIZE的倍数，满足对齐要求</span><br>        asize = DSIZE * ((size + (DSIZE) + (DSIZE - <span class="hljs-number">1</span>)) / DSIZE); <br>    &#125;<br><br>    <span class="hljs-comment">/* Search the free list for a fit */</span><br>    <span class="hljs-keyword">if</span>((ptr = find_fit(asize)) != <span class="hljs-literal">NULL</span>) &#123;  <span class="hljs-comment">// 在空闲链表中查找合适大小的空闲块</span><br>        place(ptr, asize);  <span class="hljs-comment">// 将空闲块分配给请求</span><br>        <span class="hljs-keyword">return</span> ptr;  <span class="hljs-comment">// 返回指向分配的空间的指针</span><br>    &#125;<br><br>    <span class="hljs-comment">/* No fit found. Get more memory and place the block */</span><br>    extendsize = MAX(asize, CHUNKSIZE);  <span class="hljs-comment">// 如果没有找到合适大小的空闲块，则需要扩展堆的大小，扩展的大小为请求大小和一个默认的 CHUNKSIZE 中的较大值</span><br>    <span class="hljs-keyword">if</span>((ptr = extend_heap(extendsize/WSIZE)) == <span class="hljs-literal">NULL</span>) &#123;  <span class="hljs-comment">// 扩展堆的大小，并将新分配的空间划分为一个新的空闲块</span><br>        <span class="hljs-keyword">return</span> <span class="hljs-literal">NULL</span>;  <span class="hljs-comment">// 如果扩展失败，则返回NULL</span><br>    &#125;<br>    place(ptr, asize);  <span class="hljs-comment">// 将新分配的空间分配给请求</span><br>    <span class="hljs-keyword">return</span> ptr;  <span class="hljs-comment">// 返回指向分配的空间的指针</span><br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<h3 id="find-fit"><a href="#find-fit" class="headerlink" title="find_fit"></a>find_fit</h3><p>遍历堆空间，找到一个合适大小的空闲块，并返回指向该空闲块的指针。如果找不到就返回null</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> * <span class="hljs-title">find_fit</span><span class="hljs-params">(<span class="hljs-keyword">ssize_t</span> asize)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">void</span> *bp;<br>    <span class="hljs-comment">/* 遍历空闲链表，寻找合适大小的空闲块 */</span><br>    <span class="hljs-keyword">for</span>(bp = heap_listp; GET_SIZE(HDRP(bp)) &gt; <span class="hljs-number">0</span>; bp = NEXT_BLKP(bp)) &#123;<br>        <span class="hljs-comment">/* 如果找到合适大小的空闲块，则返回指向该空闲块的指针 */</span><br>        <span class="hljs-keyword">if</span>(!GET_ALLOC(HDRP(bp)) &amp;&amp; (asize &lt;= GET_SIZE(HDRP(bp)))) &#123;<br>            <span class="hljs-keyword">return</span> bp;<br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">return</span> <span class="hljs-literal">NULL</span>; <span class="hljs-comment">/* No fit */</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="place"><a href="#place" class="headerlink" title="place"></a>place</h3><p>给定空闲块的指针和需要分配的堆空间的大小，对块进行分配</p>
+<ul>
+<li>如果空闲块的大小减去请求的大小大于等于16个字节（头部4字节、脚部4字节+8字节作为填充），那么就将空闲块分割为两部分</li>
+<li>否则，如果空闲块的大小减去请求的大小小于两个字，那么将整个空闲块分配给请求</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">place</span><span class="hljs-params">(<span class="hljs-keyword">void</span> *bp, <span class="hljs-keyword">size_t</span> asize)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">size_t</span> csize = GET_SIZE(HDRP(bp));  <span class="hljs-comment">// 获取空闲块的大小</span><br>    <span class="hljs-comment">/* 如果空闲块的大小大于请求的大小，则将空闲块分割为两部分，一部分分配给请求，另一部分仍然是空闲块 */</span><br>    <span class="hljs-keyword">if</span>((csize - asize) &gt;= (<span class="hljs-number">2</span> * DSIZE)) &#123;<br>        <span class="hljs-comment">/* 将空闲块分割为两部分，一部分分配给请求，另一部分仍然是空闲块 */</span><br>        PUT(HDRP(bp), PACK(asize, <span class="hljs-number">1</span>));  <span class="hljs-comment">// 设置分配块的头部</span><br>        PUT(FTRP(bp), PACK(asize, <span class="hljs-number">1</span>));  <span class="hljs-comment">// 设置分配块的脚部</span><br>        bp = NEXT_BLKP(bp);  <span class="hljs-comment">// 将指针指向剩余的空闲块</span><br>        PUT(HDRP(bp), PACK(csize - asize, <span class="hljs-number">0</span>));  <span class="hljs-comment">// 设置剩余空闲块的头部</span><br>        PUT(FTRP(bp), PACK(csize - asize, <span class="hljs-number">0</span>));  <span class="hljs-comment">// 设置剩余空闲块的脚部</span><br>    &#125; <span class="hljs-keyword">else</span> &#123;  <span class="hljs-comment">// 否则，将整个空闲块分配给请求</span><br>        PUT(HDRP(bp), PACK(csize, <span class="hljs-number">1</span>));  <span class="hljs-comment">// 设置分配块的头部</span><br>        PUT(FTRP(bp), PACK(csize, <span class="hljs-number">1</span>));  <span class="hljs-comment">// 设置分配块的脚部</span><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h2 id="mm-realloc"><a href="#mm-realloc" class="headerlink" title="mm_realloc"></a>mm_realloc</h2><p>根据文档，该函数具有以下约束。</p>
+<ul>
+<li>如果 ptr 为 NULL，调用等同于 mm_malloc(size)；</li>
+<li>如果 size 等于零，则调用等同于 mm_free(ptr)；</li>
+<li>如果 ptr 不为 NULL，则它必须由先前对 mm malloc 或 mm realloc 的调用返回。调用 mm realloc 将 ptr（旧块）指向的内存块的大小更改为 size bytes 并返回新块的地址。请注意，新块的地址可能与旧块的地址相同，也可能不同，具体取决于您的实现、旧块中的内部碎片量以及 realloc 请求的大小。新块的内容与旧 ptr 块的内容相同，直到新旧大小中的最小值。其他一切都未初始化。</li>
+<li>如果旧块为 8 个字节，新块为 12 个字节，则新块的前 8 个字节与旧块的前 8 个字节相同，最后 4 个字节未初始化。类似地，如果旧块是 8 个字节而新块是 4 个字节，那么新块的内容与旧块的前 4 个字节相同。</li>
+</ul>
+<h1 id="显示空闲链表实现"><a href="#显示空闲链表实现" class="headerlink" title="显示空闲链表实现"></a>显示空闲链表实现</h1><p>//todo</p>
+<p><img src="" srcset="/img/loading.gif" lazyload></p>
+<p>我的博客即将同步至腾讯云开发者社区，邀请大家一同入驻：<a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/support-plan?invite_code=2w4v1usqstus0">https://cloud.tencent.com/developer/support-plan?invite_code=2w4v1usqstus0</a></p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CSAPP/" class="category-chain-item">CSAPP</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>CSAPP-lab：malloc lab</div>
+      <div>http://gls.show/p/2c54864f/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年6月1日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/135735d/" title="SEED-lab：Public-Key Infrastructure (PKI) Lab">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">SEED-lab：Public-Key Infrastructure (PKI) Lab</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/df8f6639/" title="SEED-lab：Format String Vulnerability Lab">
+                        <span class="hidden-mobile">SEED-lab：Format String Vulnerability Lab</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

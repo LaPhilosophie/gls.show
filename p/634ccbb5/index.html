@@ -1,0 +1,942 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="R语言简介1992年由Ross Ihaka 和 Robert Gentleman发明，因此叫做R语言 R的特点：  一个专注于统计分析、制图的语言 免费、开源 适用于多个系统（Windows、macOS、Linux） 有丰富的库 社区活跃  安装&amp;环境配置安装R语言以Windows为例  在https:&#x2F;&#x2F;cloud.r-project.org&#x2F;下载R语言 使用R studio或者vsc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="R语言入门">
+<meta property="og:url" content="http://gls.show/p/634ccbb5/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="R语言简介1992年由Ross Ihaka 和 Robert Gentleman发明，因此叫做R语言 R的特点：  一个专注于统计分析、制图的语言 免费、开源 适用于多个系统（Windows、macOS、Linux） 有丰富的库 社区活跃  安装&amp;环境配置安装R语言以Windows为例  在https:&#x2F;&#x2F;cloud.r-project.org&#x2F;下载R语言 使用R studio或者vsc">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/R-Banner-Image-2.png">
+<meta property="article:published_time" content="2023-04-06T15:14:40.278Z">
+<meta property="article:modified_time" content="2023-04-16T15:03:17.462Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/R-Banner-Image-2.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>R语言入门 - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="R语言入门"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-04-06 23:14" pubdate>
+          2023年4月6日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          4.9k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          16 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">R语言入门</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2023年4月16日 晚上
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <p><img src="/image/R-Banner-Image-2.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="R语言简介"><a href="#R语言简介" class="headerlink" title="R语言简介"></a>R语言简介</h1><p>1992年由<strong>R</strong>oss Ihaka 和 <strong>R</strong>obert Gentleman发明，因此叫做R语言</p>
+<p>R的特点：</p>
+<ul>
+<li>一个专注于统计分析、制图的语言</li>
+<li>免费、开源</li>
+<li>适用于多个系统（Windows、macOS、Linux）</li>
+<li>有丰富的库</li>
+<li>社区活跃</li>
+</ul>
+<h1 id="安装-amp-环境配置"><a href="#安装-amp-环境配置" class="headerlink" title="安装&amp;环境配置"></a>安装&amp;环境配置</h1><h2 id="安装R语言"><a href="#安装R语言" class="headerlink" title="安装R语言"></a>安装R语言</h2><p>以Windows为例</p>
+<ul>
+<li>在<a target="_blank" rel="noopener" href="https://cloud.r-project.org/%E4%B8%8B%E8%BD%BDR%E8%AF%AD%E8%A8%80">https://cloud.r-project.org/下载R语言</a></li>
+<li>使用R studio或者vscode作为ide</li>
+<li>使用<code>install.packages(&quot;tidyverse&quot;)</code>语句安装宏包。其中，tydyverse是一个宏包</li>
+<li>配置环境变量，使得命令行可以识别R.exe</li>
+</ul>
+<h2 id="在vscode中配置R语言环境"><a href="#在vscode中配置R语言环境" class="headerlink" title="在vscode中配置R语言环境"></a>在vscode中配置R语言环境</h2><p>安装拓展：</p>
+<ol>
+<li>R 扩展：提供了 R 语言的语法高亮、代码补全、调试功能等。</li>
+<li>R LSP 扩展：提供了 R 语言的 Language Server Protocol（LSP）支持，可以提供更强大的代码分析和自动补全功能。</li>
+</ol>
+<p>配置 R 环境路径</p>
+<ul>
+<li><p>在 VSCode 中，按下快捷键 “Ctrl+Shift+P”（或者 “F1”），在命令面板中输入 “settings” 并选择 “Preferences: Open User Settings” 打开用户设置窗口</p>
+</li>
+<li><p>找到 “R: Executable Path” 选项，点击编辑图标，在弹出框中输入 R 环境的路径（如 “C:\Program Files\R\R-4.0.4\bin\R.exe”），保存设置</p>
+</li>
+<li><p>查找r.rterm。填写radian.exe的路径</p>
+</li>
+</ul>
+<p>安装<code>languageserver</code>包和<code>httpgd</code>包：</p>
+<ul>
+<li>注意要是用管理员模式下的命令行</li>
+<li>在设置中选择<code>use httpgd</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">install.packages(&quot;languageserver&quot;)<br>install.packages(&quot;httpgd&quot;)<br><br>pip install radian<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>4-9更新：vscode nmsl，RStudio才是yyds</p>
+</blockquote>
+<h1 id="R语言语法速通"><a href="#R语言语法速通" class="headerlink" title="R语言语法速通"></a>R语言语法速通</h1><h2 id="对象"><a href="#对象" class="headerlink" title="对象"></a>对象</h2><p>R中存储的数据是<strong>对象</strong>，使用<code>&lt;-</code>可以对对象赋值，变量命名需要遵循一定的规则</p>
+<p>对象与许多属性，比如类型和长度</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs R">r$&gt; data &lt;- read.csv(<span class="hljs-string">&quot;yourname_sample_data.csv&quot;</span>, header = <span class="hljs-literal">TRUE</span>, sep = <span class="hljs-string">&quot;,&quot;</span>)<br><br>r$&gt; typeof(data)<br>[<span class="hljs-number">1</span>] <span class="hljs-string">&quot;list&quot;</span><br><br>r$&gt; <span class="hljs-built_in">length</span>(data)<br>[<span class="hljs-number">1</span>] <span class="hljs-number">8</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h2><h3 id="向量"><a href="#向量" class="headerlink" title="向量"></a>向量</h3><p>向量是R语言中的一种数据类型，是R语言中最基础的数据结构</p>
+<p><code>c()</code> 函数可以对向量进行聚合操作</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs r"><span class="hljs-comment">#数值型向量</span><br>x &lt;- <span class="hljs-built_in">c</span>(<span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>, <span class="hljs-number">7</span>)<br>x &lt;- <span class="hljs-built_in">c</span>(<span class="hljs-number">3e+06</span>, <span class="hljs-number">1.23e2</span>)     <span class="hljs-comment"># 双精度类型，科学计数法</span><br><br><span class="hljs-comment">#字符串型向量</span><br>x &lt;- <span class="hljs-built_in">c</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>, <span class="hljs-string">&#x27;Bob&#x27;</span>, <span class="hljs-string">&#x27;Charlie&#x27;</span>, <span class="hljs-string">&#x27;Dave&#x27;</span>)  <br><br><span class="hljs-comment">#因子型向量，是带有层级（Levels）的字符串向量，指定层级信息</span><br>four_seasons &lt;- <span class="hljs-built_in">c</span>(<span class="hljs-string">&quot;spring&quot;</span>, <span class="hljs-string">&quot;summer&quot;</span>, <span class="hljs-string">&quot;autumn&quot;</span>, <span class="hljs-string">&quot;winter&quot;</span>)<br>four_seasons_factor &lt;- factor(four_seasons, <br>                              levels = <span class="hljs-built_in">c</span>(<span class="hljs-string">&quot;summer&quot;</span>, <span class="hljs-string">&quot;winter&quot;</span>, <span class="hljs-string">&quot;spring&quot;</span>, <span class="hljs-string">&quot;autumn&quot;</span>)<br>                              )<br></code></pre></td></tr></table></figure>
+
+<h3 id="矩阵"><a href="#矩阵" class="headerlink" title="矩阵"></a>矩阵</h3><p>用 <code>matrix()</code> 函数创建矩阵，第一个参数是矩阵向量，第二个指定行，第三个指定列</p>
+<p>默认是竖着排，如果想横着排就应该指定<code>byrow = TRUE</code></p>
+<p>竖着排</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs r">m &lt;- matrix(<br>  <span class="hljs-built_in">c</span>(<span class="hljs-number">2</span>, <span class="hljs-number">4</span>, <span class="hljs-number">3</span>, <span class="hljs-number">1</span>, <span class="hljs-number">5</span>, <span class="hljs-number">7</span>),<br>  nrow = <span class="hljs-number">2</span>, <br>  ncol = <span class="hljs-number">3</span><br>)<br><br><span class="hljs-comment">##      [,1] [,2] [,3]</span><br><span class="hljs-comment">## [1,]    2    3    5</span><br><span class="hljs-comment">## [2,]    4    1    7</span><br></code></pre></td></tr></table></figure>
+
+<p>横着排</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs r">matrix(<br>  <span class="hljs-built_in">c</span>(<span class="hljs-number">2</span>, <span class="hljs-number">4</span>, <span class="hljs-number">3</span>, <span class="hljs-number">1</span>, <span class="hljs-number">5</span>, <span class="hljs-number">7</span>),<br>  nrow = <span class="hljs-number">2</span>, <br>  ncol = <span class="hljs-number">3</span>,<br>  byrow = <span class="hljs-literal">TRUE</span><br>)<br><span class="hljs-comment">##      [,1] [,2] [,3]</span><br><span class="hljs-comment">## [1,]    2    4    3</span><br><span class="hljs-comment">## [2,]    1    5    7</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="列表"><a href="#列表" class="headerlink" title="列表"></a>列表</h3><p><strong>列表（list）</strong>可以将不同的数据结构组合起来</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs r">list1 &lt;- <span class="hljs-built_in">list</span>(<br>  a = <span class="hljs-built_in">c</span>(<span class="hljs-number">5</span>, <span class="hljs-number">10</span>),<br>  b = <span class="hljs-built_in">c</span>(<span class="hljs-string">&quot;I&quot;</span>, <span class="hljs-string">&quot;love&quot;</span>, <span class="hljs-string">&quot;R&quot;</span>, <span class="hljs-string">&quot;language&quot;</span>, <span class="hljs-string">&quot;!&quot;</span>),<br>  <span class="hljs-built_in">c</span> = <span class="hljs-built_in">c</span>(<span class="hljs-literal">TRUE</span>, <span class="hljs-literal">TRUE</span>, <span class="hljs-literal">FALSE</span>, <span class="hljs-literal">TRUE</span>)<br>)<br></code></pre></td></tr></table></figure>
+
+<p>这里组合了abc，分别是数字向量、字符串向量、布尔向量</p>
+<h3 id="数据框"><a href="#数据框" class="headerlink" title="数据框"></a>数据框</h3><p><strong>数据框（data frame）</strong>是一种特殊的列表，列表中的元素必须是等长的，很像是Excel表格</p>
+<h2 id="运算符"><a href="#运算符" class="headerlink" title="运算符"></a>运算符</h2><p>以向量Wie例</p>
+<h3 id="加减乘除模"><a href="#加减乘除模" class="headerlink" title="加减乘除模"></a>加减乘除模</h3><p>两个向量的加减乘除是将相同位置的元素进行运算，以÷为例</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs r">a &lt;- <span class="hljs-built_in">c</span>(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>)<br>b &lt;- <span class="hljs-built_in">c</span>(<span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>)<br>a / b<br><span class="hljs-comment">## [1] 0.25 0.40 0.50</span><br></code></pre></td></tr></table></figure>
+
+<p>注意，<code>/</code>是除，<code>%%</code>是取模操作</p>
+<p><code>%*%</code>是求内积（点乘）</p>
+<h3 id="循环补齐"><a href="#循环补齐" class="headerlink" title="循环补齐"></a>循环补齐</h3><p>当两个向量长度不相等的时候，短的向量会<strong>循环补齐</strong></p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs r">x &lt;- <span class="hljs-built_in">c</span>(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>)<br>y &lt;- <span class="hljs-built_in">c</span>(<span class="hljs-number">10</span>, <span class="hljs-number">20</span>, <span class="hljs-number">30</span>, <span class="hljs-number">40</span>, <span class="hljs-number">50</span>, <span class="hljs-number">60</span>, <span class="hljs-number">70</span>)<br><br>x + y<br><br><span class="hljs-comment">## [1] 11 22 33 41 52 63 71</span><br></code></pre></td></tr></table></figure>
+
+<p>上面例子中，x会自动补齐为(1, 2, 3，1, 2, 3，1)，也即是循环复制，直至与y的长度相同，之后进行运算</p>
+<h3 id="关系运算符"><a href="#关系运算符" class="headerlink" title="关系运算符"></a>关系运算符</h3><p>比如比较两个向量的代销关系，是否相等</p>
+<h3 id="逻辑运算符"><a href="#逻辑运算符" class="headerlink" title="逻辑运算符"></a>逻辑运算符</h3><p>与或非</p>
+<h3 id="冒号运算符"><a href="#冒号运算符" class="headerlink" title="冒号运算符"></a>冒号运算符</h3><ul>
+<li><p>创建整数序列，比如1:10创建<code>1~10</code>的整数序列</p>
+</li>
+<li><p>seq函数也可以创建序列<code>seq(from = 1, to = 10, by = 1)</code></p>
+</li>
+<li><p><code>%in%</code> 运算符用于判断元素是否属于向量</p>
+</li>
+</ul>
+<h2 id="特殊值"><a href="#特殊值" class="headerlink" title="特殊值"></a>特殊值</h2><ul>
+<li><code>Inf</code>，<strong>Infinity</strong>，无限大</li>
+<li><code>NaN</code>，<strong>Not a Number</strong>，比如0/0</li>
+</ul>
+<h2 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h2><h3 id="内置函数"><a href="#内置函数" class="headerlink" title="内置函数"></a>内置函数</h3><p>数学函数</p>
+<ul>
+<li><code>sum()</code>: 计算向量或矩阵中所有元素的总和。</li>
+<li><code>mean()</code>: 计算向量或矩阵中所有元素的平均值。</li>
+<li><code>max()</code>: 找出向量或矩阵中的最大值。</li>
+<li><code>min()</code>: 找出向量或矩阵中的最小值。</li>
+<li><code>abs()</code>: 求一个数或一组数的绝对值。</li>
+<li><code>sqrt()</code>: 求一个数或一组数的平方根。</li>
+<li><code>exp()</code>: 求一个数或一组数的指数函数。</li>
+<li><code>log()</code>: 求一个数或一组数的自然对数。</li>
+</ul>
+<p>数据处理函数</p>
+<ul>
+<li><code>unique()</code>: 去除向量或数据框中的重复元素。</li>
+<li><code>sort()</code>: 对向量进行排序。</li>
+<li><code>order()</code>: 对向量排序并返回排序后元素在原始向量中的下标。</li>
+<li><code>subset()</code>: 对数据框进行子集操作。</li>
+<li><code>merge()</code>: 将两个数据框按照某一列关键字合并。</li>
+<li><code>aggregate()</code>: 根据变量对数据框进行分组汇总。</li>
+<li><code>table()</code>: 统计向量或数据框中各元素的出现次数。</li>
+</ul>
+<p>图形函数</p>
+<ul>
+<li><code>plot()</code>: 绘制散点图、折线图等常见统计图形。</li>
+<li><code>hist()</code>: 绘制直方图。</li>
+<li><code>barplot()</code>: 绘制条形图。</li>
+<li><code>boxplot()</code>: 绘制箱线图。</li>
+<li><code>pie()</code>: 绘制饼图。</li>
+</ul>
+<h3 id="自定义函数"><a href="#自定义函数" class="headerlink" title="自定义函数"></a>自定义函数</h3><figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs r">my_divide &lt;- <span class="hljs-keyword">function</span>(a, b) &#123;<br>  <span class="hljs-keyword">if</span> (b == <span class="hljs-number">0</span>) &#123;<br>    stop(<span class="hljs-string">&quot;Error: second parameter can&#x27;t be zero!&quot;</span>)<br>  &#125;<br>  result &lt;- a/b<br>  <span class="hljs-built_in">return</span>(result)<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="管道操作"><a href="#管道操作" class="headerlink" title="管道操作"></a>管道操作</h2><p>管道操作符 <code>%&gt;%</code> 将左侧表达式的结果作为右侧表达式的第一个参数进行传递</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs r"><span class="hljs-comment"># 加载tidyverse包</span><br>library(tidyverse)<br><br><span class="hljs-comment"># 读取数据</span><br>data &lt;- read_csv(<span class="hljs-string">&quot;data.csv&quot;</span>)<br><br><span class="hljs-comment"># 进行数据清洗和转换</span><br>result &lt;- data %&gt;% <br>  filter(year &gt; <span class="hljs-number">2010</span>) %&gt;%           <span class="hljs-comment"># 只保留2010年之后的数据</span><br>  group_by(country) %&gt;%             <span class="hljs-comment"># 按国家分组</span><br>  summarize(avg_income = mean(income)) %&gt;%    <span class="hljs-comment"># 计算每个国家的平均收入</span><br>  arrange(desc(avg_income))         <span class="hljs-comment"># 按照平均收入降序排列</span><br><br><span class="hljs-comment"># 查看结果</span><br>result<br><br></code></pre></td></tr></table></figure>
+
+<p>代码从一个CSV文件中读取数据，然后使用管道操作符对数据进行筛选、分组、汇总和排序等操作，最终得到一个按照平均收入降序排列的数据框。通过使用管道操作符，我们可以用更少的代码完成更多的工作，<strong>同时使代码更加易于理解</strong></p>
+<h2 id="tidyreverse"><a href="#tidyreverse" class="headerlink" title="tidyreverse"></a>tidyreverse</h2><p>数据清洗和转换：</p>
+<ul>
+<li><code>filter()</code> 函数：根据条件筛选数据</li>
+<li><code>select()</code> 函数：选择保留的列</li>
+<li><code>mutate()</code> 函数：新增或修改数据列</li>
+<li><code>group_by()</code> 函数：按照某个变量分组</li>
+<li><code>summarize()</code> 函数：对每个分组进行汇总计算</li>
+<li><code>arrange()</code> 函数：基于某个变量排序</li>
+</ul>
+<p>数据可视化：</p>
+<ul>
+<li><code>ggplot()</code> 函数：创建高质量的数据可视化图形</li>
+<li><code>geom_*()</code> 函数：定义可视化图形的几何对象如点、线、区域等</li>
+<li><code>aes()</code> 函数：设置图形的映射关系，如x轴、y轴和颜色等</li>
+<li><code>theme()</code> 函数：调整图形的主题和外观</li>
+</ul>
+<h3 id="ggplot（grammar-of-graphics）"><a href="#ggplot（grammar-of-graphics）" class="headerlink" title="ggplot（grammar of graphics）"></a>ggplot（grammar of graphics）</h3><p>在 ggplot 中，图形是由图层 (layer) 组成的，每个图层包含以下三个部分：</p>
+<ol>
+<li>数据集（data）：即将要绘制的数据。</li>
+<li>几何对象（geom）：用来描述数据中每个点、线、矩形等几何元素的形状和位置。</li>
+<li>美学映射（aesthetics）：将数据中的变量映射到颜色、形状、大小等可视化属性上。</li>
+</ol>
+<p>以一段代码为例</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs r">library(ggplot2)<br>ggplot(data = mtcars, aes(x = wt, y = mpg)) + <br>  geom_point(color = <span class="hljs-string">&quot;blue&quot;</span>)<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><p>ggplot 函数用来创建一个基本的空白图层，其中包括了数据集和美学映射的定义</p>
+<ul>
+<li>data：表示传入的数据集</li>
+<li>aes()：表示美学映射，通常是一个用逗号隔开的字符变量列表，指定了数据中的哪些变量要映射到图形属性上</li>
+</ul>
+</li>
+<li><p>几何对象函数（geom_*）。有很多，比如geom_point() 用来绘制散点图，geom_line() 用来绘制线性图</p>
+</li>
+<li><p>每个 ggplot 函数都可以通过加上各种图层来构成更加丰富的可视化效果。例如，可以使用 facet_grid() 函数为图像添加镶嵌面板、使用 scale_color_gradient() 函数来调整颜色渐变以及使用 theme() 来修改轴标签和标题的样式等。</p>
+</li>
+</ul>
+<h1 id="将Rmd文件输出为PDF文件"><a href="#将Rmd文件输出为PDF文件" class="headerlink" title="将Rmd文件输出为PDF文件"></a>将Rmd文件输出为PDF文件</h1><p>在 R 语言中，<code>knit</code> 是一个用于将 RMarkdown 文档转换为纯文本或其他格式的函数。具体来说，<code>knit</code> 函数会读取 RMarkdown 文档中的 R 代码块，并执行这些代码块。然后，它会将执行结果（例如计算结果、图表、表格等）嵌入到 Markdown 或 LaTeX 格式的文本中，并生成最终的输出文件</p>
+<p>要正确使用 <code>knit</code> 函数，你需要先安装并加载 <code>knitr</code> 包，可以使用 “Knit” 工具按钮调用 <code>knit</code> 函数，并通过设置 “Knit” 按钮下拉菜单中的选项来指定输出格式和其他选项</p>
+<p>在 R 语言编译 rmd 文件的过程中，LaTeX 起到了将 Markdown 语法转换为 PDF 文档的作用。具体来说，当你使用 <code>pdf_document</code> 或 <code>beamer_presentation</code> 等输出格式时，RMarkdown 会将源文档转换为 LaTeX 格式，并使用 LaTeX 进行编译生成最终的 PDF 输出</p>
+<p>为了编译出PDF，需要正确设置latex的编译器，在文件开头可以加几行yaml来指定，下面指定了xelatex，xelatex可以解决不能编译出中文字符的问题。要注意下面的缩进是不能更改的（被这个卡了很久</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs r">---<br>title: <span class="hljs-string">&quot;My Document&quot;</span><br>output:<br>  pdf_document:<br>    latex_engine: xelatex<br>---<br><br><span class="hljs-comment"># Section 1</span><br><br>Some text.<br><br>​```&#123;r&#125;<br>summary(cars)<br></code></pre></td></tr></table></figure>
+
+
+
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a target="_blank" rel="noopener" href="https://bookdown.org/wangminjie/R4DS/index.html">https://bookdown.org/wangminjie/R4DS/index.html</a></p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>R语言入门</div>
+      <div>http://gls.show/p/634ccbb5/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年4月6日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/df8f6639/" title="SEED-lab：Format String Vulnerability Lab">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">SEED-lab：Format String Vulnerability Lab</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/a6055774/" title="seedlab：Meltdown Attack Lab">
+                        <span class="hidden-mobile">seedlab：Meltdown Attack Lab</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

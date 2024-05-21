@@ -1,0 +1,877 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="overview此次实验的目的是做一个tiny shell，实现的tsh有以下要求：  提示符应该是字符串“ tsh &gt;” 用户键入的命令行应该由一个名称和零个或多个参数组成，所有这些参数都由一个或多个空格隔开。如果 name 是一个内置命令，那么 tsh 应该立即处理它并等待下一个命令行。否则，tsh 应该假定 name 是一个可执行文件的路径，它在初始子进程的上下文中加载和运行该文件(在">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CSAPP-lab：shell lab">
+<meta property="og:url" content="http://gls.show/p/219af9ac/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="overview此次实验的目的是做一个tiny shell，实现的tsh有以下要求：  提示符应该是字符串“ tsh &gt;” 用户键入的命令行应该由一个名称和零个或多个参数组成，所有这些参数都由一个或多个空格隔开。如果 name 是一个内置命令，那么 tsh 应该立即处理它并等待下一个命令行。否则，tsh 应该假定 name 是一个可执行文件的路径，它在初始子进程的上下文中加载和运行该文件(在">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/csapp1.png">
+<meta property="article:published_time" content="2022-10-18T04:27:07.409Z">
+<meta property="article:modified_time" content="2022-10-29T15:30:49.749Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/csapp1.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>CSAPP-lab：shell lab - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="CSAPP-lab：shell lab"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-10-18 12:27" pubdate>
+          2022年10月18日 中午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          21k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          68 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">CSAPP-lab：shell lab</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2022年10月29日 晚上
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <h1 id="overview"><a href="#overview" class="headerlink" title="overview"></a>overview</h1><p>此次实验的目的是做一个tiny shell，<strong>实现的tsh有以下要求：</strong></p>
+<ul>
+<li>提示符应该是字符串“ tsh &gt;”</li>
+<li>用户键入的命令行应该由一个名称和零个或多个参数组成，所有这些参数都由一个或多个空格隔开。如果 name 是一个内置命令，那么 tsh 应该立即处理它并等待下一个命令行。否则，tsh 应该假定 name 是一个可执行文件的路径，它在初始子进程的上下文中加载和运行该文件(在此上下文中，术语 job 指的是这个初始子进程)</li>
+<li>tsh 不需要支持管道(|)或 I/O 重定向(&lt; 和 &gt;)</li>
+<li>键入 ctrl-c (ctrl-z)会导致 SIGINT (SIGTSTP)信号被发送到当前的前台作业，以及该作业的任何子进程(例如，它fork的任何子进程)。如果没有前台作业，那么信号应该没有效果</li>
+<li>如果命令行以 &amp; 结尾，那么 tsh 应该在后台运行作业。否则，它应该在前台运行作业</li>
+<li>每个作业可以通过进程 ID (PID)或作业 ID (JID)来标识，JID 是由 tsh 分配的正整数。JID 应该在命令行中用前缀“%”表示。例如，“% 5”表示 JID5，而“5”表示 PID 5</li>
+<li>tsh 应该支持以下内置命令<ul>
+<li>quit 终止shell</li>
+<li>jobs 列出所有后台任务</li>
+<li>bg &lt; job &gt; 命令重启 &lt; job &gt; ，发送一个 SIGCONT 信号，然后在<strong>后台</strong>运行它。&lt; job &gt; 参数可以是 PID 或 JID</li>
+<li>fg &lt; job &gt; 命令重启 &lt; job &gt; ，发送一个 SIGCONT 信号 ，然后在<strong>前台</strong>运行它。&lt; job &gt; 参数可以是 PID 或 JID</li>
+</ul>
+</li>
+<li>tsh 应该reap它所有的僵尸子进程。如果任何作业因为接收到未捕获的信号而终止，那么 tsh 应该识别此事件，并使用作业的 PID 和违规信号的描述打印消息</li>
+</ul>
+<p>每次修改 tsh.c 文件时，键入 make 以重新编译</p>
+<p>要运行 shell，需要在命令行中键入 ./tsh</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">unix&gt;</span><span class="bash"> ./tsh</span><br><span class="hljs-meta"></span><br><span class="hljs-meta">tsh&gt;</span><span class="bash"> [<span class="hljs-built_in">type</span> commands to your shell here]</span><br></code></pre></td></tr></table></figure>
+
+<p>关于shell：</p>
+<ul>
+<li><p>命令行是由空格分隔的 ASCII 文本单词序列。命令行中的第一个单词是内置命令的名称或可执行文件的路径名。其余的单词是命令行参数。如果第一个单词是内置命令，则 shell 将立即在当前进程中执行该命令。否则，该单词被假定为可执行程序的路径名。在这种情况下，shell 分支一个子进程，然后在子进程的上下文中加载并运行程序。由于解释单个命令行而创建的子进程统称为作业。通常，一个作业可以由多个子进程组成，这些子进程由 Unix 管道连接。</p>
+</li>
+<li><p>如果命令行以“ &amp;”结尾，那么作业将在后台运行，这意味着 shell 在打印提示符并等待下一个命令行之前不会等待作业终止。否则，作业将在前台运行，这意味着 shell 在等待下一个命令行之前等待作业终止。因此，在任何时候，最多只能有一个作业在前台运行。但是，任意数量的作业都可以在后台运行。例如，键入命令行</p>
+</li>
+<li><p>Unix shell 支持作业控制的概念，允许用户在后台和前台之间来回移动作业，并更改作业中进程的进程状态(运行、停止或终止)。键入 ctrl-c 会将 SIGINT 信号传递给前台作业中的每个进程。SIGINT 的默认操作是终止进程。类似地，键入 ctrl-z 将导致 SIGTSTP 信号传递到前台作业中的每个进程。SIGTSTP 的默认操作是将进程置于已停止状态，直到收到 SIGCONT 信号将其唤醒为止。UnixShell 还提供各种支持作业控制的内置命令。例如:</p>
+</li>
+</ul>
+<blockquote>
+<p>• jobs: List the running and stopped background jobs.<br>• bg &lt;job&gt;: Change a stopped background job to a running background job.<br>• fg &lt;job&gt;: Change a stopped or running background job to a running in the foreground.<br>• kill &lt;job&gt;: Terminate a job.</p>
+</blockquote>
+<p>我们需要完成tsh.c文件下面的函数以实现shell的功能</p>
+<blockquote>
+<p>• eval: Main routine that parses and interprets the command line. [70 lines]<br>• builtin cmd: Recognizes and interprets the built-in commands: quit, fg, bg, and jobs. [25 lines]<br>• do bgfg: Implements the bg and fg built-in commands. [50 lines]<br>• waitfg: Waits for a foreground job to complete. [20 lines]<br>• sigchld handler: Catches SIGCHILD signals. 80 lines]<br>• sigint handler: Catches SIGINT (ctrl-c) signals. [15 lines]<br>• sigtstp handler: Catches SIGTSTP (ctrl-z) signals. [15 lines]</p>
+</blockquote>
+<p>builtin_cmd需要处理以下<strong>内置命令</strong>：</p>
+<ul>
+<li>quit</li>
+<li>jobs</li>
+<li>bg</li>
+<li>fg</li>
+</ul>
+<h1 id="程序执行流"><a href="#程序执行流" class="headerlink" title="程序执行流"></a>程序执行流</h1><h2 id="main"><a href="#main" class="headerlink" title="main"></a>main</h2><p>调用了signal函数进行了信号的自定义安装</p>
+<p>进入while无限循环</p>
+<ul>
+<li>输出命令提示符</li>
+<li>然后进行了命令行字符串的读取，如果不成功或者eof也进行了处理</li>
+<li>调用eval函数对输入的命令进行处理</li>
+</ul>
+<h2 id="eval"><a href="#eval" class="headerlink" title="eval"></a>eval</h2><blockquote>
+<p>eval的实现可以参考PPT和csapp P543的内容</p>
+<p><code>eval</code>中进程在<code>fork</code>之前用<code>sigprocmask</code>阻塞<code>SIGCHLD</code>信号，之后在解除信号阻塞，之后在调用<code>addjob</code>添加孩子到作业列表用<code>sigprocmask</code>阻塞信号，因为子继承继承父进程的阻塞集合，所以子程序必须确保在执行新进程前解除阻塞<code>SIGCHLD</code>信号。父进程需以这种方式阻塞<code>SIGCHLD</code>信号，避免在父进程调用<code>addjob</code>之前，<code>SIGCHLD</code>处理器获取子进程(从而从任务列表中删除)的竞争状态</p>
+</blockquote>
+<ul>
+<li>调用parseline对输入的命令cmdline进行处理，将命令行解析后的结果放到argv中，parseline最终返回值为是否在后台运行</li>
+<li>调用builtin_cmd函数，builtin_cmd内部需要处理以下<strong>内置命令</strong>：quit，jobs，bg，fg，使用strcmp函数进行字符串的比较，并分别进行处理，如果不是内置命令说明要fork出子进程进行处理</li>
+<li>由于父子进程的执行顺序是不固定的，有可能子进程的执行先于父进程，那么会造成竞争条件的问题，使程序出现bug。所以这里需要信号屏蔽的一些操作<ul>
+<li>父进程先阻塞SIGCHLD信号，然后执行fork函数。如果返回值为0，说明是子进程，子进程需要使用Sigprocmask(SIG_SETMASK, &amp;prev_one, NULL); 解除SIGCHLD的阻塞，之后使用Setpgid(0,0);设置pgid为子进程的pid，并用execve执行程序</li>
+<li>如果返回值不是0，说明是父进程，父进程在addjob的时候由于要防止竞争条件问题，因此在addjob函数前后需要信号的阻塞与还原</li>
+<li>父进程判断是前台任务还使后台任务，如果是前台任务那么需要等待前台任务执行完成才可以操作，这里相当于被阻塞了，因此如果判断是前台任务那么需要调用waitfg函数，参考lab指导书的hint可以使用while循环一直获取前台id的值，如果是0说明没有前台任务，如果不是0的话说明有前台任务，使用线程安全的usleep函数等待，相当于实现了wait</li>
+</ul>
+</li>
+</ul>
+<h2 id="do-bgfg"><a href="#do-bgfg" class="headerlink" title="do_bgfg"></a>do_bgfg</h2><p>要求：</p>
+<ul>
+<li>bg &lt; job &gt; 命令重启 &lt; job &gt; ，发送一个 SIGCONT 信号，然后在<strong>后台</strong>运行它。&lt; job &gt; 参数可以是 PID 或 JID</li>
+<li>fg &lt; job &gt; 命令重启 &lt; job &gt; ，发送一个 SIGCONT 信号 ，然后在<strong>前台</strong>运行它。&lt; job &gt; 参数可以是 PID 或 JID</li>
+<li>报错处理：比如格式不正确或者虽然格式正确但是没有此进程 / job</li>
+</ul>
+<p>对于重启的实现，可以使用kill函数的sigcont参数，hint提示在使用-pid而非pid</p>
+<p>改变job的状态，直接对job-&gt;state赋值即可</p>
+<p>如果是前台运行，那么需要调用waitfg函数进行阻塞</p>
+<h2 id="sigchld-handler"><a href="#sigchld-handler" class="headerlink" title="sigchld_handler"></a>sigchld_handler</h2><p>SIGCHLD：当父进程的某一子进程终止（或者因为调用了 exit()，或者因为被信号杀死）时，（内核）将向父进程发送该信号</p>
+<p>为了防止竞争条件和信号默认不排队，在sigchld_handler函数中delete前后需要对信号掩码进行操作</p>
+<p>sigchld_handler需要包含对进程的回收，这里使用while循环，防止有信号没有处理的情况</p>
+<h2 id="sigint-handler"><a href="#sigint-handler" class="headerlink" title="sigint_handler"></a>sigint_handler</h2><p>sigint指的是使用ctrl+c对进程发出中断信号，这时候需要使用Kill(-fg,sig);对前台进程发出中断信号</p>
+<h2 id="sigtstp-handler"><a href="#sigtstp-handler" class="headerlink" title="sigtstp_handler"></a>sigtstp_handler</h2><p>使用Kill(-fg,sig);对前台进程进行挂起</p>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br><span class="line">340</span><br><span class="line">341</span><br><span class="line">342</span><br><span class="line">343</span><br><span class="line">344</span><br><span class="line">345</span><br><span class="line">346</span><br><span class="line">347</span><br><span class="line">348</span><br><span class="line">349</span><br><span class="line">350</span><br><span class="line">351</span><br><span class="line">352</span><br><span class="line">353</span><br><span class="line">354</span><br><span class="line">355</span><br><span class="line">356</span><br><span class="line">357</span><br><span class="line">358</span><br><span class="line">359</span><br><span class="line">360</span><br><span class="line">361</span><br><span class="line">362</span><br><span class="line">363</span><br><span class="line">364</span><br><span class="line">365</span><br><span class="line">366</span><br><span class="line">367</span><br><span class="line">368</span><br><span class="line">369</span><br><span class="line">370</span><br><span class="line">371</span><br><span class="line">372</span><br><span class="line">373</span><br><span class="line">374</span><br><span class="line">375</span><br><span class="line">376</span><br><span class="line">377</span><br><span class="line">378</span><br><span class="line">379</span><br><span class="line">380</span><br><span class="line">381</span><br><span class="line">382</span><br><span class="line">383</span><br><span class="line">384</span><br><span class="line">385</span><br><span class="line">386</span><br><span class="line">387</span><br><span class="line">388</span><br><span class="line">389</span><br><span class="line">390</span><br><span class="line">391</span><br><span class="line">392</span><br><span class="line">393</span><br><span class="line">394</span><br><span class="line">395</span><br><span class="line">396</span><br><span class="line">397</span><br><span class="line">398</span><br><span class="line">399</span><br><span class="line">400</span><br><span class="line">401</span><br><span class="line">402</span><br><span class="line">403</span><br><span class="line">404</span><br><span class="line">405</span><br><span class="line">406</span><br><span class="line">407</span><br><span class="line">408</span><br><span class="line">409</span><br><span class="line">410</span><br><span class="line">411</span><br><span class="line">412</span><br><span class="line">413</span><br><span class="line">414</span><br><span class="line">415</span><br><span class="line">416</span><br><span class="line">417</span><br><span class="line">418</span><br><span class="line">419</span><br><span class="line">420</span><br><span class="line">421</span><br><span class="line">422</span><br><span class="line">423</span><br><span class="line">424</span><br><span class="line">425</span><br><span class="line">426</span><br><span class="line">427</span><br><span class="line">428</span><br><span class="line">429</span><br><span class="line">430</span><br><span class="line">431</span><br><span class="line">432</span><br><span class="line">433</span><br><span class="line">434</span><br><span class="line">435</span><br><span class="line">436</span><br><span class="line">437</span><br><span class="line">438</span><br><span class="line">439</span><br><span class="line">440</span><br><span class="line">441</span><br><span class="line">442</span><br><span class="line">443</span><br><span class="line">444</span><br><span class="line">445</span><br><span class="line">446</span><br><span class="line">447</span><br><span class="line">448</span><br><span class="line">449</span><br><span class="line">450</span><br><span class="line">451</span><br><span class="line">452</span><br><span class="line">453</span><br><span class="line">454</span><br><span class="line">455</span><br><span class="line">456</span><br><span class="line">457</span><br><span class="line">458</span><br><span class="line">459</span><br><span class="line">460</span><br><span class="line">461</span><br><span class="line">462</span><br><span class="line">463</span><br><span class="line">464</span><br><span class="line">465</span><br><span class="line">466</span><br><span class="line">467</span><br><span class="line">468</span><br><span class="line">469</span><br><span class="line">470</span><br><span class="line">471</span><br><span class="line">472</span><br><span class="line">473</span><br><span class="line">474</span><br><span class="line">475</span><br><span class="line">476</span><br><span class="line">477</span><br><span class="line">478</span><br><span class="line">479</span><br><span class="line">480</span><br><span class="line">481</span><br><span class="line">482</span><br><span class="line">483</span><br><span class="line">484</span><br><span class="line">485</span><br><span class="line">486</span><br><span class="line">487</span><br><span class="line">488</span><br><span class="line">489</span><br><span class="line">490</span><br><span class="line">491</span><br><span class="line">492</span><br><span class="line">493</span><br><span class="line">494</span><br><span class="line">495</span><br><span class="line">496</span><br><span class="line">497</span><br><span class="line">498</span><br><span class="line">499</span><br><span class="line">500</span><br><span class="line">501</span><br><span class="line">502</span><br><span class="line">503</span><br><span class="line">504</span><br><span class="line">505</span><br><span class="line">506</span><br><span class="line">507</span><br><span class="line">508</span><br><span class="line">509</span><br><span class="line">510</span><br><span class="line">511</span><br><span class="line">512</span><br><span class="line">513</span><br><span class="line">514</span><br><span class="line">515</span><br><span class="line">516</span><br><span class="line">517</span><br><span class="line">518</span><br><span class="line">519</span><br><span class="line">520</span><br><span class="line">521</span><br><span class="line">522</span><br><span class="line">523</span><br><span class="line">524</span><br><span class="line">525</span><br><span class="line">526</span><br><span class="line">527</span><br><span class="line">528</span><br><span class="line">529</span><br><span class="line">530</span><br><span class="line">531</span><br><span class="line">532</span><br><span class="line">533</span><br><span class="line">534</span><br><span class="line">535</span><br><span class="line">536</span><br><span class="line">537</span><br><span class="line">538</span><br><span class="line">539</span><br><span class="line">540</span><br><span class="line">541</span><br><span class="line">542</span><br><span class="line">543</span><br><span class="line">544</span><br><span class="line">545</span><br><span class="line">546</span><br><span class="line">547</span><br><span class="line">548</span><br><span class="line">549</span><br><span class="line">550</span><br><span class="line">551</span><br><span class="line">552</span><br><span class="line">553</span><br><span class="line">554</span><br><span class="line">555</span><br><span class="line">556</span><br><span class="line">557</span><br><span class="line">558</span><br><span class="line">559</span><br><span class="line">560</span><br><span class="line">561</span><br><span class="line">562</span><br><span class="line">563</span><br><span class="line">564</span><br><span class="line">565</span><br><span class="line">566</span><br><span class="line">567</span><br><span class="line">568</span><br><span class="line">569</span><br><span class="line">570</span><br><span class="line">571</span><br><span class="line">572</span><br><span class="line">573</span><br><span class="line">574</span><br><span class="line">575</span><br><span class="line">576</span><br><span class="line">577</span><br><span class="line">578</span><br><span class="line">579</span><br><span class="line">580</span><br><span class="line">581</span><br><span class="line">582</span><br><span class="line">583</span><br><span class="line">584</span><br><span class="line">585</span><br><span class="line">586</span><br><span class="line">587</span><br><span class="line">588</span><br><span class="line">589</span><br><span class="line">590</span><br><span class="line">591</span><br><span class="line">592</span><br><span class="line">593</span><br><span class="line">594</span><br><span class="line">595</span><br><span class="line">596</span><br><span class="line">597</span><br><span class="line">598</span><br><span class="line">599</span><br><span class="line">600</span><br><span class="line">601</span><br><span class="line">602</span><br><span class="line">603</span><br><span class="line">604</span><br><span class="line">605</span><br><span class="line">606</span><br><span class="line">607</span><br><span class="line">608</span><br><span class="line">609</span><br><span class="line">610</span><br><span class="line">611</span><br><span class="line">612</span><br><span class="line">613</span><br><span class="line">614</span><br><span class="line">615</span><br><span class="line">616</span><br><span class="line">617</span><br><span class="line">618</span><br><span class="line">619</span><br><span class="line">620</span><br><span class="line">621</span><br><span class="line">622</span><br><span class="line">623</span><br><span class="line">624</span><br><span class="line">625</span><br><span class="line">626</span><br><span class="line">627</span><br><span class="line">628</span><br><span class="line">629</span><br><span class="line">630</span><br><span class="line">631</span><br><span class="line">632</span><br><span class="line">633</span><br><span class="line">634</span><br><span class="line">635</span><br><span class="line">636</span><br><span class="line">637</span><br><span class="line">638</span><br><span class="line">639</span><br><span class="line">640</span><br><span class="line">641</span><br><span class="line">642</span><br><span class="line">643</span><br><span class="line">644</span><br><span class="line">645</span><br><span class="line">646</span><br><span class="line">647</span><br><span class="line">648</span><br><span class="line">649</span><br><span class="line">650</span><br><span class="line">651</span><br><span class="line">652</span><br><span class="line">653</span><br><span class="line">654</span><br><span class="line">655</span><br><span class="line">656</span><br><span class="line">657</span><br><span class="line">658</span><br><span class="line">659</span><br><span class="line">660</span><br><span class="line">661</span><br><span class="line">662</span><br><span class="line">663</span><br><span class="line">664</span><br><span class="line">665</span><br><span class="line">666</span><br><span class="line">667</span><br><span class="line">668</span><br><span class="line">669</span><br><span class="line">670</span><br><span class="line">671</span><br><span class="line">672</span><br><span class="line">673</span><br><span class="line">674</span><br><span class="line">675</span><br><span class="line">676</span><br><span class="line">677</span><br><span class="line">678</span><br><span class="line">679</span><br><span class="line">680</span><br><span class="line">681</span><br><span class="line">682</span><br><span class="line">683</span><br><span class="line">684</span><br><span class="line">685</span><br><span class="line">686</span><br><span class="line">687</span><br><span class="line">688</span><br><span class="line">689</span><br><span class="line">690</span><br><span class="line">691</span><br><span class="line">692</span><br><span class="line">693</span><br><span class="line">694</span><br><span class="line">695</span><br><span class="line">696</span><br><span class="line">697</span><br><span class="line">698</span><br><span class="line">699</span><br><span class="line">700</span><br><span class="line">701</span><br><span class="line">702</span><br><span class="line">703</span><br><span class="line">704</span><br><span class="line">705</span><br><span class="line">706</span><br><span class="line">707</span><br><span class="line">708</span><br><span class="line">709</span><br><span class="line">710</span><br><span class="line">711</span><br><span class="line">712</span><br><span class="line">713</span><br><span class="line">714</span><br><span class="line">715</span><br><span class="line">716</span><br><span class="line">717</span><br><span class="line">718</span><br><span class="line">719</span><br><span class="line">720</span><br><span class="line">721</span><br><span class="line">722</span><br><span class="line">723</span><br><span class="line">724</span><br><span class="line">725</span><br><span class="line">726</span><br><span class="line">727</span><br><span class="line">728</span><br><span class="line">729</span><br><span class="line">730</span><br><span class="line">731</span><br><span class="line">732</span><br><span class="line">733</span><br><span class="line">734</span><br><span class="line">735</span><br><span class="line">736</span><br><span class="line">737</span><br><span class="line">738</span><br><span class="line">739</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* </span><br><span class="hljs-comment"> * tsh - A tiny shell program with job control</span><br><span class="hljs-comment"> * </span><br><span class="hljs-comment"> * &lt;Put your name and login ID here&gt;</span><br><span class="hljs-comment"> */</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdlib.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;unistd.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;string.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;ctype.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;signal.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;sys/types.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;sys/wait.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;errno.h&gt;</span></span><br><br><span class="hljs-comment">/* Misc manifest constants */</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> MAXLINE    1024   <span class="hljs-comment">/* max line size */</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> MAXARGS     128   <span class="hljs-comment">/* max args on a command line */</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> MAXJOBS      16   <span class="hljs-comment">/* max jobs at any point in time */</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> MAXJID    1&lt;&lt;16   <span class="hljs-comment">/* max job ID */</span></span><br><br><span class="hljs-comment">/* Job states */</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> UNDEF 0 <span class="hljs-comment">/* undefined */</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> FG 1    <span class="hljs-comment">/* running in foreground */</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> BG 2    <span class="hljs-comment">/* running in background */</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> ST 3    <span class="hljs-comment">/* stopped */</span></span><br><br><span class="hljs-comment">/* </span><br><span class="hljs-comment"> * Jobs states: FG (foreground), BG (background), ST (stopped)</span><br><span class="hljs-comment"> * Job state transitions and enabling actions:</span><br><span class="hljs-comment"> *     FG -&gt; ST  : ctrl-z</span><br><span class="hljs-comment"> *     ST -&gt; FG  : fg command</span><br><span class="hljs-comment"> *     ST -&gt; BG  : bg command</span><br><span class="hljs-comment"> *     BG -&gt; FG  : fg command</span><br><span class="hljs-comment"> * At most 1 job can be in the FG state.</span><br><span class="hljs-comment"> */</span><br><br><span class="hljs-comment">/* Global variables */</span><br><span class="hljs-keyword">extern</span> <span class="hljs-keyword">char</span> **environ;      <span class="hljs-comment">/* defined in libc */</span><br><span class="hljs-keyword">char</span> prompt[] = <span class="hljs-string">&quot;tsh&gt; &quot;</span>;    <span class="hljs-comment">/* command line prompt (DO NOT CHANGE) */</span><br><span class="hljs-keyword">int</span> verbose = <span class="hljs-number">0</span>;            <span class="hljs-comment">/* if true, print additional output */</span><br><span class="hljs-keyword">int</span> nextjid = <span class="hljs-number">1</span>;            <span class="hljs-comment">/* next job ID to allocate */</span><br><span class="hljs-keyword">char</span> sbuf[MAXLINE];         <span class="hljs-comment">/* for composing sprintf messages */</span><br><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">job_t</span> &#123;</span>              <span class="hljs-comment">/* The job struct */</span><br>    <span class="hljs-keyword">pid_t</span> pid;              <span class="hljs-comment">/* job PID */</span><br>    <span class="hljs-keyword">int</span> jid;                <span class="hljs-comment">/* job ID [1, 2, ...] */</span><br>    <span class="hljs-keyword">int</span> state;              <span class="hljs-comment">/* UNDEF, BG, FG, or ST */</span><br>    <span class="hljs-keyword">char</span> cmdline[MAXLINE];  <span class="hljs-comment">/* command line */</span><br>&#125;;<br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">job_t</span> <span class="hljs-title">jobs</span>[<span class="hljs-title">MAXJOBS</span>];</span> <span class="hljs-comment">/* The job list */</span><br><span class="hljs-comment">/* End global variables */</span><br><br><span class="hljs-comment">/*error handling function */</span><br><span class="hljs-function"><span class="hljs-keyword">pid_t</span> <span class="hljs-title">Fork</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Execve</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *filename, <span class="hljs-keyword">char</span> *<span class="hljs-keyword">const</span> argv[], <span class="hljs-keyword">char</span> *<span class="hljs-keyword">const</span> environ[])</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Kill</span><span class="hljs-params">(<span class="hljs-keyword">pid_t</span> pid, <span class="hljs-keyword">int</span> signum)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Sigemptyset</span><span class="hljs-params">(<span class="hljs-keyword">sigset_t</span> *<span class="hljs-built_in">set</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Sigaddset</span><span class="hljs-params">(<span class="hljs-keyword">sigset_t</span> *<span class="hljs-built_in">set</span>, <span class="hljs-keyword">int</span> signum)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Sigfillset</span><span class="hljs-params">(<span class="hljs-keyword">sigset_t</span> *<span class="hljs-built_in">set</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Setpgid</span><span class="hljs-params">(<span class="hljs-keyword">pid_t</span> pid, <span class="hljs-keyword">pid_t</span> pgid)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Sigprocmask</span><span class="hljs-params">(<span class="hljs-keyword">int</span> how, <span class="hljs-keyword">sigset_t</span> *<span class="hljs-built_in">set</span>, <span class="hljs-keyword">sigset_t</span> *oldset)</span></span>;<br><span class="hljs-comment">/* Function prototypes */</span><br><br><span class="hljs-comment">/* Here are the functions that you will implement */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">eval</span><span class="hljs-params">(<span class="hljs-keyword">char</span> *cmdline)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">builtin_cmd</span><span class="hljs-params">(<span class="hljs-keyword">char</span> **argv)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">do_bgfg</span><span class="hljs-params">(<span class="hljs-keyword">char</span> **argv)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">waitfg</span><span class="hljs-params">(<span class="hljs-keyword">pid_t</span> pid)</span></span>;<br><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">sigchld_handler</span><span class="hljs-params">(<span class="hljs-keyword">int</span> sig)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">sigtstp_handler</span><span class="hljs-params">(<span class="hljs-keyword">int</span> sig)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">sigint_handler</span><span class="hljs-params">(<span class="hljs-keyword">int</span> sig)</span></span>;<br><br><span class="hljs-comment">/* Here are helper routines that we&#x27;ve provided for you */</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">parseline</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *cmdline, <span class="hljs-keyword">char</span> **argv)</span></span>; <br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">sigquit_handler</span><span class="hljs-params">(<span class="hljs-keyword">int</span> sig)</span></span>;<br><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">clearjob</span><span class="hljs-params">(struct <span class="hljs-keyword">job_t</span> *job)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">initjobs</span><span class="hljs-params">(struct <span class="hljs-keyword">job_t</span> *jobs)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">maxjid</span><span class="hljs-params">(struct <span class="hljs-keyword">job_t</span> *jobs)</span></span>; <br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">addjob</span><span class="hljs-params">(struct <span class="hljs-keyword">job_t</span> *jobs, <span class="hljs-keyword">pid_t</span> pid, <span class="hljs-keyword">int</span> state, <span class="hljs-keyword">char</span> *cmdline)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">deletejob</span><span class="hljs-params">(struct <span class="hljs-keyword">job_t</span> *jobs, <span class="hljs-keyword">pid_t</span> pid)</span></span>; <br><span class="hljs-function"><span class="hljs-keyword">pid_t</span> <span class="hljs-title">fgpid</span><span class="hljs-params">(struct <span class="hljs-keyword">job_t</span> *jobs)</span></span>;<br><span class="hljs-function">struct <span class="hljs-keyword">job_t</span> *<span class="hljs-title">getjobpid</span><span class="hljs-params">(struct <span class="hljs-keyword">job_t</span> *jobs, <span class="hljs-keyword">pid_t</span> pid)</span></span>;<br><span class="hljs-function">struct <span class="hljs-keyword">job_t</span> *<span class="hljs-title">getjobjid</span><span class="hljs-params">(struct <span class="hljs-keyword">job_t</span> *jobs, <span class="hljs-keyword">int</span> jid)</span></span>; <br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">pid2jid</span><span class="hljs-params">(<span class="hljs-keyword">pid_t</span> pid)</span></span>; <br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">listjobs</span><span class="hljs-params">(struct <span class="hljs-keyword">job_t</span> *jobs)</span></span>;<br><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">usage</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">unix_error</span><span class="hljs-params">(<span class="hljs-keyword">char</span> *msg)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">app_error</span><span class="hljs-params">(<span class="hljs-keyword">char</span> *msg)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">typedef</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handler_t</span><span class="hljs-params">(<span class="hljs-keyword">int</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">handler_t</span> *<span class="hljs-title">Signal</span><span class="hljs-params">(<span class="hljs-keyword">int</span> signum, <span class="hljs-keyword">handler_t</span> *handler)</span></span>;<br><br><span class="hljs-comment">/*</span><br><span class="hljs-comment"> * main - The shell&#x27;s main routine </span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-keyword">int</span> argc, <span class="hljs-keyword">char</span> **argv)</span> </span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">char</span> c;<br>    <span class="hljs-keyword">char</span> cmdline[MAXLINE];<br>    <span class="hljs-keyword">int</span> emit_prompt = <span class="hljs-number">1</span>; <span class="hljs-comment">/* emit prompt (default) */</span><br><br>    <span class="hljs-comment">/* Redirect stderr to stdout (so that driver will get all output</span><br><span class="hljs-comment">     * on the pipe connected to stdout) */</span><br>    dup2(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>);<br><br>    <span class="hljs-comment">/* Parse the command line */</span><br>    <span class="hljs-keyword">while</span> ((c = getopt(argc, argv, <span class="hljs-string">&quot;hvp&quot;</span>)) != EOF) &#123;<br>        <span class="hljs-keyword">switch</span> (c) &#123;<br>        <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;h&#x27;</span>:             <span class="hljs-comment">/* print help message */</span><br>            usage();<br>        <span class="hljs-keyword">break</span>;<br>        <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;v&#x27;</span>:             <span class="hljs-comment">/* emit additional diagnostic info */</span><br>            verbose = <span class="hljs-number">1</span>;<br>        <span class="hljs-keyword">break</span>;<br>        <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;p&#x27;</span>:             <span class="hljs-comment">/* don&#x27;t print a prompt */</span><br>            emit_prompt = <span class="hljs-number">0</span>;  <span class="hljs-comment">/* handy for automatic testing */</span><br>        <span class="hljs-keyword">break</span>;<br>    <span class="hljs-keyword">default</span>:<br>            usage();<br>    &#125;<br>    &#125;<br><br>    <span class="hljs-comment">/* Install the signal handlers */</span><br><br>    <span class="hljs-comment">/* These are the ones you will need to implement */</span><br>    Signal(SIGINT,  sigint_handler);   <span class="hljs-comment">/* ctrl-c */</span><br>    Signal(SIGTSTP, sigtstp_handler);  <span class="hljs-comment">/* ctrl-z */</span><br>    Signal(SIGCHLD, sigchld_handler);  <span class="hljs-comment">/* Terminated or stopped child */</span><br><br>    <span class="hljs-comment">/* This one provides a clean way to kill the shell */</span><br>    Signal(SIGQUIT, sigquit_handler); <br><br>    <span class="hljs-comment">/* Initialize the job list */</span><br>    initjobs(jobs);<br><br>    <span class="hljs-comment">/* Execute the shell&#x27;s read/eval loop */</span><br>    <span class="hljs-keyword">while</span> (<span class="hljs-number">1</span>) &#123;<br><br>    <span class="hljs-comment">/* Read command line */</span><br>    <span class="hljs-keyword">if</span> (emit_prompt) &#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%s&quot;</span>, prompt);<br>        fflush(<span class="hljs-built_in">stdout</span>);<br>    &#125;<br>    <span class="hljs-keyword">if</span> ((fgets(cmdline, MAXLINE, <span class="hljs-built_in">stdin</span>) == <span class="hljs-literal">NULL</span>) &amp;&amp; ferror(<span class="hljs-built_in">stdin</span>))<br>        app_error(<span class="hljs-string">&quot;fgets error&quot;</span>);<br>    <span class="hljs-keyword">if</span> (feof(<span class="hljs-built_in">stdin</span>)) &#123; <span class="hljs-comment">/* End of file (ctrl-d) */</span><br>        fflush(<span class="hljs-built_in">stdout</span>);<br>        <span class="hljs-built_in">exit</span>(<span class="hljs-number">0</span>);<br>    &#125;<br><br>    <span class="hljs-comment">/* Evaluate the command line */</span><br>    eval(cmdline);<br>    fflush(<span class="hljs-built_in">stdout</span>);<br>    fflush(<span class="hljs-built_in">stdout</span>);<br>    &#125; <br><br>    <span class="hljs-built_in">exit</span>(<span class="hljs-number">0</span>); <span class="hljs-comment">/* control never reaches here */</span><br>&#125;<br>  <br><span class="hljs-comment">/* </span><br><span class="hljs-comment"> * eval - Evaluate the command line that the user has just typed in</span><br><span class="hljs-comment"> * </span><br><span class="hljs-comment"> * If the user has requested a built-in command (quit, jobs, bg or fg)</span><br><span class="hljs-comment"> * then execute it immediately. Otherwise, fork a child process and</span><br><span class="hljs-comment"> * run the job in the context of the child. If the job is running in</span><br><span class="hljs-comment"> * the foreground, wait for it to terminate and then return.  Note:</span><br><span class="hljs-comment"> * each child process must have a unique process group ID so that our</span><br><span class="hljs-comment"> * background children don&#x27;t receive SIGINT (SIGTSTP) from the kernel</span><br><span class="hljs-comment"> * when we type ctrl-c (ctrl-z) at the keyboard.  </span><br><span class="hljs-comment">*/</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">eval</span><span class="hljs-params">(<span class="hljs-keyword">char</span> *cmdline)</span> </span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">char</span> *argv[MAXARGS];<span class="hljs-comment">/*Argument list execve() */</span><br>    <span class="hljs-keyword">char</span> buf[MAXLINE];<span class="hljs-comment">/*Holds modified command line */</span><br>    <span class="hljs-keyword">int</span> bg;<span class="hljs-comment">/*Should the job run in bg or fg? */</span><br>    <span class="hljs-keyword">pid_t</span> pid;<span class="hljs-comment">/*Process id */</span><br>    <span class="hljs-keyword">sigset_t</span> mask_all,mask_one,prev_one;<br><br>    <span class="hljs-built_in">strcpy</span>(buf, cmdline);<br>    bg = parseline(buf, argv); <br>    <span class="hljs-keyword">if</span> (argv[<span class="hljs-number">0</span>] == <span class="hljs-literal">NULL</span>)<br>        <span class="hljs-keyword">return</span>;<span class="hljs-comment">/* Ignore empty lines */</span><br><br>    <span class="hljs-keyword">if</span> (!builtin_cmd(argv)) &#123;<br>        <span class="hljs-comment">//blocking SIGCHLD in if status,otherewise it maybe has bugs</span><br>        Sigfillset(&amp;mask_all);<span class="hljs-comment">/* add every signal number to set */</span><br>        Sigemptyset(&amp;mask_one);<span class="hljs-comment">/* create empty set */</span><br>        Sigaddset(&amp;mask_one, SIGCHLD);<span class="hljs-comment">/* add signal number to set */</span><br><br>        <span class="hljs-comment">/*  block SIGINT and save previous blocked set */</span><br>        <span class="hljs-comment">/* avoid parent process run to addjob exited,before fork child process block sigchild signal,after call addjob unblock  */</span><br>        Sigprocmask(SIG_BLOCK, &amp;mask_one, &amp;prev_one); <span class="hljs-comment">/* Block SIGCHLD */</span><br>        <span class="hljs-keyword">if</span> ((pid = Fork()) == <span class="hljs-number">0</span>) &#123;<span class="hljs-comment">/* Child runs user job */</span><br>            <span class="hljs-comment">/* restore previous blocked set,unblocking SIGINT */</span><br>            <span class="hljs-comment">/* child process inherit parent process&#x27; blocking sets,avoid it can&#x27;t receive itself child process signal,so we must unblock */</span><br>            Sigprocmask(SIG_SETMASK, &amp;prev_one, <span class="hljs-literal">NULL</span>); <span class="hljs-comment">/* Unblock SIGCHLD */</span><br>            Setpgid(<span class="hljs-number">0</span>,<span class="hljs-number">0</span>);<span class="hljs-comment">// set child&#x27;s group to a new process group (this is identical to the child&#x27;s PID)</span><br>            Execve(argv[<span class="hljs-number">0</span>], argv, environ);<span class="hljs-comment">//this function not return ,so must call exit,otherewise it will run forever</span><br>        &#125;<span class="hljs-comment">/* Parent waits for foreground job to terminate */</span><br><br>        Sigprocmask(SIG_BLOCK, &amp;mask_all, <span class="hljs-literal">NULL</span>); <span class="hljs-comment">/* Block SIGCHLD */</span><br>        <span class="hljs-keyword">int</span> st = (bg==<span class="hljs-number">0</span>) ? FG : BG;<br>        addjob(jobs,pid,st,cmdline);<br>        Sigprocmask(SIG_SETMASK, &amp;prev_one, <span class="hljs-literal">NULL</span>); <span class="hljs-comment">/* Unblock SIGCHLD */</span><br>        <span class="hljs-keyword">if</span> (!bg) &#123;<br>            <span class="hljs-comment">//because sigchld_handler was called above，it call waitpid，so don&#x27;t call and circular wait wait</span><br>            waitfg(pid);<br>        &#125;<br>        <span class="hljs-keyword">else</span><br>            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;[%d] (%d) %s&quot;</span>, pid2jid(pid),pid, cmdline);<br>    &#125;<br>    <span class="hljs-keyword">return</span>;<br>&#125;<br><br><span class="hljs-comment">/* </span><br><span class="hljs-comment"> * parseline - Parse the command line and build the argv array.</span><br><span class="hljs-comment"> * </span><br><span class="hljs-comment"> * Characters enclosed in single quotes are treated as a single</span><br><span class="hljs-comment"> * argument.  Return true if the user has requested a BG job, false if</span><br><span class="hljs-comment"> * the user has requested a FG job.  </span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">parseline</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *cmdline, <span class="hljs-keyword">char</span> **argv)</span> </span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">static</span> <span class="hljs-keyword">char</span> <span class="hljs-built_in">array</span>[MAXLINE]; <span class="hljs-comment">/* holds local copy of command line */</span><br>    <span class="hljs-keyword">char</span> *buf = <span class="hljs-built_in">array</span>;          <span class="hljs-comment">/* ptr that traverses command line */</span><br>    <span class="hljs-keyword">char</span> *delim;                <span class="hljs-comment">/* points to first space delimiter */</span><br>    <span class="hljs-keyword">int</span> argc;                   <span class="hljs-comment">/* number of args */</span><br>    <span class="hljs-keyword">int</span> bg;                     <span class="hljs-comment">/* background job? */</span><br><br>    <span class="hljs-built_in">strcpy</span>(buf, cmdline);<br>    buf[<span class="hljs-built_in">strlen</span>(buf)<span class="hljs-number">-1</span>] = <span class="hljs-string">&#x27; &#x27;</span>;  <span class="hljs-comment">/* replace trailing &#x27;\n&#x27; with space */</span><br>    <span class="hljs-keyword">while</span> (*buf &amp;&amp; (*buf == <span class="hljs-string">&#x27; &#x27;</span>)) <span class="hljs-comment">/* ignore leading spaces */</span><br>    buf++;<br><br>    <span class="hljs-comment">/* Build the argv list */</span><br>    argc = <span class="hljs-number">0</span>;<br>    <span class="hljs-keyword">if</span> (*buf == <span class="hljs-string">&#x27;\&#x27;&#x27;</span>) &#123;<br>    buf++;<br>    delim = <span class="hljs-built_in">strchr</span>(buf, <span class="hljs-string">&#x27;\&#x27;&#x27;</span>);<br>    &#125;<br>    <span class="hljs-keyword">else</span> &#123;<br>    delim = <span class="hljs-built_in">strchr</span>(buf, <span class="hljs-string">&#x27; &#x27;</span>);<br>    &#125;<br><br>    <span class="hljs-keyword">while</span> (delim) &#123;<br>    argv[argc++] = buf;<br>    *delim = <span class="hljs-string">&#x27;\0&#x27;</span>;<br>    buf = delim + <span class="hljs-number">1</span>;<br>    <span class="hljs-keyword">while</span> (*buf &amp;&amp; (*buf == <span class="hljs-string">&#x27; &#x27;</span>)) <span class="hljs-comment">/* ignore spaces */</span><br>           buf++;<br><br>    <span class="hljs-keyword">if</span> (*buf == <span class="hljs-string">&#x27;\&#x27;&#x27;</span>) &#123;<br>        buf++;<br>        delim = <span class="hljs-built_in">strchr</span>(buf, <span class="hljs-string">&#x27;\&#x27;&#x27;</span>);<br>    &#125;<br>    <span class="hljs-keyword">else</span> &#123;<br>        delim = <span class="hljs-built_in">strchr</span>(buf, <span class="hljs-string">&#x27; &#x27;</span>);<br>    &#125;<br>    &#125;<br>    argv[argc] = <span class="hljs-literal">NULL</span>;<br>    <br>    <span class="hljs-keyword">if</span> (argc == <span class="hljs-number">0</span>)  <span class="hljs-comment">/* ignore blank line */</span><br>    <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br><br>    <span class="hljs-comment">/* should the job run in the background? */</span><br>    <span class="hljs-keyword">if</span> ((bg = (*argv[argc<span class="hljs-number">-1</span>] == <span class="hljs-string">&#x27;&amp;&#x27;</span>)) != <span class="hljs-number">0</span>) &#123;<br>    argv[--argc] = <span class="hljs-literal">NULL</span>;<br>    &#125;<br>    <span class="hljs-keyword">return</span> bg;<br>&#125;<br><br><span class="hljs-comment">/* </span><br><span class="hljs-comment"> * builtin_cmd - If the user has typed a built-in command then execute</span><br><span class="hljs-comment"> *    it immediately.  </span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">builtin_cmd</span><span class="hljs-params">(<span class="hljs-keyword">char</span> **argv)</span> </span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">if</span>(!<span class="hljs-built_in">strcmp</span>(argv[<span class="hljs-number">0</span>],<span class="hljs-string">&quot;quit&quot;</span>)) <span class="hljs-comment">/* quit command */</span><br>        <span class="hljs-built_in">exit</span>(<span class="hljs-number">0</span>);<br><br>    <span class="hljs-keyword">if</span> (!<span class="hljs-built_in">strcmp</span>(argv[<span class="hljs-number">0</span>], <span class="hljs-string">&quot;&amp;&quot;</span>)) <span class="hljs-comment">/* Ignore singleton &amp; */</span><br>        <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>; <br>    <br>    <span class="hljs-keyword">if</span>(!<span class="hljs-built_in">strcmp</span>((argv[<span class="hljs-number">0</span>]),<span class="hljs-string">&quot;jobs&quot;</span>))<span class="hljs-comment">/* jobs command */</span><br>    &#123;<br>        listjobs(jobs);<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br>    &#125;<br><br>    <span class="hljs-keyword">if</span>(!<span class="hljs-built_in">strcmp</span>((argv[<span class="hljs-number">0</span>]),<span class="hljs-string">&quot;fg&quot;</span>) || !<span class="hljs-built_in">strcmp</span>((argv[<span class="hljs-number">0</span>]),<span class="hljs-string">&quot;bg&quot;</span>))<span class="hljs-comment">/* bg/fg command */</span><br>    &#123;<br>        do_bgfg(argv);<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br>    &#125;<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;     <span class="hljs-comment">/* not a builtin command */</span><br>&#125;<br><br><span class="hljs-comment">/* </span><br><span class="hljs-comment"> * do_bgfg - Execute the builtin bg and fg commands</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">do_bgfg</span><span class="hljs-params">(<span class="hljs-keyword">char</span> **argv)</span> </span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">if</span>(!argv[<span class="hljs-number">1</span>])&#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%s command requires PID or %%jobid argument\n&quot;</span>, argv[<span class="hljs-number">0</span>]);<br>        <span class="hljs-keyword">return</span>;<br>    &#125;<br><br>    <span class="hljs-keyword">if</span> (!<span class="hljs-built_in">isdigit</span>(argv[<span class="hljs-number">1</span>][<span class="hljs-number">0</span>]) &amp;&amp; argv[<span class="hljs-number">1</span>][<span class="hljs-number">0</span>] != <span class="hljs-string">&#x27;%&#x27;</span>) &#123;            <span class="hljs-comment">//checks if the second argument is valid</span><br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%s: argument must be a PID or %%jobid\n&quot;</span>, argv[<span class="hljs-number">0</span>]);<br>        <span class="hljs-keyword">return</span>;<br>    &#125;<br><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">job_t</span>* <span class="hljs-title">myjob</span>;</span><br>    <span class="hljs-keyword">if</span>(argv[<span class="hljs-number">1</span>][<span class="hljs-number">0</span>]==<span class="hljs-string">&#x27;%&#x27;</span>)&#123;<span class="hljs-comment">//jid</span><br>        myjob = getjobjid(jobs,atoi(&amp;argv[<span class="hljs-number">1</span>][<span class="hljs-number">1</span>]));<br>        <span class="hljs-keyword">if</span>(!myjob)&#123;<br>            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%s: No such job\n&quot;</span>, argv[<span class="hljs-number">1</span>]);<br>            <span class="hljs-keyword">return</span>;<br>        &#125;<br>    &#125;<span class="hljs-keyword">else</span>&#123;<span class="hljs-comment">//pid</span><br>        myjob = getjobpid(jobs,atoi(argv[<span class="hljs-number">1</span>]));<br>        <span class="hljs-keyword">if</span> (!myjob) &#123;                                 <span class="hljs-comment">// Checks if the given PID is there</span><br>            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;(%d): No such process\n&quot;</span>, atoi(argv[<span class="hljs-number">1</span>]));<br>            <span class="hljs-keyword">return</span>;<br>        &#125;<br>    &#125;<br>    <br>    Kill(-myjob-&gt;pid,SIGCONT);<span class="hljs-comment">//send continue signal </span><br>    <span class="hljs-keyword">if</span>(!<span class="hljs-built_in">strcmp</span>(argv[<span class="hljs-number">0</span>],<span class="hljs-string">&quot;bg&quot;</span>))&#123;<br>        myjob-&gt;state = BG;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;[%d] (%d) %s&quot;</span>,myjob-&gt;jid,myjob-&gt;pid,myjob-&gt;cmdline);<br>    &#125;<span class="hljs-keyword">else</span>&#123;<br>        myjob-&gt;state = FG;<br>        waitfg(myjob-&gt;pid);<br>    &#125;<br><br>    <span class="hljs-keyword">return</span>;<br>&#125;<br><br><span class="hljs-comment">/* </span><br><span class="hljs-comment"> * waitfg - Block until process pid is no longer the foreground process</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">waitfg</span><span class="hljs-params">(<span class="hljs-keyword">pid_t</span> pid)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">while</span>(fgpid(jobs))<br>        usleep(<span class="hljs-number">1000</span>);<span class="hljs-comment">//sleep one second</span><br>    <span class="hljs-keyword">return</span>;<br>&#125;<br><br><span class="hljs-comment">/*****************</span><br><span class="hljs-comment"> * Signal handlers</span><br><span class="hljs-comment"> *****************/</span><br><br><span class="hljs-comment">/* </span><br><span class="hljs-comment"> * sigchld_handler - The kernel sends a SIGCHLD to the shell whenever</span><br><span class="hljs-comment"> *     a child job terminates (becomes a zombie), or stops because it</span><br><span class="hljs-comment"> *     received a SIGSTOP or SIGTSTP signal. The handler reaps all</span><br><span class="hljs-comment"> *     available zombie children, but doesn&#x27;t wait for any other</span><br><span class="hljs-comment"> *     currently running children to terminate.  </span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">sigchld_handler</span><span class="hljs-params">(<span class="hljs-keyword">int</span> sig)</span> </span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">int</span> olderrno = errno;<br>    <span class="hljs-keyword">sigset_t</span> mask_all,prev;<br>    <span class="hljs-keyword">pid_t</span> pid;<br>    <span class="hljs-keyword">int</span> status;<br>    Sigfillset(&amp;mask_all);<br>    <span class="hljs-keyword">while</span>((pid = waitpid(<span class="hljs-number">-1</span>,&amp;status,WNOHANG | WUNTRACED))&gt;<span class="hljs-number">0</span>)&#123;<br>        <span class="hljs-comment">// WNOHANG | WUNTRACED return immediately</span><br>        <span class="hljs-keyword">if</span> (WIFEXITED(status))  <span class="hljs-comment">// normally exited,delete job</span><br>        &#123;<br>            sigprocmask(SIG_BLOCK, &amp;mask_all, &amp;prev);<br>            deletejob(jobs, pid);<br>            sigprocmask(SIG_SETMASK, &amp;prev, <span class="hljs-literal">NULL</span>);<br>        &#125;<br>        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (WIFSIGNALED(status))  <span class="hljs-comment">//terminated by signal, delete job and print message</span><br>        &#123;<br>            struct <span class="hljs-keyword">job_t</span>* job = getjobpid(jobs, pid);<br>            sigprocmask(SIG_BLOCK, &amp;mask_all, &amp;prev);<br>            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Job [%d] (%d) terminated by signal %d\n&quot;</span>, job-&gt;jid, job-&gt;pid, WTERMSIG(status));<br>            deletejob(jobs, pid);<br>            sigprocmask(SIG_SETMASK, &amp;prev, <span class="hljs-literal">NULL</span>);<br>        &#125;<br>        <span class="hljs-keyword">else</span>  <span class="hljs-comment">//stopped,change the status</span><br>        &#123;<br>            struct <span class="hljs-keyword">job_t</span>* job = getjobpid(jobs, pid);<br>            sigprocmask(SIG_BLOCK, &amp;mask_all, &amp;prev);<br>            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Job [%d] (%d) stopped by signal %d\n&quot;</span>, job-&gt;jid, job-&gt;pid, WSTOPSIG(status));<br>            job-&gt;state= ST;<br>            sigprocmask(SIG_SETMASK, &amp;prev, <span class="hljs-literal">NULL</span>);<br>        &#125;<br>        <span class="hljs-comment">//actually there is WIFCONTINUED,but we don&#x27;t care about</span><br>    &#125;<br>    errno = olderrno;  <br>    <span class="hljs-keyword">return</span>;<br>&#125;<br><br><span class="hljs-comment">/* </span><br><span class="hljs-comment"> * sigint_handler - The kernel sends a SIGINT to the shell whenver the</span><br><span class="hljs-comment"> *    user types ctrl-c at the keyboard.  Catch it and send it along</span><br><span class="hljs-comment"> *    to the foreground job.  </span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">sigint_handler</span><span class="hljs-params">(<span class="hljs-keyword">int</span> sig)</span> </span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">int</span> olderrno = errno;<br>    <span class="hljs-keyword">pid_t</span> fg = fgpid(jobs);<br>    <span class="hljs-keyword">if</span>(fg)&#123;<br>        Kill(-fg,sig);<br>    &#125;<br>    errno = olderrno;<br>    <span class="hljs-keyword">return</span>;<br>&#125;<br><br><span class="hljs-comment">/*</span><br><span class="hljs-comment"> * sigtstp_handler - The kernel sends a SIGTSTP to the shell whenever</span><br><span class="hljs-comment"> *     the user types ctrl-z at the keyboard. Catch it and suspend the</span><br><span class="hljs-comment"> *     foreground job by sending it a SIGTSTP.  </span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">sigtstp_handler</span><span class="hljs-params">(<span class="hljs-keyword">int</span> sig)</span> </span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">int</span> olderrno = errno;<br>    <span class="hljs-keyword">pid_t</span> fg = fgpid(jobs);<br>    <span class="hljs-keyword">if</span>(fg)&#123;<br>        Kill(-fg,sig);<br>    &#125;<br>    errno = olderrno;<br>    <span class="hljs-keyword">return</span>;<br>&#125;<br><br><span class="hljs-comment">/*********************</span><br><span class="hljs-comment"> * End signal handlers</span><br><span class="hljs-comment"> *********************/</span><br><br><span class="hljs-comment">/***********************************************</span><br><span class="hljs-comment"> * Helper routines that manipulate the job list</span><br><span class="hljs-comment"> **********************************************/</span><br><br><span class="hljs-comment">/* clearjob - Clear the entries in a job struct */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">clearjob</span><span class="hljs-params">(struct <span class="hljs-keyword">job_t</span> *job)</span> </span>&#123;<br>    job-&gt;pid = <span class="hljs-number">0</span>;<br>    job-&gt;jid = <span class="hljs-number">0</span>;<br>    job-&gt;state = UNDEF;<br>    job-&gt;cmdline[<span class="hljs-number">0</span>] = <span class="hljs-string">&#x27;\0&#x27;</span>;<br>&#125;<br><br><span class="hljs-comment">/* initjobs - Initialize the job list */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">initjobs</span><span class="hljs-params">(struct <span class="hljs-keyword">job_t</span> *jobs)</span> </span>&#123;<br>    <span class="hljs-keyword">int</span> i;<br><br>    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; MAXJOBS; i++)<br>    clearjob(&amp;jobs[i]);<br>&#125;<br><br><span class="hljs-comment">/* maxjid - Returns largest allocated job ID */</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">maxjid</span><span class="hljs-params">(struct <span class="hljs-keyword">job_t</span> *jobs)</span> </span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">int</span> i, max=<span class="hljs-number">0</span>;<br><br>    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; MAXJOBS; i++)<br>    <span class="hljs-keyword">if</span> (jobs[i].jid &gt; max)<br>        max = jobs[i].jid;<br>    <span class="hljs-keyword">return</span> max;<br>&#125;<br><br><span class="hljs-comment">/* addjob - Add a job to the job list */</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">addjob</span><span class="hljs-params">(struct <span class="hljs-keyword">job_t</span> *jobs, <span class="hljs-keyword">pid_t</span> pid, <span class="hljs-keyword">int</span> state, <span class="hljs-keyword">char</span> *cmdline)</span> </span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">int</span> i;<br>    <br>    <span class="hljs-keyword">if</span> (pid &lt; <span class="hljs-number">1</span>)<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br><br>    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; MAXJOBS; i++) &#123;<br>    <span class="hljs-keyword">if</span> (jobs[i].pid == <span class="hljs-number">0</span>) &#123;<br>        jobs[i].pid = pid;<br>        jobs[i].state = state;<br>        jobs[i].jid = nextjid++;<br>        <span class="hljs-keyword">if</span> (nextjid &gt; MAXJOBS)<br>        nextjid = <span class="hljs-number">1</span>;<br>        <span class="hljs-built_in">strcpy</span>(jobs[i].cmdline, cmdline);<br>          <span class="hljs-keyword">if</span>(verbose)&#123;<br>            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Added job [%d] %d %s\n&quot;</span>, jobs[i].jid, jobs[i].pid, jobs[i].cmdline);<br>            &#125;<br>            <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br>    &#125;<br>    &#125;<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Tried to create too many jobs\n&quot;</span>);<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br><br><span class="hljs-comment">/* deletejob - Delete a job whose PID=pid from the job list */</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">deletejob</span><span class="hljs-params">(struct <span class="hljs-keyword">job_t</span> *jobs, <span class="hljs-keyword">pid_t</span> pid)</span> </span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">int</span> i;<br><br>    <span class="hljs-keyword">if</span> (pid &lt; <span class="hljs-number">1</span>)<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br><br>    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; MAXJOBS; i++) &#123;<br>        <span class="hljs-keyword">if</span> (jobs[i].pid == pid) &#123;<br>            clearjob(&amp;jobs[i]);<br>            nextjid = maxjid(jobs)+<span class="hljs-number">1</span>;<br>            <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br><br><span class="hljs-comment">/* fgpid - Return PID of current foreground job, 0 if no such job */</span><br><span class="hljs-function"><span class="hljs-keyword">pid_t</span> <span class="hljs-title">fgpid</span><span class="hljs-params">(struct <span class="hljs-keyword">job_t</span> *jobs)</span> </span>&#123;<br>    <span class="hljs-keyword">int</span> i;<br><br>    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; MAXJOBS; i++)<br>    <span class="hljs-keyword">if</span> (jobs[i].state == FG)<br>        <span class="hljs-keyword">return</span> jobs[i].pid;<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br><br><span class="hljs-comment">/* getjobpid  - Find a job (by PID) on the job list */</span><br><span class="hljs-function">struct <span class="hljs-keyword">job_t</span> *<span class="hljs-title">getjobpid</span><span class="hljs-params">(struct <span class="hljs-keyword">job_t</span> *jobs, <span class="hljs-keyword">pid_t</span> pid)</span> </span>&#123;<br>    <span class="hljs-keyword">int</span> i;<br><br>    <span class="hljs-keyword">if</span> (pid &lt; <span class="hljs-number">1</span>)<br>    <span class="hljs-keyword">return</span> <span class="hljs-literal">NULL</span>;<br>    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; MAXJOBS; i++)<br>    <span class="hljs-keyword">if</span> (jobs[i].pid == pid)<br>        <span class="hljs-keyword">return</span> &amp;jobs[i];<br>    <span class="hljs-keyword">return</span> <span class="hljs-literal">NULL</span>;<br>&#125;<br><br><span class="hljs-comment">/* getjobjid  - Find a job (by JID) on the job list */</span><br><span class="hljs-function">struct <span class="hljs-keyword">job_t</span> *<span class="hljs-title">getjobjid</span><span class="hljs-params">(struct <span class="hljs-keyword">job_t</span> *jobs, <span class="hljs-keyword">int</span> jid)</span> </span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">int</span> i;<br><br>    <span class="hljs-keyword">if</span> (jid &lt; <span class="hljs-number">1</span>)<br>    <span class="hljs-keyword">return</span> <span class="hljs-literal">NULL</span>;<br>    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; MAXJOBS; i++)<br>    <span class="hljs-keyword">if</span> (jobs[i].jid == jid)<br>        <span class="hljs-keyword">return</span> &amp;jobs[i];<br>    <span class="hljs-keyword">return</span> <span class="hljs-literal">NULL</span>;<br>&#125;<br><br><span class="hljs-comment">/* pid2jid - Map process ID to job ID */</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">pid2jid</span><span class="hljs-params">(<span class="hljs-keyword">pid_t</span> pid)</span> </span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">int</span> i;<br><br>    <span class="hljs-keyword">if</span> (pid &lt; <span class="hljs-number">1</span>)<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; MAXJOBS; i++)<br>    <span class="hljs-keyword">if</span> (jobs[i].pid == pid) &#123;<br>            <span class="hljs-keyword">return</span> jobs[i].jid;<br>        &#125;<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br><br><span class="hljs-comment">/* listjobs - Print the job list */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">listjobs</span><span class="hljs-params">(struct <span class="hljs-keyword">job_t</span> *jobs)</span> </span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">int</span> i;<br>    <br>    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; MAXJOBS; i++) &#123;<br>    <span class="hljs-keyword">if</span> (jobs[i].pid != <span class="hljs-number">0</span>) &#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;[%d] (%d) &quot;</span>, jobs[i].jid, jobs[i].pid);<br>        <span class="hljs-keyword">switch</span> (jobs[i].state) &#123;<br>        <span class="hljs-keyword">case</span> BG: <br>            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Running &quot;</span>);<br>            <span class="hljs-keyword">break</span>;<br>        <span class="hljs-keyword">case</span> FG: <br>            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Foreground &quot;</span>);<br>            <span class="hljs-keyword">break</span>;<br>        <span class="hljs-keyword">case</span> ST: <br>            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Stopped &quot;</span>);<br>            <span class="hljs-keyword">break</span>;<br>        <span class="hljs-keyword">default</span>:<br>            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;listjobs: Internal error: job[%d].state=%d &quot;</span>, <br>               i, jobs[i].state);<br>        &#125;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%s&quot;</span>, jobs[i].cmdline);<br>    &#125;<br>    &#125;<br>&#125;<br><span class="hljs-comment">/******************************</span><br><span class="hljs-comment"> * end job list helper routines</span><br><span class="hljs-comment"> ******************************/</span><br><br><br><span class="hljs-comment">/***********************</span><br><span class="hljs-comment"> * Other helper routines</span><br><span class="hljs-comment"> ***********************/</span><br><br><span class="hljs-comment">/*</span><br><span class="hljs-comment"> * usage - print a help message</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">usage</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span> </span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Usage: shell [-hvp]\n&quot;</span>);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;   -h   print this message\n&quot;</span>);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;   -v   print additional diagnostic information\n&quot;</span>);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;   -p   do not emit a command prompt\n&quot;</span>);<br>    <span class="hljs-built_in">exit</span>(<span class="hljs-number">1</span>);<br>&#125;<br><br><span class="hljs-comment">/*</span><br><span class="hljs-comment"> * unix_error - unix-style error routine</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">unix_error</span><span class="hljs-params">(<span class="hljs-keyword">char</span> *msg)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stdout</span>, <span class="hljs-string">&quot;%s: %s\n&quot;</span>, msg, strerror(errno));<br>    <span class="hljs-built_in">exit</span>(<span class="hljs-number">1</span>);<br>&#125;<br><br><span class="hljs-comment">/*</span><br><span class="hljs-comment"> * app_error - application-style error routine</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">app_error</span><span class="hljs-params">(<span class="hljs-keyword">char</span> *msg)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stdout</span>, <span class="hljs-string">&quot;%s\n&quot;</span>, msg);<br>    <span class="hljs-built_in">exit</span>(<span class="hljs-number">1</span>);<br>&#125;<br><br><span class="hljs-comment">/*</span><br><span class="hljs-comment"> * Signal - wrapper for the sigaction function</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">handler_t</span> *<span class="hljs-title">Signal</span><span class="hljs-params">(<span class="hljs-keyword">int</span> signum, <span class="hljs-keyword">handler_t</span> *handler)</span> </span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">sigaction</span> <span class="hljs-title">action</span>, <span class="hljs-title">old_action</span>;</span><br><br>    action.sa_handler = handler;  <br>    sigemptyset(&amp;action.sa_mask); <span class="hljs-comment">/* block sigs of type being handled */</span><br>    action.sa_flags = SA_RESTART; <span class="hljs-comment">/* restart syscalls if possible */</span><br><br>    <span class="hljs-keyword">if</span> (sigaction(signum, &amp;action, &amp;old_action) &lt; <span class="hljs-number">0</span>)<br>    unix_error(<span class="hljs-string">&quot;Signal error&quot;</span>);<br>    <span class="hljs-keyword">return</span> (old_action.sa_handler);<br>&#125;<br><br><span class="hljs-comment">/*</span><br><span class="hljs-comment"> * sigquit_handler - The driver program can gracefully terminate the</span><br><span class="hljs-comment"> *    child shell by sending it a SIGQUIT signal.</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">sigquit_handler</span><span class="hljs-params">(<span class="hljs-keyword">int</span> sig)</span> </span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Terminating after receipt of SIGQUIT signal\n&quot;</span>);<br>    <span class="hljs-built_in">exit</span>(<span class="hljs-number">1</span>);<br>&#125;<br><br><span class="hljs-comment">/******************************</span><br><span class="hljs-comment"> * my functions with error handling</span><br><span class="hljs-comment"> ******************************/</span><br><br><span class="hljs-comment">/*</span><br><span class="hljs-comment"> * fork error handling</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">pid_t</span> <span class="hljs-title">Fork</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">pid_t</span> pid;<br><br>    <span class="hljs-keyword">if</span> ((pid = fork()) &lt; <span class="hljs-number">0</span>)<br>        unix_error(<span class="hljs-string">&quot;Fork error&quot;</span>);<br>    <span class="hljs-keyword">return</span> pid;<br>&#125;<br><br><span class="hljs-comment">/*</span><br><span class="hljs-comment"> * execve error handling</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Execve</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *filename, <span class="hljs-keyword">char</span> *<span class="hljs-keyword">const</span> argv[], <span class="hljs-keyword">char</span> *<span class="hljs-keyword">const</span> environ[])</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">if</span> (execve(filename, argv, environ) &lt; <span class="hljs-number">0</span>) &#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%s: Command not found.\n&quot;</span>, argv[<span class="hljs-number">0</span>]);<br>        <span class="hljs-built_in">exit</span>(<span class="hljs-number">0</span>);<br>    &#125;<br>&#125;<br><br><span class="hljs-comment">/*</span><br><span class="hljs-comment"> * kill error handling</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Kill</span><span class="hljs-params">(<span class="hljs-keyword">pid_t</span> pid, <span class="hljs-keyword">int</span> signum)</span> </span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">int</span> kr;<br><br>    <span class="hljs-keyword">if</span> ((kr = kill(pid, signum)) &lt; <span class="hljs-number">0</span>)<br>        unix_error(<span class="hljs-string">&quot;Kill error&quot;</span>);<br>    <span class="hljs-keyword">return</span>;<br>&#125;<br><br><span class="hljs-comment">/*</span><br><span class="hljs-comment"> * sigemptyset error handling</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Sigemptyset</span><span class="hljs-params">(<span class="hljs-keyword">sigset_t</span> *<span class="hljs-built_in">set</span>)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">if</span>(sigemptyset(<span class="hljs-built_in">set</span>)&lt;<span class="hljs-number">0</span>)<br>        unix_error(<span class="hljs-string">&quot;Sigemptyset error&quot;</span>);<br>    <span class="hljs-keyword">return</span>;<br>&#125;<br><span class="hljs-comment">/*</span><br><span class="hljs-comment"> * sigaddset error handling</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Sigaddset</span><span class="hljs-params">(<span class="hljs-keyword">sigset_t</span> *<span class="hljs-built_in">set</span>,<span class="hljs-keyword">int</span> sign)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">if</span>(sigaddset(<span class="hljs-built_in">set</span>,sign)&lt;<span class="hljs-number">0</span>)<br>        unix_error(<span class="hljs-string">&quot;Sigaddset error&quot;</span>);<br>    <span class="hljs-keyword">return</span>;<br>&#125;<br><br><span class="hljs-comment">/*</span><br><span class="hljs-comment"> * sigprocmask error handling</span><br><span class="hljs-comment"> */</span> <br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Sigprocmask</span><span class="hljs-params">(<span class="hljs-keyword">int</span> how, <span class="hljs-keyword">sigset_t</span> *<span class="hljs-built_in">set</span>, <span class="hljs-keyword">sigset_t</span> *oldset)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">if</span>(sigprocmask(how,<span class="hljs-built_in">set</span>,oldset)&lt;<span class="hljs-number">0</span>)<br>        unix_error(<span class="hljs-string">&quot;Sigprocmask error&quot;</span>);<br>    <span class="hljs-keyword">return</span>;<br>&#125;<br><br><span class="hljs-comment">/*</span><br><span class="hljs-comment"> * sigfillset error handling</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Sigfillset</span><span class="hljs-params">(<span class="hljs-keyword">sigset_t</span> *<span class="hljs-built_in">set</span>)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">if</span>(sigfillset(<span class="hljs-built_in">set</span>)&lt;<span class="hljs-number">0</span>)<br>        unix_error(<span class="hljs-string">&quot;Sigfillset error&quot;</span>);<br>    <span class="hljs-keyword">return</span>;<br>&#125;<br><br><span class="hljs-comment">/*</span><br><span class="hljs-comment"> * setpgid error handling</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Setpgid</span><span class="hljs-params">(<span class="hljs-keyword">pid_t</span> pid, <span class="hljs-keyword">pid_t</span> pgid)</span> </span>&#123;<br>    <span class="hljs-keyword">int</span> rc;<br><br>    <span class="hljs-keyword">if</span> ((rc = setpgid(pid, pgid)) &lt; <span class="hljs-number">0</span>)<br>        unix_error(<span class="hljs-string">&quot;Setpgid error&quot;</span>);<br>    <span class="hljs-keyword">return</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CSAPP/" class="category-chain-item">CSAPP</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>CSAPP-lab：shell lab</div>
+      <div>http://gls.show/p/219af9ac/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年10月18日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/529b2f3d/" title="SEED-lab：Race Condition Vulnerability Lab">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">SEED-lab：Race Condition Vulnerability Lab</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/c8db7269/" title="SEED-lab：Pseudo Random Number Generation Lab">
+                        <span class="hidden-mobile">SEED-lab：Pseudo Random Number Generation Lab</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

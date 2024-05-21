@@ -1,0 +1,959 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="进程是什么进程是操作系统为正在运行的程序提供的抽象 程序本身是没有生命周期的，它只是存在磁盘上面的一些指令与静态数据，那么操作系统如何创建并启动一个进程？  将代码和静态数据从磁盘中加载到内存中进程的地址空间 早期系统会把所有数据在程序运行前加载完成，现代操作系统使用懒加载，也即是在程序执行期间需要加载的代码或数据片段，才会加载   为程序的运行时栈分配内存 为堆分配内存 一些别的初始化任务，比如">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OSTEP NOTES &amp; HW：进程">
+<meta property="og:url" content="http://gls.show/p/9e7f5052/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="进程是什么进程是操作系统为正在运行的程序提供的抽象 程序本身是没有生命周期的，它只是存在磁盘上面的一些指令与静态数据，那么操作系统如何创建并启动一个进程？  将代码和静态数据从磁盘中加载到内存中进程的地址空间 早期系统会把所有数据在程序运行前加载完成，现代操作系统使用懒加载，也即是在程序执行期间需要加载的代码或数据片段，才会加载   为程序的运行时栈分配内存 为堆分配内存 一些别的初始化任务，比如">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/ostep/osteplogo.jpg">
+<meta property="article:published_time" content="2022-09-15T15:18:45.765Z">
+<meta property="article:modified_time" content="2022-09-27T17:07:01.342Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/ostep/osteplogo.jpg">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>OSTEP NOTES &amp; HW：进程 - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="OSTEP NOTES &amp; HW：进程"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-09-15 23:18" pubdate>
+          2022年9月15日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          8.3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          26 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">OSTEP NOTES &amp; HW：进程</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2022年9月28日 凌晨
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <h1 id="进程是什么"><a href="#进程是什么" class="headerlink" title="进程是什么"></a>进程是什么</h1><p>进程是操作系统为正在运行的程序提供的抽象</p>
+<p>程序本身是没有生命周期的，它只是存在磁盘上面的一些指令与静态数据，那么操作系统如何创建并启动一个进程？</p>
+<ul>
+<li>将代码和静态数据从磁盘中加载到内存中进程的地址空间<ul>
+<li>早期系统会把所有数据在程序运行前加载完成，现代操作系统使用懒加载，也即是在程序执行期间需要加载的代码或数据片段，才会加载</li>
+</ul>
+</li>
+<li>为程序的运行时栈分配内存</li>
+<li>为堆分配内存</li>
+<li>一些别的初始化任务，比如在 UNIX 系统中，默认情况下每个进程都有 3 个打开的文件描述符（file descriptor），分别对应标准输入、输出和错误</li>
+<li>跳转到程序的main函数入口处运行</li>
+</ul>
+<h1 id="进程状态"><a href="#进程状态" class="headerlink" title="进程状态"></a>进程状态</h1><p>进程可以处于以下状态之一</p>
+<p><img src="/image/ostep/Snipaste_2022-09-15_14-35-32.png" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li>运行 running<ul>
+<li>正在被CPU执行</li>
+</ul>
+</li>
+<li>就绪 ready<ul>
+<li>已经准备好运行，可以转换为运行态</li>
+</ul>
+</li>
+<li>阻塞 blocked <ul>
+<li>一个进程执行了某种操作（比如向磁盘发起I/O请求），他就会被阻塞，直到发生其他事件时才会准备运行</li>
+<li>阻塞态的程序不可以直接转为运行态，需要先转为就绪态才可以转为运行态</li>
+</ul>
+</li>
+<li>初始 initial<ul>
+<li>进程刚被创建</li>
+</ul>
+</li>
+<li>最终 final <ul>
+<li>也被称为僵尸状态</li>
+</ul>
+</li>
+</ul>
+<h1 id="进程的数据结构"><a href="#进程的数据结构" class="headerlink" title="进程的数据结构"></a>进程的数据结构</h1><p>进程的机器状态：</p>
+<ul>
+<li>进程可以访问的内存（地址空间）</li>
+<li>寄存器。许多指令明确地读取或更新寄存器，他们构成了该机器状态的一部分</li>
+</ul>
+<p>以xv6为例：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// the registers xv6 will save and restore</span><br><span class="hljs-comment">// to stop and subsequently restart a process</span><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">context</span> &#123;</span><br>	<span class="hljs-keyword">int</span> eip;<br>	<span class="hljs-keyword">int</span> esp;<br>	<span class="hljs-keyword">int</span> ebx;<br>	<span class="hljs-keyword">int</span> ecx;<br>	<span class="hljs-keyword">int</span> edx;<br>	<span class="hljs-keyword">int</span> esi;<br>	<span class="hljs-keyword">int</span> edi;<br>	<span class="hljs-keyword">int</span> ebp;<br>&#125;;<br><br><br><span class="hljs-comment">// the different states a process can be in</span><br><span class="hljs-class"><span class="hljs-keyword">enum</span> <span class="hljs-title">proc_state</span> &#123;</span> UNUSED, EMBRYO, SLEEPING,<br>					RUNNABLE, RUNNING, ZOMBIE &#125;;<br><br><br><span class="hljs-comment">// the information xv6 tracks about each process</span><br><span class="hljs-comment">// including its register context and state</span><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">proc</span> &#123;</span><br>	<span class="hljs-keyword">char</span> *mem; <span class="hljs-comment">// Start of process memory</span><br>	uint sz; <span class="hljs-comment">// Size of process memory</span><br>	<span class="hljs-keyword">char</span> *kstack; <span class="hljs-comment">// Bottom of kernel stack</span><br>	<span class="hljs-comment">// for this process</span><br>	<span class="hljs-class"><span class="hljs-keyword">enum</span> <span class="hljs-title">proc_state</span> <span class="hljs-title">state</span>;</span> <span class="hljs-comment">// Process state</span><br>	<span class="hljs-keyword">int</span> pid; <span class="hljs-comment">// Process ID</span><br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">proc</span> *<span class="hljs-title">parent</span>;</span> <span class="hljs-comment">// Parent process</span><br>	<span class="hljs-keyword">void</span> *chan; <span class="hljs-comment">// If non-zero, sleeping on chan</span><br>	<span class="hljs-keyword">int</span> killed; <span class="hljs-comment">// If non-zero, have been killed</span><br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">file</span> *<span class="hljs-title">ofile</span>[<span class="hljs-title">NOFILE</span>];</span> <span class="hljs-comment">// Open files</span><br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">inode</span> *<span class="hljs-title">cwd</span>;</span> <span class="hljs-comment">// Current directory</span><br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">context</span> <span class="hljs-title">context</span>;</span> <span class="hljs-comment">// Switch here to run process</span><br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">trapframe</span> *<span class="hljs-title">tf</span>;</span> <span class="hljs-comment">// Trap frame for the</span><br>	<span class="hljs-comment">// current interrupt</span><br>&#125;;<br><br></code></pre></td></tr></table></figure>
+
+<h1 id="进程API"><a href="#进程API" class="headerlink" title="进程API"></a>进程API</h1><h2 id="fork"><a href="#fork" class="headerlink" title="fork"></a>fork</h2><ul>
+<li>fork函数执行后，后将存在两个进程，且每个进程都会从 fork()的返回处继续执行</li>
+<li>新的子进程几近于对父进程的翻版：子进程获得父进程的栈、数据段、堆和执行文本段的拷贝</li>
+<li>执行 fork()之后，每个进程均可修改各自的栈数据、以及堆段中的变量，而并不影响另一进程</li>
+<li>父进程的fork返回值为子进程的pid，子进程的fork返回值为0<h2 id="wait"><a href="#wait" class="headerlink" title="wait"></a>wait</h2>父子进程的前后顺序是不固定的，如果父进程想要等待子进程结束之后再进行某种操作，父进程可以先调用 wait()，该系统调用会在子进程运行结束后才返回，从而延迟自己的执行，直到子进程执行完毕</li>
+</ul>
+<h2 id="exec"><a href="#exec" class="headerlink" title="exec"></a>exec</h2><p>fork+exec可以让子进程执行与父进程不同的程序。给我可执行程序的名称以及需要的参数后，exec()会从可执行程序中加载代码和静态数据，并用它覆写自己的代码段（以及静态数据），堆、栈及其他内存空间也会被重新初始化。然后操作系统就执行该程序，将参数通过 argv 传递给该进程</p>
+<p><img src="https://img-blog.csdnimg.cn/9ba130a0de0146db90b3050a63bb95e9.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6YOt5ZCM5a2m5aaC5piv6K-0,size_20,color_FFFFFF,t_70,g_se,x_16" srcset="/img/loading.gif" lazyload></p>
+<h1 id="CPU虚拟化与进程"><a href="#CPU虚拟化与进程" class="headerlink" title="CPU虚拟化与进程"></a>CPU虚拟化与进程</h1><p>一些目标：</p>
+<ul>
+<li>如何提供有许多 CPU 的假象，使得让我们感觉同时有许多进程同时运行？</li>
+<li>性能：如何在不增加系统开销的情况下实现虚拟化？</li>
+<li>控制权：如何有效地运行进程，同时保留对 CPU 的控制？</li>
+</ul>
+<p>运行进程的一个简化的方式：</p>
+<p>操作系统：</p>
+<ul>
+<li>在进程列表上创建条目</li>
+<li>为程序分配内存，并将程序加载到内存中</li>
+<li>根据 argc/argv 设置程序栈</li>
+<li>清除寄存器</li>
+<li>执行 call main() 方法</li>
+</ul>
+<p>进程：</p>
+<ul>
+<li>执行main开始的代码</li>
+<li>return</li>
+</ul>
+<p>操作系统：</p>
+<ul>
+<li>释放进程内存</li>
+<li>从进程列表中移除进程</li>
+</ul>
+<p>但是这种方式存在一些问题：</p>
+<ul>
+<li>操作系统怎么能确保程序不做一些受限操作，如向磁盘发出 I/O 请求或获得更多系统资源（如 CPU 或内存）？<ul>
+<li>进程必须能够执行 I/O 和其他一些受限制的操作，但又不能让进程完全控制系统</li>
+</ul>
+</li>
+<li>当我们运行一个进程时，操作系统如何让它停下来并切换到另一个进程，从而实现虚拟化 CPU 所需的时分共享？</li>
+</ul>
+<p>通过区分内核模式和用户模式，操作系统可以提供受保护的控制权转移：</p>
+<blockquote>
+<p>在用户模式（user mode）下，应用程序不能完全访问硬件资源。在内核模式（kernel mode）下，操作系统可以访问机器的全部资源。还提供了陷入（trap）内核和从陷阱返回（return-from-trap）到用户模式程序的特别说明，以及一些指令，让操作系统告诉硬件陷阱表（trap table）在内存中的位置 </p>
+</blockquote>
+<p>进程不可以不受约束的做所有它想做的事情，那么如果用户希望执行某种特权操作怎么办？</p>
+<p>答案是内核小心地向用户程序暴露某些关键功能（通过提供几百个系统调用），如访问文件系统、创建和销毁进程、与其他进程通信，以及分配更多内存</p>
+<p>要执行系统调用，程序必须执行特殊的陷阱（trap）指令。该指令同时跳入内核并将特权级别提升到内核模式。一旦进入内核，系统就可以执行任何需要的特权操作，完成后，操作系统调用一个特殊的从陷阱返回（return-from-trap）指令，该指令返回到发起调用的用户程序中，同时将特权级别降低，回到用户模式。为了保证在操作系统发出从陷阱返回指令时能够正确返回，必须确保存储足够的调用者寄存器。例如，在 x86 上，处理器会将程序计数器、标志和其他一些寄存器推送到每个进程的内核栈（kernel stack）上</p>
+<p>因此，在上面运行进程的基础上，需要加以下操作：</p>
+<ul>
+<li>内核栈相关操作</li>
+<li>trap与return-from-trap</li>
+<li>中断处理程序</li>
+</ul>
+<h1 id="进程的上下文切换（context-switch）"><a href="#进程的上下文切换（context-switch）" class="headerlink" title="进程的上下文切换（context switch）"></a>进程的上下文切换（context switch）</h1><ul>
+<li>进程上下文切换概念：操作系统要为当前正在执行的进程保存一些寄存器的值（例如，到它的内核栈），并为即将执行的进程恢复一些寄存器的值（从它的内核栈）</li>
+<li>为了完成进程上下文切换，操作系统会执行一些底层汇编代码，来保存通用寄存器、程序计数器，以及当前正在运行的进程的内核栈指针，然后恢复寄存器、程序计数器，并切换内核栈，供即将运行的进程使用</li>
+</ul>
+<p><img src="/image/ostep/Snipaste_2022-09-18_20-01-40.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="chapter-4-HW"><a href="#chapter-4-HW" class="headerlink" title="chapter 4 HW"></a>chapter 4 HW</h1><p>1</p>
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs tap">$ ./process-run.py -l 5:100,5:100   <br><br><br><br>Time        PID:<span class="hljs-number"> 0 </span>       PID:<span class="hljs-number"> 1 </span>          CPU           IOs<br> <span class="hljs-number"> 1 </span>       RUN:cpu         READY             1<br> <span class="hljs-number"> 2 </span>       RUN:cpu         READY             1<br> <span class="hljs-number"> 3 </span>       RUN:cpu         READY             1<br> <span class="hljs-number"> 4 </span>       RUN:cpu         READY             1<br> <span class="hljs-number"> 5 </span>       RUN:cpu         READY             1<br> <span class="hljs-number"> 6 </span>          DONE       RUN:cpu             1<br> <span class="hljs-number"> 7 </span>          DONE       RUN:cpu             1<br> <span class="hljs-number"> 8 </span>          DONE       RUN:cpu             1<br> <span class="hljs-number"> 9 </span>          DONE       RUN:cpu             1<br><span class="hljs-number"> 10 </span>          DONE       RUN:cpu             1<br><br>Stats: Total Time 10<br>Stats: CPU Busy<span class="hljs-number"> 10 </span>(100.00%)<br>Stats: IO Busy <span class="hljs-number"> 0 </span>(0.00%)<br><br><br><span class="hljs-comment"># 5:100表示一个程序由5条指令组成，每条指令是 CPU 指令的几率是100%</span><br></code></pre></td></tr></table></figure>
+
+<p>2、3</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">Time</span>        PID: <span class="hljs-number">0</span>        PID: <span class="hljs-number">1</span>           CPU           IOs<br>  <span class="hljs-attribute">1</span>        RUN:cpu         READY             <span class="hljs-number">1</span><br>  <span class="hljs-attribute">2</span>        RUN:cpu         READY             <span class="hljs-number">1</span><br>  <span class="hljs-attribute">3</span>        RUN:cpu         READY             <span class="hljs-number">1</span><br>  <span class="hljs-attribute">4</span>        RUN:cpu         READY             <span class="hljs-number">1</span><br>  <span class="hljs-attribute">5</span>           DONE        RUN:io             <span class="hljs-number">1</span><br>  <span class="hljs-attribute">6</span>           DONE       WAITING                           <span class="hljs-number">1</span><br>  <span class="hljs-attribute">7</span>           DONE       WAITING                           <span class="hljs-number">1</span><br>  <span class="hljs-attribute">8</span>           DONE       WAITING                           <span class="hljs-number">1</span><br>  <span class="hljs-attribute">9</span>           DONE       WAITING                           <span class="hljs-number">1</span><br> <span class="hljs-attribute">10</span>           DONE       WAITING                           <span class="hljs-number">1</span><br> <span class="hljs-attribute">11</span>*          DONE   RUN:io_done             <span class="hljs-number">1</span><br><br><span class="hljs-attribute">Stats</span>: Total Time <span class="hljs-number">11</span><br><span class="hljs-attribute">Stats</span>: CPU Busy <span class="hljs-number">6</span> (<span class="hljs-number">54</span>.<span class="hljs-number">55</span>%)<br><span class="hljs-attribute">Stats</span>: IO Busy  <span class="hljs-number">5</span> (<span class="hljs-number">45</span>.<span class="hljs-number">45</span>%)<br></code></pre></td></tr></table></figure>
+
+<p>4</p>
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><code class="hljs tap">Time        PID:<span class="hljs-number"> 0 </span>       PID:<span class="hljs-number"> 1 </span>          CPU           IOs<br> <span class="hljs-number"> 1 </span>        RUN:io         READY             1<br> <span class="hljs-number"> 2 </span>       WAITING       RUN:cpu            <span class="hljs-number"> 1 </span>            1<br> <span class="hljs-number"> 3 </span>       WAITING       RUN:cpu            <span class="hljs-number"> 1 </span>            1<br> <span class="hljs-number"> 4 </span>       WAITING       RUN:cpu            <span class="hljs-number"> 1 </span>            1<br> <span class="hljs-number"> 5 </span>       WAITING       RUN:cpu            <span class="hljs-number"> 1 </span>            1<br> <span class="hljs-number"> 6 </span>       WAITING          DONE                           1<br>  7*   RUN:io_done          DONE             1<br><br>Stats: Total Time 7<br>Stats: CPU Busy<span class="hljs-number"> 6 </span>(85.71%)<br>Stats: IO Busy <span class="hljs-number"> 5 </span>(71.43%)<br><br><br>Time        PID:<span class="hljs-number"> 0 </span>       PID:<span class="hljs-number"> 1 </span>          CPU           IOs<br> <span class="hljs-number"> 1 </span>       RUN:cpu         READY             1<br> <span class="hljs-number"> 2 </span>       RUN:cpu         READY             1<br> <span class="hljs-number"> 3 </span>       RUN:cpu         READY             1<br> <span class="hljs-number"> 4 </span>       RUN:cpu         READY             1<br> <span class="hljs-number"> 5 </span>          DONE        RUN:io             1<br> <span class="hljs-number"> 6 </span>          DONE       WAITING                           1<br> <span class="hljs-number"> 7 </span>          DONE       WAITING                           1<br> <span class="hljs-number"> 8 </span>          DONE       WAITING                           1<br> <span class="hljs-number"> 9 </span>          DONE       WAITING                           1<br><span class="hljs-number"> 10 </span>          DONE       WAITING                           1<br> 11*          DONE   RUN:io_done             1<br><br>Stats: Total Time 11<br>Stats: CPU Busy<span class="hljs-number"> 6 </span>(54.55%)<br>Stats: IO Busy <span class="hljs-number"> 5 </span>(45.45%)<br><br>一个重要的标志是-S，它决定了当进程发出 I/O 时系统如何反应。将标志设置为 SWITCH_ON_END，在进程进行 I/O 操作时，系统将不会切换到另一个进程，而是等待进程完成。<br></code></pre></td></tr></table></figure>
+
+<p>5</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">Time</span>        PID: <span class="hljs-number">0</span>        PID: <span class="hljs-number">1</span>           CPU           IOs<br>  <span class="hljs-attribute">1</span>         RUN:io         READY             <span class="hljs-number">1</span><br>  <span class="hljs-attribute">2</span>        WAITING       RUN:cpu             <span class="hljs-number">1</span>             <span class="hljs-number">1</span><br>  <span class="hljs-attribute">3</span>        WAITING       RUN:cpu             <span class="hljs-number">1</span>             <span class="hljs-number">1</span><br>  <span class="hljs-attribute">4</span>        WAITING       RUN:cpu             <span class="hljs-number">1</span>             <span class="hljs-number">1</span><br>  <span class="hljs-attribute">5</span>        WAITING       RUN:cpu             <span class="hljs-number">1</span>             <span class="hljs-number">1</span><br>  <span class="hljs-attribute">6</span>        WAITING          DONE                           <span class="hljs-number">1</span><br>  <span class="hljs-attribute">7</span>*   RUN:io_done          DONE             <span class="hljs-number">1</span><br><br><span class="hljs-attribute">Stats</span>: Total Time <span class="hljs-number">7</span><br><span class="hljs-attribute">Stats</span>: CPU Busy <span class="hljs-number">6</span> (<span class="hljs-number">85</span>.<span class="hljs-number">71</span>%)<br><span class="hljs-attribute">Stats</span>: IO Busy  <span class="hljs-number">5</span> (<span class="hljs-number">71</span>.<span class="hljs-number">43</span>%)<br></code></pre></td></tr></table></figure>
+
+<p>6</p>
+<figure class="highlight ruleslanguage"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><code class="hljs ruleslanguage">$ ./process-run.py -l <span class="hljs-number">3</span>:<span class="hljs-number">0</span>,<span class="hljs-number">5</span>:<span class="hljs-number">100</span>,<span class="hljs-number">5</span>:<span class="hljs-number">100</span>,<span class="hljs-number">5</span>:<span class="hljs-number">100</span> -S SWITCH_ON_IO -I IO_RUN_LATER -c -p<br><br>Time        PID: <span class="hljs-number">0</span>        PID: <span class="hljs-number">1</span>        PID: <span class="hljs-number">2</span>        PID: <span class="hljs-number">3</span>           CPU           IOs<br>  <span class="hljs-number">1</span>         RUN:io         READY         READY         READY             <span class="hljs-number">1</span><br>  <span class="hljs-number">2</span>        WAITING       RUN:cpu         READY         READY             <span class="hljs-number">1</span>             <span class="hljs-number">1</span><br>  <span class="hljs-number">3</span>        WAITING       RUN:cpu         READY         READY             <span class="hljs-number">1</span>             <span class="hljs-number">1</span><br>  <span class="hljs-number">4</span>        WAITING       RUN:cpu         READY         READY             <span class="hljs-number">1</span>             <span class="hljs-number">1</span><br>  <span class="hljs-number">5</span>        WAITING       RUN:cpu         READY         READY             <span class="hljs-number">1</span>             <span class="hljs-number">1</span><br>  <span class="hljs-number">6</span>        WAITING       RUN:cpu         READY         READY             <span class="hljs-number">1</span>             <span class="hljs-number">1</span><br>  <span class="hljs-number">7</span>*         READY          <span class="hljs-keyword">DONE</span>       RUN:cpu         READY             <span class="hljs-number">1</span><br>  <span class="hljs-number">8</span>          READY          <span class="hljs-keyword">DONE</span>       RUN:cpu         READY             <span class="hljs-number">1</span><br>  <span class="hljs-number">9</span>          READY          <span class="hljs-keyword">DONE</span>       RUN:cpu         READY             <span class="hljs-number">1</span><br> <span class="hljs-number">10</span>          READY          <span class="hljs-keyword">DONE</span>       RUN:cpu         READY             <span class="hljs-number">1</span><br> <span class="hljs-number">11</span>          READY          <span class="hljs-keyword">DONE</span>       RUN:cpu         READY             <span class="hljs-number">1</span><br> <span class="hljs-number">12</span>          READY          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>       RUN:cpu             <span class="hljs-number">1</span><br> <span class="hljs-number">13</span>          READY          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>       RUN:cpu             <span class="hljs-number">1</span><br> <span class="hljs-number">14</span>          READY          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>       RUN:cpu             <span class="hljs-number">1</span><br> <span class="hljs-number">15</span>          READY          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>       RUN:cpu             <span class="hljs-number">1</span><br> <span class="hljs-number">16</span>          READY          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>       RUN:cpu             <span class="hljs-number">1</span><br> <span class="hljs-number">17</span>    RUN:io_done          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>             <span class="hljs-number">1</span><br> <span class="hljs-number">18</span>         RUN:io          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>             <span class="hljs-number">1</span><br> <span class="hljs-number">19</span>        WAITING          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>                           <span class="hljs-number">1</span><br> <span class="hljs-number">20</span>        WAITING          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>                           <span class="hljs-number">1</span><br> <span class="hljs-number">21</span>        WAITING          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>                           <span class="hljs-number">1</span><br> <span class="hljs-number">22</span>        WAITING          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>                           <span class="hljs-number">1</span><br> <span class="hljs-number">23</span>        WAITING          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>                           <span class="hljs-number">1</span><br> <span class="hljs-number">24</span>*   RUN:io_done          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>             <span class="hljs-number">1</span><br> <span class="hljs-number">25</span>         RUN:io          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>             <span class="hljs-number">1</span><br> <span class="hljs-number">26</span>        WAITING          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>                           <span class="hljs-number">1</span><br> <span class="hljs-number">27</span>        WAITING          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>                           <span class="hljs-number">1</span><br> <span class="hljs-number">28</span>        WAITING          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>                           <span class="hljs-number">1</span><br> <span class="hljs-number">29</span>        WAITING          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>                           <span class="hljs-number">1</span><br> <span class="hljs-number">30</span>        WAITING          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>                           <span class="hljs-number">1</span><br> <span class="hljs-number">31</span>*   RUN:io_done          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>          <span class="hljs-keyword">DONE</span>             <span class="hljs-number">1</span><br><br>Stats: Total Time <span class="hljs-number">31</span><br>Stats: CPU Busy <span class="hljs-number">21</span> (<span class="hljs-number">67.74</span>%)<br>Stats: IO Busy  <span class="hljs-number">15</span> (<span class="hljs-number">48.39</span>%)<br><br><br>IO_RUN_LATER选项使得当 I/O 完成时，发出它的进程不一定马上运行，当时正在运行的进程一直运行；<br><br>使用-I IO_RUN_IMMEDIATE 设置，该设置立即运行发出I/O的进程<br><br>这种方式会让IO程序等待，IO程序如果优先使用CPU，当IO程序被阻塞的时候，其他进程被CPU调度，这种情况下的CPU利用率更高。<br></code></pre></td></tr></table></figure>
+
+<p>7</p>
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs tap">./process-run.py -l 3:0,5:100,5:100,5:100 -S SWITCH_ON_IO -I IO_RUN_IMMEDIATE -c -p<br>Time        PID:<span class="hljs-number"> 0 </span>       PID:<span class="hljs-number"> 1 </span>       PID:<span class="hljs-number"> 2 </span>       PID:<span class="hljs-number"> 3 </span>          CPU           IOs<br> <span class="hljs-number"> 1 </span>        RUN:io         READY         READY         READY             1<br> <span class="hljs-number"> 2 </span>       WAITING       RUN:cpu         READY         READY            <span class="hljs-number"> 1 </span>            1<br> <span class="hljs-number"> 3 </span>       WAITING       RUN:cpu         READY         READY            <span class="hljs-number"> 1 </span>            1<br> <span class="hljs-number"> 4 </span>       WAITING       RUN:cpu         READY         READY            <span class="hljs-number"> 1 </span>            1<br> <span class="hljs-number"> 5 </span>       WAITING       RUN:cpu         READY         READY            <span class="hljs-number"> 1 </span>            1<br> <span class="hljs-number"> 6 </span>       WAITING       RUN:cpu         READY         READY            <span class="hljs-number"> 1 </span>            1<br>  7*   RUN:io_done          DONE         READY         READY             1<br> <span class="hljs-number"> 8 </span>        RUN:io          DONE         READY         READY             1<br> <span class="hljs-number"> 9 </span>       WAITING          DONE       RUN:cpu         READY            <span class="hljs-number"> 1 </span>            1<br><span class="hljs-number"> 10 </span>       WAITING          DONE       RUN:cpu         READY            <span class="hljs-number"> 1 </span>            1<br><span class="hljs-number"> 11 </span>       WAITING          DONE       RUN:cpu         READY            <span class="hljs-number"> 1 </span>            1<br><span class="hljs-number"> 12 </span>       WAITING          DONE       RUN:cpu         READY            <span class="hljs-number"> 1 </span>            1<br><span class="hljs-number"> 13 </span>       WAITING          DONE       RUN:cpu         READY            <span class="hljs-number"> 1 </span>            1<br> 14*   RUN:io_done          DONE          DONE         READY             1<br><span class="hljs-number"> 15 </span>        RUN:io          DONE          DONE         READY             1<br><span class="hljs-number"> 16 </span>       WAITING          DONE          DONE       RUN:cpu            <span class="hljs-number"> 1 </span>            1<br><span class="hljs-number"> 17 </span>       WAITING          DONE          DONE       RUN:cpu            <span class="hljs-number"> 1 </span>            1<br><span class="hljs-number"> 18 </span>       WAITING          DONE          DONE       RUN:cpu            <span class="hljs-number"> 1 </span>            1<br><span class="hljs-number"> 19 </span>       WAITING          DONE          DONE       RUN:cpu            <span class="hljs-number"> 1 </span>            1<br><span class="hljs-number"> 20 </span>       WAITING          DONE          DONE       RUN:cpu            <span class="hljs-number"> 1 </span>            1<br> 21*   RUN:io_done          DONE          DONE          DONE             1<br><br>Stats: Total Time 21<br>Stats: CPU Busy<span class="hljs-number"> 21 </span>(100.00%)<br>Stats: IO Busy <span class="hljs-number"> 15 </span>(71.43%)<br><br><br></code></pre></td></tr></table></figure>
+
+<h1 id="chapter-5-HW"><a href="#chapter-5-HW" class="headerlink" title="chapter 5 HW"></a>chapter 5 HW</h1><h2 id="1"><a href="#1" class="headerlink" title="1"></a>1</h2><p>父子进程的变量的值是独立的，一个进程对变量的修改并不会影响另一个变量的相同名字的值</p>
+<h2 id="2"><a href="#2" class="headerlink" title="2"></a>2</h2><p>父子进程具有相同的文件偏移量</p>
+<h2 id="3"><a href="#3" class="headerlink" title="3"></a>3</h2><p>fork之后父子进程的执行顺序是不固定的，但是vfork可以实现题意目的，vfork会使子进程先执行</p>
+<blockquote>
+<p>vfork() differs from fork(2) in that the calling thread is suspended until  the  child  terminates<br>       (either  normally,  by  calling  _exit(2), or abnormally, after delivery of a fatal signal), or it<br>       makes a call to execve(2).</p>
+</blockquote>
+<h2 id="4"><a href="#4" class="headerlink" title="4"></a>4</h2><p>函数原型</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs cpp">SYNOPSIS<br>       <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;unistd.h&gt;</span></span><br><br>       <span class="hljs-keyword">extern</span> <span class="hljs-keyword">char</span> **environ;<br><br>       <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">execl</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *pathname, <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *arg, ...</span></span><br><span class="hljs-params"><span class="hljs-function">                       <span class="hljs-comment">/* (char  *) NULL */</span>)</span></span>;<br>       <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">execlp</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *file, <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *arg, ...</span></span><br><span class="hljs-params"><span class="hljs-function">                       <span class="hljs-comment">/* (char  *) NULL */</span>)</span></span>;<br>       <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">execle</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *pathname, <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *arg, ...</span></span><br><span class="hljs-params"><span class="hljs-function">                       <span class="hljs-comment">/*, (char *) NULL, char *const envp[] */</span>)</span></span>;<br>       <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">execv</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *pathname, <span class="hljs-keyword">char</span> *<span class="hljs-keyword">const</span> argv[])</span></span>;<br>       <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">execvp</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *file, <span class="hljs-keyword">char</span> *<span class="hljs-keyword">const</span> argv[])</span></span>;<br>       <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">execvpe</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *file, <span class="hljs-keyword">char</span> *<span class="hljs-keyword">const</span> argv[],</span></span><br><span class="hljs-params"><span class="hljs-function">                       <span class="hljs-keyword">char</span> *<span class="hljs-keyword">const</span> envp[])</span></span>;<br></code></pre></td></tr></table></figure>
+<p>引自<a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/5769734/what-are-the-different-versions-of-exec-used-for-in-c-and-c/5769803#5769803%EF%BC%9A">https://stackoverflow.com/questions/5769734/what-are-the-different-versions-of-exec-used-for-in-c-and-c/5769803#5769803：</a></p>
+<p>The differences are combinations of:</p>
+<ol>
+<li><strong>L vs V</strong>: whether you want to pass the parameters to the exec’ed program as<ul>
+<li>  <strong>L</strong>: individual parameters in the call (variable argument list): <code>execl()</code>, <code>execle()</code>, <code>execlp()</code>, and <code>execlpe()</code></li>
+<li>  <strong>V</strong>: as an array of char* <code>execv()</code>, <code>execve()</code>, <code>execvp()</code>, and <code>execvpe()</code></li>
+</ul>
+ The array format is useful when the number of parameters that are to be sent to the exec’ed process are variable – as in not known in advance, so you can’t put in a fixed number of parameters in a function call.</li>
+<li><strong>E</strong>: The versions with an ‘e’ at the end let you additionally pass an array of char* that are a set of strings added to the spawned processes environment before the exec’ed program launches. Yet another way of passing parameters, really.</li>
+<li> <strong>P</strong>: The versions with ‘p’ in there use the environment variable <code>PATH</code> to search for the executable file named to execute. The versions without the ‘p’ require an absolute or relative file path to be prepended to the filename of the executable if it is not in the current working directory.</li>
+</ol>
+<h2 id="5"><a href="#5" class="headerlink" title="5"></a>5</h2><ul>
+<li>父进程：返回子进程的进程号</li>
+<li>子进程：调用的进程<code>wait()</code>没有要等待的子进程，那么它会立即返回<code>-1</code>，指示错误。在这种情况下，<code>errno</code>将设置为<code>ECHILD</code>。可见man手册的return error内容</li>
+</ul>
+<h2 id="6"><a href="#6" class="headerlink" title="6"></a>6</h2><ul>
+<li><code>pid_t wait (int * status)</code><ul>
+<li>子进程的结束状态值会由参数status返回，如果不在意结束状态值，则参数status可以设成NULL</li>
+</ul>
+</li>
+<li><code>pid_t waitpid(pid_t pid,int * status,int options)</code><ul>
+<li>参数pid为欲等待的子进程识别码<ul>
+<li>pid&lt;-1 等待进程组识别码为pid绝对值的任何子进程。  </li>
+<li>pid=-1 等待任何子进程，相当于wait()。  </li>
+<li>pid=0 等待进程组识别码与目前进程相同的任何子进程。  </li>
+<li>pid&gt;0 等待任何子进程识别码为pid的子进程。</li>
+</ul>
+</li>
+<li>子进程的结束状态返回后存于status</li>
+</ul>
+</li>
+</ul>
+<h2 id="7"><a href="#7" class="headerlink" title="7"></a>7</h2><p>子进程在关闭标准输出后，printf无法打印到标准输出</p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/OSTEP/" class="category-chain-item">OSTEP</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>OSTEP NOTES &amp; HW：进程</div>
+      <div>http://gls.show/p/9e7f5052/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年9月15日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/591d8b99/" title="OSTEP NOTES &amp; HW：虚拟内存">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">OSTEP NOTES &amp; HW：虚拟内存</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/8b271bd/" title="计算机加电后发生了什么？代码 &amp; 理论分析">
+                        <span class="hidden-mobile">计算机加电后发生了什么？代码 &amp; 理论分析</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

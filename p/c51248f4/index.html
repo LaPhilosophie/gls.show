@@ -1,0 +1,870 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Task 1: Manipulating Environment Variables环境变量是个以&#x3D;号连接的键值对，是隐式传入程序中的  printenv和env命令可以在shell中打印出当前的环境变量 使用grep获取某个特定值   export命令和unset命令分别可以设置和去除环境变量  Task 2: Passing Environment Variables from Parent">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SEED-lab：Environment Variable and Set-UID Program Lab">
+<meta property="og:url" content="http://gls.show/p/c51248f4/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="Task 1: Manipulating Environment Variables环境变量是个以&#x3D;号连接的键值对，是隐式传入程序中的  printenv和env命令可以在shell中打印出当前的环境变量 使用grep获取某个特定值   export命令和unset命令分别可以设置和去除环境变量  Task 2: Passing Environment Variables from Parent">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/seed/seed2.0_vm.jpg">
+<meta property="article:published_time" content="2022-10-30T06:40:58.465Z">
+<meta property="article:modified_time" content="2023-03-21T14:42:50.904Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/seed/seed2.0_vm.jpg">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>SEED-lab：Environment Variable and Set-UID Program Lab - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="SEED-lab：Environment Variable and Set-UID Program Lab"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-10-30 14:40" pubdate>
+          2022年10月30日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          5.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          19 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">SEED-lab：Environment Variable and Set-UID Program Lab</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2023年3月21日 晚上
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <h1 id="Task-1-Manipulating-Environment-Variables"><a href="#Task-1-Manipulating-Environment-Variables" class="headerlink" title="Task 1: Manipulating Environment Variables"></a>Task 1: Manipulating Environment Variables</h1><p>环境变量是个以=号连接的键值对，是隐式传入程序中的</p>
+<ul>
+<li>printenv和env命令可以在shell中打印出当前的环境变量<ul>
+<li>使用grep获取某个特定值</li>
+</ul>
+</li>
+<li>export命令和unset命令分别可以设置和去除环境变量</li>
+</ul>
+<h1 id="Task-2-Passing-Environment-Variables-from-Parent-Process-to-Child-Process"><a href="#Task-2-Passing-Environment-Variables-from-Parent-Process-to-Child-Process" class="headerlink" title="Task 2: Passing Environment Variables from Parent Process to Child Process"></a>Task 2: Passing Environment Variables from Parent Process to Child Process</h1><p>使用gcc命令生成可执行文件，将父子进程printenv的结果分别重定向到两个不同的文件a和b，并用diff a b命令进行比对，发现没有区别</p>
+<p>这说明通过fork的方式产生的父子进程的环境变量是相同的</p>
+<h1 id="Task-3-Environment-Variables-and-execve"><a href="#Task-3-Environment-Variables-and-execve" class="headerlink" title="Task 3: Environment Variables and execve()"></a>Task 3: Environment Variables and execve()</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;unistd.h&gt;</span></span><br><br><span class="hljs-keyword">extern</span> <span class="hljs-keyword">char</span> **environ;<br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-keyword">char</span> *argv[<span class="hljs-number">2</span>];<br><br>  argv[<span class="hljs-number">0</span>] = <span class="hljs-string">&quot;/usr/bin/env&quot;</span>;<br>  argv[<span class="hljs-number">1</span>] = <span class="hljs-literal">NULL</span>;<br><br>  execve(<span class="hljs-string">&quot;/usr/bin/env&quot;</span>, argv, <span class="hljs-literal">NULL</span>);  <br><br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span> ;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>运行上面的程序没有任何输出，说明该进程没有继承任何的环境变量</p>
+<p>将<code>execve(&quot;/usr/bin/env&quot;, argv, NULL);  </code>语句修改为<code>execve(&quot;/usr/bin/env&quot;, argv, environ);  </code>发现可以打印出环境变量</p>
+<p>因此execve最后一个参数如果不指定的话，是默认不传递任何环境变量的</p>
+<h1 id="Task-4-Environment-Variables-and-system"><a href="#Task-4-Environment-Variables-and-system" class="headerlink" title="Task 4: Environment Variables and system()"></a>Task 4: Environment Variables and system()</h1><figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs livecodeserver">The  <span class="hljs-keyword">system</span>()  library  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">uses</span> <span class="hljs-title">fork</span>(<span class="hljs-title">2</span>) <span class="hljs-title">to</span> <span class="hljs-title">create</span> <span class="hljs-title">a</span> <span class="hljs-title">child</span> <span class="hljs-title">process</span></span><br>   that executes <span class="hljs-keyword">the</span> <span class="hljs-built_in">shell</span> <span class="hljs-keyword">command</span> <span class="hljs-title">specified</span> <span class="hljs-title">in</span> <span class="hljs-title">command</span> <span class="hljs-title">using</span> <span class="hljs-title">execl</span>(<span class="hljs-title">3</span>)  <span class="hljs-title">as</span><br>   follows:<br><br>       execl(<span class="hljs-string">&quot;/bin/sh&quot;</span>, <span class="hljs-string">&quot;sh&quot;</span>, <span class="hljs-string">&quot;-c&quot;</span>, <span class="hljs-keyword">command</span>, (<span class="hljs-title">char</span> *) <span class="hljs-title">NULL</span>);<br><br>   <span class="hljs-keyword">system</span>() returns <span class="hljs-keyword">after</span> <span class="hljs-keyword">the</span> <span class="hljs-keyword">command</span> <span class="hljs-title">has</span> <span class="hljs-title">been</span> <span class="hljs-title">completed</span>.<br><br>   During  execution  <span class="hljs-keyword">of</span>  <span class="hljs-keyword">the</span> <span class="hljs-keyword">command</span>, <span class="hljs-title">SIGCHLD</span> <span class="hljs-title">will</span> <span class="hljs-title">be</span> <span class="hljs-title">blocked</span>, <span class="hljs-title">and</span> <span class="hljs-title">SIGINT</span><br>   <span class="hljs-keyword">and</span> SIGQUIT will be  ignored,  <span class="hljs-keyword">in</span>  <span class="hljs-keyword">the</span>  <span class="hljs-built_in">process</span>  that  calls  <span class="hljs-keyword">system</span>().<br>   (These  signals  will be handled according <span class="hljs-built_in">to</span> their defaults inside <span class="hljs-keyword">the</span><br>   child <span class="hljs-built_in">process</span> that executes command.)<br><br>   If <span class="hljs-keyword">command</span> <span class="hljs-title">is</span> <span class="hljs-title">NULL</span>, <span class="hljs-title">then</span> <span class="hljs-title">system</span>() <span class="hljs-title">returns</span> <span class="hljs-title">a</span> <span class="hljs-title">status</span> <span class="hljs-title">indicating</span> <span class="hljs-title">whether</span> <span class="hljs-title">a</span><br>   <span class="hljs-built_in">shell</span> is available <span class="hljs-keyword">on</span> <span class="hljs-title">the</span> <span class="hljs-title">system</span>.<br><br></code></pre></td></tr></table></figure>
+
+
+
+<h1 id="Task-5-Environment-Variable-and-Set-UID-Programs"><a href="#Task-5-Environment-Variable-and-Set-UID-Programs" class="headerlink" title="Task 5: Environment Variable and Set-UID Programs"></a>Task 5: Environment Variable and Set-UID Programs</h1><figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs elixir">[<span class="hljs-number">10</span>/<span class="hljs-number">31</span>/<span class="hljs-number">22</span>]seed<span class="hljs-variable">@VM</span><span class="hljs-symbol">:~/lab/Labsetup</span><span class="hljs-variable">$ </span>sudo chown root a.out <br>[<span class="hljs-number">10</span>/<span class="hljs-number">31</span>/<span class="hljs-number">22</span>]seed<span class="hljs-variable">@VM</span><span class="hljs-symbol">:~/lab/Labsetup</span><span class="hljs-variable">$ </span>sudo chmod <span class="hljs-number">4755</span> a.out <br>[<span class="hljs-number">10</span>/<span class="hljs-number">31</span>/<span class="hljs-number">22</span>]seed<span class="hljs-variable">@VM</span><span class="hljs-symbol">:~/lab/Labsetup</span><span class="hljs-variable">$ </span>ll a.out <br>-rwsr-xr-x <span class="hljs-number">1</span> root seed <span class="hljs-number">16760</span> Oct <span class="hljs-number">31</span> 04<span class="hljs-symbol">:</span>03 a.out<br><br>[<span class="hljs-number">10</span>/<span class="hljs-number">31</span>/<span class="hljs-number">22</span>]seed<span class="hljs-variable">@VM</span><span class="hljs-symbol">:~/lab/Labsetup</span><span class="hljs-variable">$ </span>export PATH=<span class="hljs-string">&quot;/usr/bin&quot;</span><br>[<span class="hljs-number">10</span>/<span class="hljs-number">31</span>/<span class="hljs-number">22</span>]seed<span class="hljs-variable">@VM</span><span class="hljs-symbol">:~/lab/Labsetup</span><span class="hljs-variable">$ </span>export LD_LIBRARY_PATH=<span class="hljs-string">&quot;wdnmd&quot;</span><br>[<span class="hljs-number">10</span>/<span class="hljs-number">31</span>/<span class="hljs-number">22</span>]seed<span class="hljs-variable">@VM</span><span class="hljs-symbol">:~/lab/Labsetup</span><span class="hljs-variable">$ </span>export wdnmd=<span class="hljs-string">&quot;nmsl&quot;</span><br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><p>PATH:可执行文件的搜索路径</p>
+</li>
+<li><p>LD_LIBRARY_PATH:用于告诉动态链接加载器在哪里寻找特定应用程序的共享库</p>
+</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdlib.h&gt;</span></span><br><span class="hljs-keyword">extern</span> <span class="hljs-keyword">char</span> **environ;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>;<br>    <span class="hljs-keyword">while</span> (environ[i] != <span class="hljs-literal">NULL</span>) &#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%s\n&quot;</span>, environ[i]);<br>        i++;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>上面的程序打印出环境变量的值，发现PATH和wdnmd被更改，LD_LIBRARY_PATH没有被更改</p>
+<h1 id="Task-6-The-PATH-Environment-Variable-and-Set-UID-Programs"><a href="#Task-6-The-PATH-Environment-Variable-and-Set-UID-Programs" class="headerlink" title="Task 6: The PATH Environment Variable and Set-UID Programs"></a>Task 6: The PATH Environment Variable and Set-UID Programs</h1><p>使用<code>export PATH=$PWD:$PATH</code>命令将/home/seed加到path环境变量的前面</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br><span class="hljs-built_in">system</span>(<span class="hljs-string">&quot;ls&quot;</span>);<br><span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>编译一下上面的程序，当它执行的时候会fork出进程然后执行ls程序</p>
+<p>将/bin/ls复制到当前目录，修改为suid程序</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell">[10/31/22]seed@VM:~/lab/Labsetup$ sudo chown root ls<br>[10/31/22]seed@VM:~/lab/Labsetup$ sudo chmod 4755 ls<br>[10/31/22]seed@VM:~/lab/Labsetup$ ll ls<br>-rwsr-xr-x 1 root seed 16696 Oct 31 04:22 ls<br></code></pre></td></tr></table></figure>
+
+<p>由于/bin/sh 实际上是一个指向/bin/dash 的符号链接，dash有一个防御对策，可以防止自己在 Set-UID 进程中执行：如果检测到它是在 Set-UID 进程中执行的，它会立即将有效用户 ID 更改为进程的实际用户 ID，实际上就是放弃了特权。由于我们的受害者程序是一个 Set-UID 程序，所以/bin/dash 中的对策可以防止我们的攻击</p>
+<p>为了正常进行攻击，修改sh指向：</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs awk">sudo ln -sf <span class="hljs-regexp">/bin/</span>zsh <span class="hljs-regexp">/bin/</span>sh<br></code></pre></td></tr></table></figure>
+
+<p>此时你在shell中输入ls那么会执行当前目录下的ls程序</p>
+<h1 id="Task-7-The-LD-PRELOAD-Environment-Variable-and-Set-UID-Programs"><a href="#Task-7-The-LD-PRELOAD-Environment-Variable-and-Set-UID-Programs" class="headerlink" title="Task 7: The LD PRELOAD Environment Variable and Set-UID Programs"></a>Task 7: The LD PRELOAD Environment Variable and Set-UID Programs</h1><blockquote>
+<p><code>LD_</code>开头的环境变量会影响动态链接器/加载器的行为</p>
+<p>fPIC：Generate position-independent code (PIC)，意味着生成的机器代码不依赖于位于特定的地址</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs c">$ gcc -fPIC -g -c mylib.c<br>$ gcc -shared -o libmylib.so<span class="hljs-number">.1</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span> mylib.o -lc<br>$ <span class="hljs-keyword">export</span> LD_PRELOAD=./libmylib.so<span class="hljs-number">.1</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span><br><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-keyword">void</span> sleep (<span class="hljs-keyword">int</span> s)<br>&#123;<br><span class="hljs-comment">/* If this is invoked by a privileged program,</span><br><span class="hljs-comment">you can do damages here! */</span><br><span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;I am not sleeping!\n&quot;</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><code>myproc.c</code>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;unistd.h&gt;</span></span><br><span class="hljs-keyword">extern</span> <span class="hljs-keyword">char</span> ** environ;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>	<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>;<br>	<span class="hljs-keyword">while</span> (environ[i] != <span class="hljs-literal">NULL</span>)<br>    	&#123;<br>		<span class="hljs-keyword">if</span> (<span class="hljs-built_in">strstr</span>(environ[i],<span class="hljs-string">&quot;LD_PRELOAD&quot;</span>)!= <span class="hljs-literal">NULL</span>)<br>		&#123;<br>		    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%s\n&quot;</span>, environ[i]);<br>		    <span class="hljs-keyword">break</span>;<br>		&#125;<br>		<span class="hljs-keyword">else</span> i++;<br>	&#125;<br>	sleep(<span class="hljs-number">1</span>);<br>	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<h2 id="Make-myprog-a-regular-program-and-run-it-as-a-normal-user"><a href="#Make-myprog-a-regular-program-and-run-it-as-a-normal-user" class="headerlink" title="Make myprog a regular program, and run it as a normal user."></a>Make myprog a regular program, and run it as a normal user.</h2><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs routeros">$ myprog <br><span class="hljs-attribute">LD_PRELOAD</span>=./libmylib.so.1.0.1<br>I am <span class="hljs-keyword">not</span> sleeping!<br></code></pre></td></tr></table></figure>
+
+<h2 id="Make-myprog-a-Set-UID-root-program-and-run-it-as-a-normal-user"><a href="#Make-myprog-a-Set-UID-root-program-and-run-it-as-a-normal-user" class="headerlink" title="Make myprog a Set-UID root program, and run it as a normal user."></a>Make myprog a Set-UID root program, and run it as a normal user.</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs shell">[10/31/22]seed@VM:~/lab/Labsetup$ sudo chown root myprog <br>[10/31/22]seed@VM:~/lab/Labsetup$ sudo chmod 4755 myprog<br>[10/31/22]seed@VM:~/lab/Labsetup$ ll myprog<br>-rwsr-xr-x 1 root seed 16856 Oct 31 12:06 myprog<br><br>[10/31/22]seed@VM:~/lab/Labsetup$ ./myprog <br>[10/31/22]seed@VM:~/lab/Labsetup$ <br></code></pre></td></tr></table></figure>
+
+<p>这里什么都没有打印</p>
+<h2 id="Make-myprog-a-Set-UID-root-program-export-the-LD-PRELOAD-environment-variable-again-in-the-root-account-and-run-it"><a href="#Make-myprog-a-Set-UID-root-program-export-the-LD-PRELOAD-environment-variable-again-in-the-root-account-and-run-it" class="headerlink" title="Make myprog a Set-UID root program, export the LD PRELOAD environment variable again in the root account and run it"></a>Make myprog a Set-UID root program, export the LD PRELOAD environment variable again in the root account and run it</h2><figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs elixir">root<span class="hljs-variable">@VM</span><span class="hljs-symbol">:/home/seed/lab/Labsetup</span><span class="hljs-comment"># export LD_PRELOAD=&quot;/home/seed/lab/Labsetup/libmylib.so.1.0.1&quot;</span><br>root<span class="hljs-variable">@VM</span><span class="hljs-symbol">:/home/seed/lab/Labsetup</span><span class="hljs-comment"># ./myprog</span><br>LD_PRELOAD=<span class="hljs-regexp">/home/seed</span><span class="hljs-regexp">/lab/</span>Labsetup/libmylib.so.<span class="hljs-number">1.0</span>.<span class="hljs-number">1</span><br>I am <span class="hljs-keyword">not</span> sleeping!<br></code></pre></td></tr></table></figure>
+
+<p>在切换为root用户后，打印出了LD_PRELOAD环境变量，并且调用了我们设计的共享库的sleep函数</p>
+<h2 id="Make-myprog-a-Set-UID-user1-program-i-e-the-owner-is-user1-which-is-another-user-account-export-the-LD-PRELOAD-environment-variable-again-in-a-different-user’s-account-not-root-user-and-run-it"><a href="#Make-myprog-a-Set-UID-user1-program-i-e-the-owner-is-user1-which-is-another-user-account-export-the-LD-PRELOAD-environment-variable-again-in-a-different-user’s-account-not-root-user-and-run-it" class="headerlink" title="Make myprog a Set-UID user1 program (i.e., the owner is user1, which is another user account),export the LD PRELOAD environment variable again in a different user’s account (not-root user) and run it."></a>Make myprog a Set-UID user1 program (i.e., the owner is user1, which is another user account),export the LD PRELOAD environment variable again in a different user’s account (not-root user) and run it.</h2><p>和Make myprog a regular program, and run it as a normal user.结果相同</p>
+<h1 id="Task-8-Invoking-External-Programs-Using-system-versus-execve"><a href="#Task-8-Invoking-External-Programs-Using-system-versus-execve" class="headerlink" title="Task 8: Invoking External Programs Using system() versus execve()"></a>Task 8: Invoking External Programs Using system() versus execve()</h1><ul>
+<li><p>system()会执行sh -c “a.out 1;/bin/sh”因此可以得到root权限的shell</p>
+</li>
+<li><p>execve不可以</p>
+</li>
+</ul>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs elixir">[<span class="hljs-number">10</span>/<span class="hljs-number">31</span>/<span class="hljs-number">22</span>]seed<span class="hljs-variable">@VM</span><span class="hljs-symbol">:~/lab/Labsetup</span><span class="hljs-variable">$ </span>ll a.out <br>-rwsr-xr-x <span class="hljs-number">1</span> root seed <span class="hljs-number">16928</span> Oct <span class="hljs-number">31</span> <span class="hljs-number">12</span><span class="hljs-symbol">:</span><span class="hljs-number">41</span> a.out<br>[<span class="hljs-number">10</span>/<span class="hljs-number">31</span>/<span class="hljs-number">22</span>]seed<span class="hljs-variable">@VM</span><span class="hljs-symbol">:~/lab/Labsetup</span><span class="hljs-variable">$ </span>a.out <span class="hljs-string">&quot;catall.c;/bin/sh&quot;</span><br><span class="hljs-comment">#</span><br><br>[<span class="hljs-number">10</span>/<span class="hljs-number">31</span>/<span class="hljs-number">22</span>]seed<span class="hljs-variable">@VM</span><span class="hljs-symbol">:~/lab/Labsetup</span><span class="hljs-variable">$ </span>a.out <span class="hljs-string">&quot;catall.c;/bin/sh&quot;</span><br>/bin/<span class="hljs-symbol">cat:</span> <span class="hljs-string">&#x27;catall.c;/bin/sh&#x27;</span>: No such file <span class="hljs-keyword">or</span> directory<br></code></pre></td></tr></table></figure>
+
+<h1 id="Task-9-Capability-Leaking"><a href="#Task-9-Capability-Leaking" class="headerlink" title="Task 9: Capability Leaking"></a>Task 9: Capability Leaking</h1><blockquote>
+<p>The setuid() system call can be<br>used to revoke the privileges. According to the manual, “setuid() sets the effective user ID of the calling<br>process. If the effective UID of the caller is root, the real UID and saved set-user-ID are also set”. Therefore,<br>if a Set-UID program with effective UID 0 calls setuid(n), the process will become a normal process,<br>with all its UIDs being set to n</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;unistd.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdlib.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;fcntl.h&gt;</span></span><br><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-keyword">int</span> fd;<br>  <span class="hljs-keyword">char</span> *v[<span class="hljs-number">2</span>];<br><br>  <span class="hljs-comment">/* Assume that /etc/zzz is an important system file,</span><br><span class="hljs-comment">   * and it is owned by root with permission 0644.</span><br><span class="hljs-comment">   * Before running this program, you should create</span><br><span class="hljs-comment">   * the file /etc/zzz first. */</span><br>  fd = open(<span class="hljs-string">&quot;/etc/zzz&quot;</span>, O_RDWR | O_APPEND);        <br>  <span class="hljs-keyword">if</span> (fd == <span class="hljs-number">-1</span>) &#123;<br>     <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Cannot open /etc/zzz\n&quot;</span>);<br>     <span class="hljs-built_in">exit</span>(<span class="hljs-number">0</span>);<br>  &#125;<br><br>  <span class="hljs-comment">// Print out the file descriptor value</span><br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;fd is %d\n&quot;</span>, fd);<br><br>  <span class="hljs-comment">// Permanently disable the privilege by making the</span><br>  <span class="hljs-comment">// effective uid the same as the real uid</span><br>  setuid(getuid());                                <br><br>  <span class="hljs-comment">// Execute /bin/sh</span><br>  v[<span class="hljs-number">0</span>] = <span class="hljs-string">&quot;/bin/sh&quot;</span>; v[<span class="hljs-number">1</span>] = <span class="hljs-number">0</span>;<br>  execve(v[<span class="hljs-number">0</span>], v, <span class="hljs-number">0</span>);                             <br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>虽然上面程序放弃了特权，但是fd被泄露，因此可以使用<code>echo xxx &gt;&amp;fd</code>写入</p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/SEED-lab/" class="category-chain-item">SEED-lab</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>SEED-lab：Environment Variable and Set-UID Program Lab</div>
+      <div>http://gls.show/p/c51248f4/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年10月30日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/187136b6/" title="SEED-lab：Buffer-Overflow Attack Lab （16.04虚拟机）">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">SEED-lab：Buffer-Overflow Attack Lab （16.04虚拟机）</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/cd0d68e2/" title="一个基于 LKM 的 Linux 内核级 rootkit 的实现">
+                        <span class="hidden-mobile">一个基于 LKM 的 Linux 内核级 rootkit 的实现</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

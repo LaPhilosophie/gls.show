@@ -1,0 +1,1121 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Vim简介——编辑器之神Vim是一个文本编辑器，被称为编辑器之神，但与之强大功能所对应的，是陡峭的学习曲线 很多人学习Vim都是从入门到放弃，之后便将其束之高阁。但是掌握之后，你将感受到Vim哲学与效率的巨大提升  在学习之前需要明确的几点：  学习Vim在开始是痛苦的  只有多用才会熟练  克服的一切困难都是值得的   下面是Vim的一个快速使用示范：  在命令行中键入Vim 1.cpp，会直接">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机教育中缺失的一课——Vim">
+<meta property="og:url" content="http://gls.show/p/4f2baa62/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="Vim简介——编辑器之神Vim是一个文本编辑器，被称为编辑器之神，但与之强大功能所对应的，是陡峭的学习曲线 很多人学习Vim都是从入门到放弃，之后便将其束之高阁。但是掌握之后，你将感受到Vim哲学与效率的巨大提升  在学习之前需要明确的几点：  学习Vim在开始是痛苦的  只有多用才会熟练  克服的一切困难都是值得的   下面是Vim的一个快速使用示范：  在命令行中键入Vim 1.cpp，会直接">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.gls.show/img/20230906103547.png">
+<meta property="article:published_time" content="2023-07-26T02:09:10.033Z">
+<meta property="article:modified_time" content="2023-09-06T02:36:18.309Z">
+<meta property="article:author" content="郭佳明">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="Vim">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://img.gls.show/img/20230906103547.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>计算机教育中缺失的一课——Vim - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="计算机教育中缺失的一课——Vim"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-07-26 10:09" pubdate>
+          2023年7月26日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          3.1k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          10 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">计算机教育中缺失的一课——Vim</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2023年9月6日 上午
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <h1 id="Vim简介——编辑器之神"><a href="#Vim简介——编辑器之神" class="headerlink" title="Vim简介——编辑器之神"></a>Vim简介——编辑器之神</h1><p>Vim是一个文本编辑器，被称为编辑器之神，但与之强大功能所对应的，是陡峭的学习曲线</p>
+<p>很多人学习Vim都是从入门到放弃，之后便将其束之高阁。但是掌握之后，你将感受到Vim哲学与效率的巨大提升</p>
+<p><img src="/image/vim-tutorial/vim-1.jpg" srcset="/img/loading.gif" lazyload></p>
+<p>在学习之前需要明确的几点：</p>
+<ul>
+<li><p>学习Vim在开始是痛苦的</p>
+</li>
+<li><p>只有多用才会熟练</p>
+</li>
+<li><p>克服的一切困难都是值得的</p>
+</li>
+</ul>
+<p>下面是Vim的一个快速使用示范：</p>
+<ul>
+<li><p>在命令行中键入<code>Vim 1.cpp</code>，会直接进入Vim的普通模式（Normal Pattern），此时是无法输入文字的</p>
+</li>
+<li><p>按下<code>i</code>，便进入了编辑模式（Insert Pattern），在编辑模式下，方可键入文字</p>
+</li>
+<li><p>输入文字</p>
+</li>
+<li><p>按下<code>ESC</code>，输入<code>:wq</code>，我们便回到了命令行，并且成功完成了文件的编辑</p>
+</li>
+</ul>
+<h1 id="Vim模式"><a href="#Vim模式" class="headerlink" title="Vim模式"></a>Vim模式</h1><p>在上面我们可以发现，Vim具有普通模式和编辑模式（这是最常用的模式），不同的模式具有不同的特点，这是Vim的特性，也是我们初学会感受到别扭的地方</p>
+<p>在普通模式下不可以插入文字，只能输入命令。要想进行编辑，需要切换到插入模式</p>
+<p><img src="/image/vim-tutorial/image-20220103233026488.png" srcset="/img/loading.gif" lazyload alt="模式切换"></p>
+<p>Vim打开之后即进入普通模式，<strong>在Vim的普通模式下，所有的键都是功能键。</strong>对于以下不同情景的目的，有不同的按键帮助我们提升效率</p>
+<p>对于以下特殊情景，不同的快捷键可以快速移动光标。比如输入2 G，即可移动到第二行</p>
+<h1 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h1><h2 id="移动到特定位置："><a href="#移动到特定位置：" class="headerlink" title="移动到特定位置："></a><strong>移动到特定位置：</strong></h2><table>
+<thead>
+<tr>
+<th>按键</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>光标移动到行首</td>
+</tr>
+<tr>
+<td>$</td>
+<td>光标移动到行尾部</td>
+</tr>
+<tr>
+<td>gg</td>
+<td>光标移动到文件的第一个字符</td>
+</tr>
+<tr>
+<td>G</td>
+<td>光标移动到文件的最后一个字符</td>
+</tr>
+<tr>
+<td>n G</td>
+<td>光标移动到第n行</td>
+</tr>
+<tr>
+<td>w</td>
+<td>光标移动到下个单词的开始</td>
+</tr>
+<tr>
+<td>e</td>
+<td>光标移动到本单词最后一个字母</td>
+</tr>
+<tr>
+<td>b</td>
+<td>光标移动到本单词的第一个字母</td>
+</tr>
+</tbody></table>
+<p><strong>上下左右：</strong></p>
+<p>除了上下左右箭头可以移动之外，Vim支持使用<code>hjkl</code>进行光标的移动，分别对应</p>
+<table>
+<thead>
+<tr>
+<th>按键</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>h 或 左箭头键</td>
+<td>光标向左移动一个字符</td>
+</tr>
+<tr>
+<td>j 或 向下箭头</td>
+<td>光标向下移动一个字符</td>
+</tr>
+<tr>
+<td>k 或 向上箭头</td>
+<td>光标向上移动一个字符</td>
+</tr>
+<tr>
+<td>l 或 向右箭头</td>
+<td>光标向右移动一个字符</td>
+</tr>
+</tbody></table>
+<h2 id="字符串匹配"><a href="#字符串匹配" class="headerlink" title="字符串匹配"></a><strong>字符串匹配</strong></h2><p>输入<code>/</code>之后，可以输入<code>text</code>，之后光标会移动到text首次出现的地方，在这之后：</p>
+<table>
+<thead>
+<tr>
+<th>按键</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>n</td>
+<td>光标移动到下一个text出现的地方</td>
+</tr>
+<tr>
+<td>N</td>
+<td>光标移动到前一个text出现的地方</td>
+</tr>
+</tbody></table>
+<h2 id="替换"><a href="#替换" class="headerlink" title="替换"></a><strong>替换</strong></h2><p>普通模式，可以替换单个字母，方式很简单，先按下r，然后输入要替换的字母即可</p>
+<h2 id="删除"><a href="#删除" class="headerlink" title="删除"></a><strong>删除</strong></h2><table>
+<thead>
+<tr>
+<th>按键</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>dw</td>
+<td>删除光标到下个单词的开始处所有文本</td>
+</tr>
+<tr>
+<td>de</td>
+<td>删除光标到本单词的结束处所有文本</td>
+</tr>
+<tr>
+<td>d2w</td>
+<td>删除光标到后面第二个单词的开始处所有文本</td>
+</tr>
+</tbody></table>
+<h2 id="撤销"><a href="#撤销" class="headerlink" title="撤销"></a><strong>撤销</strong></h2><table>
+<thead>
+<tr>
+<th>按键</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>u</td>
+<td>撤销</td>
+</tr>
+<tr>
+<td>ctrl+r</td>
+<td>撤销你的撤销</td>
+</tr>
+</tbody></table>
+<h2 id="拷贝-粘贴"><a href="#拷贝-粘贴" class="headerlink" title="拷贝/粘贴"></a><strong>拷贝/粘贴</strong></h2><table>
+<thead>
+<tr>
+<th>按键</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>yy</td>
+<td>拷贝当前行</td>
+</tr>
+<tr>
+<td>p</td>
+<td>在当前位置后面粘贴</td>
+</tr>
+<tr>
+<td>P</td>
+<td>在当前位置的下一行粘贴</td>
+</tr>
+</tbody></table>
+<h2 id="普通模式切换到插入模式"><a href="#普通模式切换到插入模式" class="headerlink" title="普通模式切换到插入模式"></a><strong>普通模式切换到插入模式</strong></h2><table>
+<thead>
+<tr>
+<th>按键</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>a</td>
+<td>在光标后插入</td>
+</tr>
+<tr>
+<td>o</td>
+<td>在当前行后面插入一个新行</td>
+</tr>
+<tr>
+<td>O</td>
+<td>在当前行前面插入一个新行</td>
+</tr>
+</tbody></table>
+<h2 id="保存-退出"><a href="#保存-退出" class="headerlink" title="保存/退出"></a>保存/退出</h2><p>保存/退出都要在命令模式下完成</p>
+<table>
+<thead>
+<tr>
+<th>按键</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>：w</td>
+<td>仅保存</td>
+</tr>
+<tr>
+<td>：q</td>
+<td>退出</td>
+</tr>
+<tr>
+<td>：wq</td>
+<td>保存且退出</td>
+</tr>
+</tbody></table>
+<h1 id="快速入门"><a href="#快速入门" class="headerlink" title="快速入门"></a>快速入门</h1><ul>
+<li><p>vimtutor命令打开官方教程，并建立一份教程文件的拷贝，该教程有各种语言的版本，如果想要打开中文版本，输入<code>vimtutor zh</code>即可</p>
+</li>
+<li><p>按 CTRL-O 回跳，C-I后跳</p>
+</li>
+<li><p>ZZ保存并退出</p>
+</li>
+<li><p>“J” 命令删除两行间的换行符</p>
+</li>
+<li><p>x删除单个字符</p>
+</li>
+<li><p>dd删除整行</p>
+</li>
+<li><p>u撤销</p>
+</li>
+<li><p>U撤销整行所有修改</p>
+</li>
+<li><p>C-R撤销你的撤销</p>
+</li>
+<li><p>9k向上移动 9 行</p>
+</li>
+<li><p>w向后移动一个单词</p>
+</li>
+<li><p>b向前移动一个单词</p>
+</li>
+<li><p>f向右移动到一个指定的字符，fy向右移动到第一个y出现的位置    </p>
+</li>
+<li><p>F向左移动到一个指定的字符</p>
+</li>
+<li><p>%进行括号匹配</p>
+</li>
+<li><p>“H” 表示 “Home” (头)，”M” 表示 “Middle” (中) 而 “L” 表示 “Last” (尾)</p>
+</li>
+<li><p>C-G输出你现在在的位置</p>
+</li>
+<li><p>C-D向下滚屏</p>
+</li>
+<li><p>C-U向上</p>
+</li>
+<li><p>zz让光标保持在屏幕中间</p>
+</li>
+<li><p>/pattern进行字符串匹配，n向后查找，N向前查找</p>
+</li>
+<li><p>^匹配行首，$匹配行尾，d$删除光标到尾端所有的文本</p>
+</li>
+<li><p>cw修改一个词，c2w修改两个词，c$修改到行尾，cc修改一整行。确切地说，它删除一个词，并切换到插入模式</p>
+</li>
+<li><p>灵活的组合上面命令，/pattern查找字符串，cw修改单词，n找到下一个单词，<code>.</code>重复修改操作，n继续下一个单词</p>
+</li>
+<li><p>dd+p可以用来移动文本</p>
+</li>
+<li><p>p接受计数前缀，比如3p就是插入相同的文本三次</p>
+</li>
+<li><p>xp可以交换两个字符，比如你把the打成了teh，那么把光标放到e下面，按下xp即可</p>
+</li>
+<li><p>y是yank（抽出）的意思，可以将文本拷贝到寄存器中，然后使用p粘贴到别的地方。yw就是拷贝一个单词的意思。yy拷贝一整行</p>
+</li>
+<li><p>yaw表示yank a word，可以在一个单词的任意位置复制该单词</p>
+</li>
+<li><p>一些经常用到的文本删除：</p>
+</li>
+</ul>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs less"><br><span class="hljs-selector-tag">x</span>       删除光标下的字符 (<span class="hljs-string">&quot;dl&quot;</span> 的缩写)<br><span class="hljs-selector-tag">X</span>       删除光标前的字符 (<span class="hljs-string">&quot;dh&quot;</span> 的缩写)<br><span class="hljs-selector-tag">D</span>       从当前位置删除到行尾 (<span class="hljs-string">&quot;d$&quot;</span> 的缩写)<br><span class="hljs-selector-tag">dw</span>      从当前位置删除到下一个单词开头<br><span class="hljs-selector-tag">db</span>      从当前位置删除到前一个单词的开头<br><span class="hljs-selector-tag">diw</span>     删除光标上的单词 (不包括空白字符)<br><span class="hljs-selector-tag">daw</span>     删除光标上的单词 (包括空白字符)<br><span class="hljs-selector-tag">dG</span>      删除到文件末<br><span class="hljs-selector-tag">dgg</span>     删除到文件首<br><br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><p>~ 将字符的大小写转换</p>
+</li>
+<li><p>I移动到当前行第一个非空字符处并切换到插入模式</p>
+</li>
+<li><p>A移动到行尾并切换到插入模式</p>
+</li>
+</ul>
+<h1 id="vimtutor"><a href="#vimtutor" class="headerlink" title="vimtutor"></a>vimtutor</h1><h1 id="lunavim"><a href="#lunavim" class="headerlink" title="lunavim"></a>lunavim</h1><p>首先要安装最新版neovim，如果是Ubuntu直接apt install可能会安装较低版本的nvim，不符合lunavim的版本要求，可以参考<a target="_blank" rel="noopener" href="https://github.com/neovim/neovim/releases/tag/stable%E8%BF%9B%E8%A1%8C%E5%AE%89%E8%A3%85">https://github.com/neovim/neovim/releases/tag/stable进行安装</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">wget https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.deb<br><br>sudo apt install ./nvim-linux64.deb<br></code></pre></td></tr></table></figure>
+
+<p>如果版本过低需要先卸载neovim再重新安装</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">sudo apt remove neovim-runtime    <br>sudo apt remove neovim  <br></code></pre></td></tr></table></figure>
+
+<p>安装lunavim</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs shell">sudo apt-get install cargo<br><br>sudo apt-get install neovim    #需要cargo<br><br>LV_BRANCH=&#x27;release-1.2/neovim-0.8&#x27; bash &lt;(curl -s https://raw.githubusercontent.com/lunarvim/lunarvim/fc6873809934917b470bff1b072171879899a36b/utils/installer/install.sh)<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>[ERROR]: Unable to verify plugins, make sure to manually run ‘:PackerSync’ when starting lvim for the first time.</p>
+<p>添加环境变量即可：</p>
+<p><code>export PATH=&quot;$PATH:/home/$USER/.local/bin&quot;</code></p>
+<p>source ~/.bashrc</p>
+</blockquote>
+<p>还遇到了一些由于网络因素被墙无法访问外网下载插件的问题，给服务器挂代理即可解决。由于Linux挂代理比较麻烦，因此建议直接走主机代理</p>
+<h1 id="一些好用的vim资源"><a href="#一些好用的vim资源" class="headerlink" title="一些好用的vim资源"></a>一些好用的vim资源</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://www.openvim.com/">https://www.openvim.com/</a></li>
+<li><a target="_blank" rel="noopener" href="https://vim.rtorr.com/">Vim Cheat Sheet</a></li>
+<li><a target="_blank" rel="noopener" href="https://yianwillis.github.io/vimcdoc/doc/help.html">vim中文文档计划</a></li>
+<li>vim的官方教程（在命令行中输入vimtutor）</li>
+<li><a target="_blank" rel="noopener" href="https://vimcn.github.io/vimcdoc/doc/help.html">vim中文文档</a></li>
+</ul>
+<h1 id="Vim插件"><a href="#Vim插件" class="headerlink" title="Vim插件"></a>Vim插件</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://www.twilio.com/blog/5-must-have-vim-plugins-that-will-change-your-workflow">5 Must-Have Vim Plugins That Will Change Your Workflow</a></li>
+<li><a target="_blank" rel="noopener" href="https://spacevim.org/">spacevim</a></li>
+</ul>
+<h1 id="在其他软件上使用vim"><a href="#在其他软件上使用vim" class="headerlink" title="在其他软件上使用vim"></a>在其他软件上使用vim</h1><ul>
+<li>jetbrain系软件的Vim插件</li>
+<li>Chrome浏览器的Surfingkeys插件</li>
+<li>Vscode的Vim插件</li>
+</ul>
+<h1 id="推荐阅读"><a href="#推荐阅读" class="headerlink" title="推荐阅读"></a>推荐阅读</h1><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/599417117">如何使用原生 vim 覆盖90%的插件功能 - 知乎</a><br><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/1218390/what-is-your-most-productive-shortcut-with-vim/1220118#1220118">vi - What is your most productive shortcut with Vim? - Stack Overflow</a></p>
+<h1 id="TODO"><a href="#TODO" class="headerlink" title="TODO"></a>TODO</h1>
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E6%95%99%E8%82%B2%E4%B8%AD%E7%BC%BA%E5%A4%B1%E7%9A%84%E4%B8%80%E8%AF%BE/" class="category-chain-item">计算机教育中缺失的一课</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/linux/">#linux</a>
+      
+        <a href="/tags/Vim/">#Vim</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>计算机教育中缺失的一课——Vim</div>
+      <div>http://gls.show/p/4f2baa62/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年7月26日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/69660c86/" title="MIT-6.S081：Lab4 trap">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">MIT-6.S081：Lab4 trap</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/45f7d752/" title="SEED-lab：MD5 Collision Attack Lab">
+                        <span class="hidden-mobile">SEED-lab：MD5 Collision Attack Lab</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,1028 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Lab Environment下载docker文件、解压、运行docker 1234567$ curl https:&#x2F;&#x2F;seedsecuritylabs.org&#x2F;Labs_20.04&#x2F;Files&#x2F;Crypto_PKI&#x2F;Labsetup.zip --output pki.zip $ unzip pki.zip$ dcbuild # docker-compose build$ dcup # dock">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SEED-lab：Public-Key Infrastructure (PKI) Lab">
+<meta property="og:url" content="http://gls.show/p/135735d/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="Lab Environment下载docker文件、解压、运行docker 1234567$ curl https:&#x2F;&#x2F;seedsecuritylabs.org&#x2F;Labs_20.04&#x2F;Files&#x2F;Crypto_PKI&#x2F;Labsetup.zip --output pki.zip $ unzip pki.zip$ dcbuild # docker-compose build$ dcup # dock">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.gls.show/img/202306241631184.png">
+<meta property="article:published_time" content="2023-06-24T08:27:06.825Z">
+<meta property="article:modified_time" content="2023-06-24T08:31:58.731Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://img.gls.show/img/202306241631184.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>SEED-lab：Public-Key Infrastructure (PKI) Lab - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="SEED-lab：Public-Key Infrastructure (PKI) Lab"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-06-24 16:27" pubdate>
+          2023年6月24日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          28k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          90 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">SEED-lab：Public-Key Infrastructure (PKI) Lab</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2023年6月24日 下午
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <p><img src="https://img.gls.show/img/202306241631184.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="Lab-Environment"><a href="#Lab-Environment" class="headerlink" title="Lab Environment"></a>Lab Environment</h1><p>下载docker文件、解压、运行docker</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> curl https://seedsecuritylabs.org/Labs_20.04/Files/Crypto_PKI/Labsetup.zip --output pki.zip</span> <br><span class="hljs-meta"></span><br><span class="hljs-meta">$</span><span class="bash"> unzip pki.zip</span><br><span class="hljs-meta"></span><br><span class="hljs-meta">$</span><span class="bash"> dcbuild <span class="hljs-comment"># docker-compose build</span></span><br><span class="hljs-meta"></span><br><span class="hljs-meta">$</span><span class="bash"> dcup <span class="hljs-comment"># docker-compose up</span></span><br></code></pre></td></tr></table></figure>
+
+<p>这里docker可能没有速度，把/etc/docker/daemon.json文件写入下面的源即可</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs gradle"># cat  <span class="hljs-regexp">/etc/</span>docker/daemon.json<br>&#123;<br>  <span class="hljs-string">&quot;registry-mirrors&quot;</span>: [<br>    <span class="hljs-string">&quot;https://hub-mirror.c.163.com&quot;</span>,<br>    <span class="hljs-string">&quot;https://mirror.baidubce.com&quot;</span><br>  ]<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>SEED VM已经提前做好了命令替换 ，可以看到.bashrc有如下代码</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> Commands <span class="hljs-keyword">for</span> <span class="hljs-keyword">for</span> docker</span> <br>alias dcbuild=&#x27;docker-compose build&#x27;<br>alias dcup=&#x27;docker-compose up&#x27;<br>alias dcdown=&#x27;docker-compose down&#x27;<br>alias dockps=&#x27;docker ps --format &quot;&#123;&#123;.ID&#125;&#125;  &#123;&#123;.Names&#125;&#125;&quot;&#x27;<br>docksh() &#123; docker exec -it $1 /bin/bash; &#125;<br></code></pre></td></tr></table></figure>
+
+<p>给/etc/hosts文件增加映射</p>
+<figure class="highlight accesslog"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs accesslog"><span class="hljs-number">10.9.0.80</span> www.gls23.com<br></code></pre></td></tr></table></figure>
+
+
+
+<h1 id="Task-1-Becoming-a-Certificate-Authority-CA"><a href="#Task-1-Becoming-a-Certificate-Authority-CA" class="headerlink" title="Task 1: Becoming a Certificate Authority (CA)"></a>Task 1: Becoming a Certificate Authority (CA)</h1><blockquote>
+<p>证书颁发机构(CA)是颁发数字证书的可信实体。数字证书证明证书的指定主体对公钥的所有权。许多商业 CA 被视为根 CA; VeriSign 是编写本文时最大的 CA。希望获得商业 CA 颁发的数字证书的用户需要向这些 CA 支付费用。</p>
+<p>在这个实验室，我们需要创建数字证书。我们自己将成为一个根 CA，并为这个 CA 生成一个证书。然后使用这个 CA 为其他 CA (例如服务器)颁发证书。</p>
+<p>与通常由另一个 CA 签名的其他证书不同，根 CA 的证书是自签名的。Root CA 的证书通常预先加载到大多数操作系统、 Web 浏览器和其他依赖 PKI 的软件中。根 CA 的证书是无条件受信任的</p>
+</blockquote>
+<h2 id="配置文件-openssl-conf"><a href="#配置文件-openssl-conf" class="headerlink" title="配置文件 openssl.conf"></a>配置文件 openssl.conf</h2><blockquote>
+<p>为了使用 OpenSSL 创建证书，必须有一个配置文件。</p>
+<p>配置文件通常有一个扩展名.Cnf。它由三个 OpenSSL 命令使用: ca、 req 和 x509</p>
+</blockquote>
+<p>默认情况下，OpenSSL 使用来自/usr/lib/ssl/OpenSSL.cnf 的配置文件。因为我们需要对这个文件进行更改，所以我们将把它复制到我们的工作目录中，并指示 OpenSSL 使用这个副本。配置文件的[ CA default ]部分显示了我们需要准备的默认设置。</p>
+<p>在使用 OpenSSL 生成证书时，可以使用 <code>-config</code> 参数来指定要使用的 <code>openssl.cnf</code> 配置文件。该参数允许你提供自定义的配置文件路径。</p>
+<p>以下是使用 OpenSSL 命令生成证书时指定 <code>openssl.cnf</code> 文件的示例命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">openssl req -new -config /path/to/openssl.cnf -keyout private.key -out csr.csr<br></code></pre></td></tr></table></figure>
+
+<p>进入/usr/lib/ssl看一下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell">[06/21/23]seed@VM:.../ssl$ ll<br>total 4<br>lrwxrwxrwx 1 root root   14 Nov 24  2020 certs -&gt; /etc/ssl/certs<br>drwxr-xr-x 2 root root 4096 Jul 31  2020 misc<br>lrwxrwxrwx 1 root root   20 Nov 24  2020 openssl.cnf -&gt; /etc/ssl/openssl.cnf<br>lrwxrwxrwx 1 root root   16 Nov 24  2020 private -&gt; /etc/ssl/private<br></code></pre></td></tr></table></figure>
+
+<p>查看一下openssl.cnf文件的内容，很长，我们关注一下配置文件的[ CA default ]部分，它显示了我们需要准备的默认设置</p>
+<figure class="highlight clean"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs clean">####################################################################<br>[ CA_default ]<br><br>dir             = ./demoCA              # Where everything is kept<br>certs           = $dir/certs            # Where the issued certs are kept<br>crl_dir         = $dir/crl              # Where the issued crl are kept<br>database        = $dir/index.txt        # database index file.<br>unique_subject  = no                    # Set to <span class="hljs-string">&#x27;no&#x27;</span> to allow creation <span class="hljs-keyword">of</span><br>                                        # several certs <span class="hljs-keyword">with</span> same subject.<br>new_certs_dir   = $dir/newcerts         # default place for new certs.<br><br>certificate     = $dir/cacert.pem       # The CA certificate<br>serial          = $dir/serial           # The current serial number<br>crlnumber       = $dir/crlnumber        # the current crl number<br>                                        # must be commented out to leave a V1 CRL<br>crl             = $dir/crl.pem          # The current CRL<br>private_key     = $dir/private/cakey.pem# The private key<br><br>x509_extensions = usr_cert              # The extensions to add to the cert<br><br># Comment out the following two lines for the <span class="hljs-string">&quot;traditional&quot;</span><br># (and highly broken) format.<br>name_opt        = ca_default            # Subject Name options<br>cert_opt        = ca_default            # Certificate field options<br><br># Extension copying option: use <span class="hljs-keyword">with</span> caution.<br># copy_extensions = copy<br><br><br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>设置</th>
+<th>值</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>dir</td>
+<td>./demoCA</td>
+<td>所有文件存放的根目录</td>
+</tr>
+<tr>
+<td>certs</td>
+<td>$dir/certs</td>
+<td>存储已颁发证书的目录</td>
+</tr>
+<tr>
+<td>crl_dir</td>
+<td>$dir/crl</td>
+<td>存储已颁发CRL的目录</td>
+</tr>
+<tr>
+<td>database</td>
+<td>$dir/index.txt</td>
+<td>数据库索引文件</td>
+</tr>
+<tr>
+<td>unique_subject</td>
+<td>no</td>
+<td>是否允许创建具有相同主题的多个证书</td>
+</tr>
+<tr>
+<td>new_certs_dir</td>
+<td>$dir/newcerts</td>
+<td>存储新创建证书的默认目录</td>
+</tr>
+<tr>
+<td>certificate</td>
+<td>$dir/cacert.pem</td>
+<td>CA证书文件</td>
+</tr>
+<tr>
+<td>serial</td>
+<td>$dir/serial</td>
+<td>当前序列号文件</td>
+</tr>
+<tr>
+<td>crlnumber</td>
+<td>$dir/crlnumber</td>
+<td>当前CRL号码文件</td>
+</tr>
+<tr>
+<td>crl</td>
+<td>$dir/crl.pem</td>
+<td>当前CRL文件</td>
+</tr>
+<tr>
+<td>private_key</td>
+<td>$dir/private/cakey.pem</td>
+<td>私钥文件</td>
+</tr>
+<tr>
+<td>x509_extensions</td>
+<td>usr_cert</td>
+<td>添加到证书的扩展</td>
+</tr>
+<tr>
+<td>name_opt</td>
+<td>ca_default</td>
+<td>主题名称选项</td>
+</tr>
+<tr>
+<td>cert_opt</td>
+<td>ca_default</td>
+<td>证书字段选项</td>
+</tr>
+<tr>
+<td>copy_extensions</td>
+<td>copy</td>
+<td>复制扩展选项（当前被注释掉）</td>
+</tr>
+</tbody></table>
+<p>在家目录下创建工作目录CA，将openssl.cnf复制到此处，删除文件中copy_extensions = copy和unique_subject  = no的注释</p>
+<p>将该文件复制到工作目录之后，需要按照配置文件中指定的方式创建几个子目录。我们需要创建几个子目录<code>mkdir certs crl newcerts</code></p>
+<blockquote>
+<p>对于 index.txt 文件，只需创建一个空文件。对于serial文件，在文件中放置一个字符串格式的数字(例如1000)。一旦设置了配置文件 openssl.cnf，就可以创建和颁发证书。</p>
+</blockquote>
+<p>创建几个必须的文件</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs elixir">[06/<span class="hljs-number">21</span>/<span class="hljs-number">23</span>]seed<span class="hljs-variable">@VM</span><span class="hljs-symbol">:~/demoCA</span><span class="hljs-variable">$ </span> mkdir certs crl newcerts<br>[06/<span class="hljs-number">21</span>/<span class="hljs-number">23</span>]seed<span class="hljs-variable">@VM</span><span class="hljs-symbol">:~/demoCA</span><span class="hljs-variable">$ </span>ls<br>certs  crl  newcerts<br>[06/<span class="hljs-number">21</span>/<span class="hljs-number">23</span>]seed<span class="hljs-variable">@VM</span><span class="hljs-symbol">:~/demoCA</span><span class="hljs-variable">$ </span>echo <span class="hljs-number">1000</span> &gt; serial<br>[06/<span class="hljs-number">21</span>/<span class="hljs-number">23</span>]seed<span class="hljs-variable">@VM</span><span class="hljs-symbol">:~/demoCA</span><span class="hljs-variable">$ </span>echo <span class="hljs-string">&#x27;&#x27;</span> &gt; index.txt<br>[06/<span class="hljs-number">21</span>/<span class="hljs-number">23</span>]seed<span class="hljs-variable">@VM</span><span class="hljs-symbol">:~/demoCA</span><span class="hljs-variable">$ </span>ls<br>certs  crl  index.txt  newcerts  serial<br>[06/<span class="hljs-number">21</span>/<span class="hljs-number">23</span>]seed<span class="hljs-variable">@VM</span><span class="hljs-symbol">:~/demoCA</span><span class="hljs-variable">$ </span>ls<br>certs  crl  index.txt  newcerts  serial<br><br></code></pre></td></tr></table></figure>
+
+<p>如前所述，我们需要为 CA 生成一个自签名证书。这意味着这个 CA 是完全可信的，它的证书将充当根证书。可以运行以下命令为 CA 生成自签名证书:</p>
+<p>在命令行中指定主题信息和密码，这样就不会提示您输入任何其他信息。在下面的命令中，我们使用-subj 来设置主题信息，使用-passout pass: dees 来设置 dees 的密码。</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs vim">openssl req -x509 -newkey rs<span class="hljs-variable">a:4096</span> -<span class="hljs-built_in">sha256</span> -days <span class="hljs-number">3650</span> \<br>-keyout <span class="hljs-keyword">ca</span>.key -out <span class="hljs-keyword">ca</span>.crt \<br>-subj <span class="hljs-string">&quot;/CN=www.modelCA.com/O=Model CA LTD./C=US&quot;</span> \<br>-passout pas<span class="hljs-variable">s:dees</span> \<br>-config ./my_openssl.<span class="hljs-keyword">cnf</span><br></code></pre></td></tr></table></figure>
+
+<p>执行该命令后，将生成一个名为 <code>ca.key</code> 的私钥文件和一个名为 <code>ca.crt</code> 的自签名根证书文件，可以将该根证书用于签发其他证书</p>
+<ul>
+<li><code>-x509</code>：指定生成自签名的证书，而无需先生成证书请求（CSR）</li>
+<li><code>-newkey rsa:4096</code>：生成一个新的 RSA 4096 位的密钥对。</li>
+<li><code>-sha256</code>：使用 SHA-256 算法进行证书哈希。</li>
+<li><code>-days 3650</code>：证书的有效期为 3650 天（约为 10 年）。</li>
+<li><code>-keyout ca.key</code>：将生成的私钥保存到 <code>ca.key</code> 文件。</li>
+<li><code>-out ca.crt</code>：将生成的证书保存到 <code>ca.crt</code> 文件。</li>
+<li><code>-subj &quot;/CN=www.modelCA.com/O=Model CA LTD./C=US&quot;</code>：指定证书的主题信息，包括通用名称（Common Name）、组织（Organization）和国家代码（Country Code）。</li>
+<li><code>-passout pass:dees</code>：指定私钥的密码为 “dees”。</li>
+<li>/path/to/your/openssl.cnf 配置文件的路径</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs shell">[06/22/23]seed@VM:~/demoCA$ openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 \<br><span class="hljs-meta">&gt;</span><span class="bash"> -keyout ca.key -out ca.crt \</span><br><span class="bash">&gt; -subj <span class="hljs-string">&quot;/CN=www.modelCA.com/O=Model CA LTD./C=US&quot;</span> \</span><br><span class="bash">&gt; -passout pass:dees \</span><br><span class="bash">&gt; -config</span> <br>demoCA/          tmp_openssl.cnf  <br><span class="hljs-meta">&gt;</span><span class="bash"> -config ./tmp_openssl.cnf</span> <br>Generating a RSA private key<br>............................................................++++<br>................++++<br>writing new private key to &#x27;ca.key&#x27;<br>-----<br><br></code></pre></td></tr></table></figure>
+
+<p>我们可以使用以下命令查看 X509证书的解码内容和 RSA 密钥(- text 意味着将内容解码为纯文本;-noout 意味着不打印编码版本)</p>
+<figure class="highlight processing"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs processing">openssl x509 -in ca.crt -<span class="hljs-built_in">text</span> -noout<br>openssl rsa -in ca.<span class="hljs-built_in">key</span> -<span class="hljs-built_in">text</span> -noout<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><code class="hljs shell">[06/21/23]seed@VM:~/.../demoCA$ openssl x509 -in ca.crt -text -noout<br>Certificate:<br>    Data:<br>        Version: 3 (0x2)<br>        Serial Number:<br>            36:b9:8a:24:a2:ea:a6:49:b8:a0:53:22:31:68:75:f1:0f:31:34:69<br>        Signature Algorithm: sha256WithRSAEncryption<br>        Issuer: CN = www.modelCA.com, O = Model CA LTD., C = US<br>        Validity<br>            Not Before: Jun 22 03:45:53 2023 GMT<br>            Not After : Jun 19 03:45:53 2033 GMT<br>        Subject: CN = www.modelCA.com, O = Model CA LTD., C = US<br>        Subject Public Key Info:<br>            Public Key Algorithm: rsaEncryption<br>                RSA Public-Key: (4096 bit)<br>                Modulus:<br>                    00:eb:fb:ab:8d:c2:3b:65:a7:cd:9a:34:ae:6d:b9:<br>                    01:49:ff:cb:c5:7d:8f:b5:19:34:41:a7:3f:df:44:<br>                    56:25:65:ba:92:af:21:16:4b:1f:71:a3:27:1d:04:<br>                    8a:fc:b0:f3:01:47:e9:26:d2:ab:e7:62:36:ff:82:<br>                    6b:1a:a8:b3:03:1f:2c:97:a0:bc:d1:17:75:eb:b2:<br>                    12:f6:2b:94:a1:30:17:45:ab:40:e1:32:31:20:92:<br>                    27:f9:de:22:bf:32:8f:f0:bf:cb:93:b2:18:a7:75:<br>                    43:85:ca:cf:ff:75:48:79:e1:9a:19:43:e0:75:1a:<br>                    10:50:0b:52:6d:a7:0d:bf:a1:db:60:f9:50:82:78:<br>                    35:23:09:a7:12:ad:6b:78:78:e1:f8:d0:d6:ba:19:<br>                    f2:ee:fd:a5:5a:16:49:41:e6:f8:68:e5:84:6b:54:<br>                    ab:a9:ec:a9:22:2e:87:29:0d:62:51:a4:f6:80:49:<br>                    ca:36:4d:ab:ef:22:83:51:df:d7:5b:9c:14:40:4c:<br>                    75:42:85:92:ae:9a:4f:93:75:47:7b:e1:a7:09:35:<br>                    bb:b7:ea:08:2d:0f:e5:df:0d:23:86:9d:33:ef:f5:<br>                    f5:f4:52:60:4a:16:f0:34:80:bd:66:7a:46:6c:e2:<br>                    c5:10:11:ee:5e:44:14:00:74:ff:1c:57:70:bd:69:<br>                    f6:9f:ff:46:8c:48:4e:ea:5e:2c:33:67:fc:e4:ad:<br>                    c8:57:26:b1:ce:27:ed:4f:72:d3:d0:f7:12:6c:69:<br>                    ff:af:af:76:57:cb:2b:7e:96:88:12:34:8d:5e:f7:<br>                    2e:58:a3:96:4e:d5:98:13:ee:91:0c:12:45:97:a8:<br>                    e8:50:61:2a:c4:b0:ca:29:d5:5c:0c:4f:de:67:99:<br>                    c9:7c:2d:77:84:f4:41:44:61:5e:99:69:21:fe:7e:<br>                    e8:0f:06:2a:24:e7:ed:e4:17:37:40:d1:2f:53:99:<br>                    c3:65:b6:91:a4:3d:86:d9:b3:9c:4b:af:b3:b8:56:<br>                    c4:d8:83:8c:5b:16:c9:c2:89:de:55:8f:4e:6c:eb:<br>                    f2:8e:6d:2e:00:7f:6c:9e:f9:6b:63:cc:58:fe:af:<br>                    6d:33:31:02:8c:5f:6b:d1:1f:2f:f5:79:67:8d:d2:<br>                    20:33:fc:8e:f7:1c:c5:67:49:bc:bd:c7:e3:c6:e3:<br>                    ec:52:0c:75:34:f0:1f:2b:15:14:21:8c:91:87:1a:<br>                    0f:1a:90:f8:16:9b:ed:8e:da:49:ba:33:03:82:6e:<br>                    ff:c1:cd:6d:c0:b5:4b:42:99:e9:e2:4f:fb:e3:55:<br>                    30:6e:0d:6e:7d:9c:cb:94:3e:8e:65:60:76:9a:01:<br>                    24:81:b1:72:61:b3:bc:3e:f2:3b:52:d5:24:29:e3:<br>                    9f:47:1b<br>                Exponent: 65537 (0x10001)<br>        X509v3 extensions:<br>            X509v3 Subject Key Identifier: <br>                AA:E0:4C:38:F1:86:1C:61:27:D8:D4:35:85:21:CB:AF:5F:01:07:71<br>            X509v3 Authority Key Identifier: <br>                keyid:AA:E0:4C:38:F1:86:1C:61:27:D8:D4:35:85:21:CB:AF:5F:01:07:71<br><br>            X509v3 Basic Constraints: <br>                CA:TRUE<br>    Signature Algorithm: sha256WithRSAEncryption<br>         03:c1:de:ef:e1:a4:22:3d:53:5f:5c:9d:ca:4f:80:14:7e:f3:<br>         e4:11:83:57:85:03:13:86:87:e0:20:39:d8:67:5f:c2:56:3c:<br>         a3:b0:4a:86:ab:34:21:df:71:8d:32:93:aa:a4:9e:99:36:64:<br>         ea:d7:13:c7:a4:da:2e:80:31:de:be:ff:64:c4:a0:7a:50:ec:<br>         7d:79:2b:07:ea:33:a0:f8:96:c4:c9:d7:cc:02:53:ac:43:22:<br>         ec:7d:33:eb:0d:86:4d:eb:17:c5:d4:cb:65:23:38:ef:6f:a7:<br>         dd:a2:2f:28:22:b6:2f:a3:56:28:18:69:1b:04:07:0b:06:2a:<br>         58:6c:96:ba:66:d0:0b:b6:8c:58:7b:8d:82:a6:82:fd:9c:ff:<br>         a3:08:1a:50:53:d0:4e:f8:5d:18:8f:af:0c:b7:7f:78:34:e9:<br>         7f:79:4c:8b:62:9d:86:b3:a2:4f:3c:f4:aa:47:b5:72:9d:7c:<br>         14:fc:be:28:97:3e:b7:cb:7e:19:55:8f:ea:d9:53:b1:e5:67:<br>         70:09:a7:51:3e:56:e7:d7:43:98:ae:c5:8f:81:92:e5:46:49:<br>         a9:95:7b:dd:56:5a:f6:97:ed:41:bb:5b:85:9d:56:06:3a:ac:<br>         47:1b:16:c6:c3:fc:5d:c5:b4:ef:74:bf:68:90:17:11:34:07:<br>         6d:f8:d8:63:f1:7e:3e:63:03:4d:59:86:5a:3b:32:1b:aa:58:<br>         df:9d:ee:81:3b:a0:d0:2b:d5:6b:65:0e:05:26:e8:4b:a8:c5:<br>         f8:57:64:d7:36:5c:20:43:aa:21:1d:f1:2e:cb:e8:d1:f4:8a:<br>         2c:51:53:1f:3e:3e:29:ca:bc:f7:dd:cd:86:ff:72:93:73:22:<br>         e9:48:7e:ca:00:92:85:20:e4:e3:06:3d:cb:42:b4:eb:be:85:<br>         80:d9:d0:ec:59:6c:1e:c7:0a:d0:00:a5:71:07:5e:e7:c6:9b:<br>         48:42:af:0d:21:bb:1e:87:50:89:ba:5f:cc:3b:a5:59:f1:49:<br>         ec:64:85:ce:42:f9:1a:f4:52:ff:e9:92:83:64:24:c7:57:4a:<br>         85:bc:b9:71:1d:4a:9b:3c:c9:b9:29:01:3f:eb:4c:9f:c1:4b:<br>         d7:8b:da:a1:1b:ba:80:dd:19:62:1b:fb:4f:6d:4f:2a:20:ff:<br>         ee:f6:11:4d:11:c1:1b:3f:af:82:d3:19:93:82:d8:c6:5c:9c:<br>         d3:38:58:5a:3f:4d:8d:c5:23:3c:87:fc:bc:b0:86:8c:d5:5f:<br>         ed:3d:be:26:22:b7:a9:6e:e5:d8:00:49:7c:35:5d:1d:96:b2:<br>         7e:59:bd:61:17:24:ff:fa:3c:f5:78:bd:1f:a0:7f:b5:4a:02:<br>         2c:d8:44:37:4c:6d:4b:b0<br></code></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br></pre></td><td class="code"><pre><code class="hljs shell">[06/21/23]seed@VM:~/.../demoCA$ openssl rsa -in ca.key -text -noout<br>Enter pass phrase for ca.key:<br>RSA Private-Key: (4096 bit, 2 primes)<br>modulus:<br>    00:eb:fb:ab:8d:c2:3b:65:a7:cd:9a:34:ae:6d:b9:<br>    01:49:ff:cb:c5:7d:8f:b5:19:34:41:a7:3f:df:44:<br>    56:25:65:ba:92:af:21:16:4b:1f:71:a3:27:1d:04:<br>    8a:fc:b0:f3:01:47:e9:26:d2:ab:e7:62:36:ff:82:<br>    6b:1a:a8:b3:03:1f:2c:97:a0:bc:d1:17:75:eb:b2:<br>    12:f6:2b:94:a1:30:17:45:ab:40:e1:32:31:20:92:<br>    27:f9:de:22:bf:32:8f:f0:bf:cb:93:b2:18:a7:75:<br>    43:85:ca:cf:ff:75:48:79:e1:9a:19:43:e0:75:1a:<br>    10:50:0b:52:6d:a7:0d:bf:a1:db:60:f9:50:82:78:<br>    35:23:09:a7:12:ad:6b:78:78:e1:f8:d0:d6:ba:19:<br>    f2:ee:fd:a5:5a:16:49:41:e6:f8:68:e5:84:6b:54:<br>    ab:a9:ec:a9:22:2e:87:29:0d:62:51:a4:f6:80:49:<br>    ca:36:4d:ab:ef:22:83:51:df:d7:5b:9c:14:40:4c:<br>    75:42:85:92:ae:9a:4f:93:75:47:7b:e1:a7:09:35:<br>    bb:b7:ea:08:2d:0f:e5:df:0d:23:86:9d:33:ef:f5:<br>    f5:f4:52:60:4a:16:f0:34:80:bd:66:7a:46:6c:e2:<br>    c5:10:11:ee:5e:44:14:00:74:ff:1c:57:70:bd:69:<br>    f6:9f:ff:46:8c:48:4e:ea:5e:2c:33:67:fc:e4:ad:<br>    c8:57:26:b1:ce:27:ed:4f:72:d3:d0:f7:12:6c:69:<br>    ff:af:af:76:57:cb:2b:7e:96:88:12:34:8d:5e:f7:<br>    2e:58:a3:96:4e:d5:98:13:ee:91:0c:12:45:97:a8:<br>    e8:50:61:2a:c4:b0:ca:29:d5:5c:0c:4f:de:67:99:<br>    c9:7c:2d:77:84:f4:41:44:61:5e:99:69:21:fe:7e:<br>    e8:0f:06:2a:24:e7:ed:e4:17:37:40:d1:2f:53:99:<br>    c3:65:b6:91:a4:3d:86:d9:b3:9c:4b:af:b3:b8:56:<br>    c4:d8:83:8c:5b:16:c9:c2:89:de:55:8f:4e:6c:eb:<br>    f2:8e:6d:2e:00:7f:6c:9e:f9:6b:63:cc:58:fe:af:<br>    6d:33:31:02:8c:5f:6b:d1:1f:2f:f5:79:67:8d:d2:<br>    20:33:fc:8e:f7:1c:c5:67:49:bc:bd:c7:e3:c6:e3:<br>    ec:52:0c:75:34:f0:1f:2b:15:14:21:8c:91:87:1a:<br>    0f:1a:90:f8:16:9b:ed:8e:da:49:ba:33:03:82:6e:<br>    ff:c1:cd:6d:c0:b5:4b:42:99:e9:e2:4f:fb:e3:55:<br>    30:6e:0d:6e:7d:9c:cb:94:3e:8e:65:60:76:9a:01:<br>    24:81:b1:72:61:b3:bc:3e:f2:3b:52:d5:24:29:e3:<br>    9f:47:1b<br>publicExponent: 65537 (0x10001)<br>privateExponent:<br>    5d:f2:8c:c2:db:ff:df:a1:a5:85:ed:d1:3f:97:76:<br>    be:ea:1a:4a:de:89:16:d5:18:eb:c6:54:f4:62:f5:<br>    54:e0:22:1e:01:a0:cf:8a:4a:d3:67:db:cb:7e:a2:<br>    82:a5:43:a9:4f:e2:af:75:11:c1:05:65:d5:e5:2b:<br>    14:aa:f2:d1:9c:58:99:69:01:a2:d0:8f:3e:ad:5f:<br>    45:27:e6:7d:21:73:32:66:52:67:15:1f:5f:d3:30:<br>    1d:16:e5:88:6e:ed:c5:2f:e6:31:3f:a6:f7:0c:05:<br>    3c:bf:98:7d:20:49:21:54:c2:8f:aa:69:32:d5:94:<br>    86:f9:6a:f0:82:a0:43:99:81:88:22:d9:7d:87:b3:<br>    c7:e6:30:e0:8b:b0:0c:7f:3b:9f:5e:2d:0e:5c:04:<br>    4e:47:26:cc:2d:b1:2e:8e:70:78:fa:5e:f4:87:f9:<br>    eb:a5:6f:54:4f:67:b9:dd:3d:36:39:d1:75:13:6b:<br>    70:a1:0d:81:1f:a1:5e:38:1a:39:bb:72:88:82:a7:<br>    f0:3a:d3:41:b5:e7:56:52:4b:8a:33:34:d7:c2:cf:<br>    a0:11:88:fd:bf:a5:89:5e:66:b5:51:e2:7a:76:d6:<br>    5b:55:6c:46:32:c9:a0:6d:5c:79:ee:d6:18:c5:53:<br>    24:e9:ae:97:52:cd:0f:bd:84:4e:d9:34:e6:03:c8:<br>    8d:f8:31:0c:52:b8:38:73:f3:62:74:e2:38:72:cb:<br>    fe:00:7a:47:8e:a0:6a:8e:1a:57:1d:d6:40:2b:54:<br>    2f:e8:d3:2d:be:d0:e4:3e:f4:ed:c8:2a:df:af:b7:<br>    a0:47:75:fe:8d:19:13:4f:30:d9:23:d1:86:9a:9f:<br>    d5:db:45:43:9f:fb:fa:c6:f3:2b:44:02:98:f6:e8:<br>    a8:12:af:c1:c0:9d:24:53:72:c6:29:ac:b0:4f:9c:<br>    a6:37:2e:9f:5d:f9:d9:1a:6c:7b:b6:b0:13:35:63:<br>    a7:f0:d3:ac:be:da:ab:c6:19:49:d5:eb:c3:6c:42:<br>    f8:5e:46:96:a7:7e:6f:33:2f:c4:60:20:f2:18:c4:<br>    cc:c6:24:da:bc:6c:19:1c:c7:bf:07:e9:b0:8a:44:<br>    a0:4d:6b:3d:42:84:b6:b6:3b:bc:16:24:0c:79:e8:<br>    0c:0b:77:29:7f:90:0c:e1:e6:2d:a6:d1:3a:41:8e:<br>    f6:f2:b9:74:91:aa:ea:fc:d2:45:2e:ed:46:21:8c:<br>    1c:3b:22:73:75:c7:d1:b6:f1:9f:0d:80:c0:30:af:<br>    58:4d:4d:43:38:5c:36:ff:ba:0a:bc:70:be:12:66:<br>    81:09:68:b2:53:92:f6:3f:1c:25:19:2b:b9:f5:e2:<br>    0e:a8:54:d3:90:73:50:52:6c:d0:96:f3:ce:30:7a:<br>    dd:19<br>prime1:<br>    00:ff:1d:5f:ca:d9:83:4a:b1:26:b2:82:69:0d:77:<br>    2c:c1:ed:99:84:40:22:f0:63:33:e0:ff:94:7f:c0:<br>    2c:aa:41:2f:a9:b7:25:df:06:e2:1d:30:f1:c1:8c:<br>    02:12:0d:38:61:94:f3:de:c8:20:56:0f:a9:ea:61:<br>    82:9b:06:25:8c:38:33:e1:fa:e0:b9:54:76:12:2d:<br>    27:c5:6b:8c:29:c9:ee:06:ed:1f:6b:d0:8a:b2:56:<br>    3f:27:ec:13:bf:58:c7:2c:57:80:56:d7:9c:e2:a2:<br>    e1:e9:73:1b:3e:95:e0:35:7f:c5:4a:20:e7:53:59:<br>    49:b9:85:fe:9e:05:fa:89:f0:5d:35:5a:d1:c3:5a:<br>    1d:d9:6b:a5:3b:2f:11:0b:4b:71:42:6c:7e:df:8b:<br>    4c:d1:38:37:87:b4:99:88:7b:e2:3c:c5:18:f1:7d:<br>    6c:01:b7:9f:39:ab:b0:14:93:fe:4a:d2:a1:37:f5:<br>    11:f4:a7:68:24:a6:1e:96:b6:ed:5d:85:1f:bc:df:<br>    eb:11:a3:1a:8b:98:a9:dc:4a:ab:19:a1:4f:12:02:<br>    cc:35:58:92:ca:5b:e3:e9:f3:7d:cf:25:ac:7a:cb:<br>    ab:46:32:4d:e6:75:01:03:5f:63:cb:1f:96:2d:4e:<br>    ad:a7:48:52:03:4d:83:80:b2:84:58:30:df:bd:59:<br>    22:0d<br>prime2:<br>    00:ec:cd:4c:fd:33:fc:4f:e4:c2:13:df:0a:79:eb:<br>    4a:a1:70:9e:52:c4:bd:74:4f:d9:8d:ff:f2:20:62:<br>    dc:86:09:2f:37:01:39:54:8f:84:02:bf:f3:01:e4:<br>    b4:8e:14:3d:1c:5d:f0:7b:48:11:a1:b6:54:ec:7d:<br>    98:79:a6:23:7b:6d:9e:c0:fa:10:cc:cf:2f:89:11:<br>    08:16:37:c9:7e:8b:1b:d4:71:3e:ae:ba:1d:76:46:<br>    6b:72:25:b5:6e:8c:63:b5:00:5d:6f:8f:c0:00:a8:<br>    76:ce:40:5c:53:ca:2e:ac:c6:9a:84:cc:72:9a:96:<br>    3e:27:3c:cc:3f:41:c2:13:bd:6c:f2:37:cb:c4:e3:<br>    8b:3a:03:a2:bb:ab:e4:8f:53:0f:1a:b3:2a:16:2e:<br>    b3:7f:de:a2:9d:0a:93:77:8e:6c:90:97:cb:7c:9e:<br>    71:e0:4c:56:f7:ae:24:f6:8c:a5:7f:41:96:5c:cd:<br>    4c:c5:dc:8b:54:46:30:10:61:85:5f:e5:a0:7d:78:<br>    fd:fe:90:9a:ec:b1:3f:8c:37:1a:a5:7d:07:75:fe:<br>    41:30:0f:ea:44:db:24:ea:7d:51:f1:c4:1b:40:46:<br>    18:3a:ed:c5:e1:1f:ea:4f:70:f0:84:7c:24:3d:5e:<br>    f6:72:27:ab:10:fb:63:03:1e:e8:55:ad:fa:44:cc:<br>    4b:c7<br>exponent1:<br>    00:ec:dd:a8:20:5e:7e:91:6e:13:e0:f0:46:7b:d3:<br>    28:02:53:0a:13:89:bd:26:f6:e4:a7:46:85:e9:6b:<br>    53:cd:2c:43:05:cf:df:e0:c8:b2:4e:aa:2f:fd:25:<br>    72:92:b2:25:a4:2c:b9:95:22:b9:2b:4e:d5:d3:a1:<br>    7f:b3:52:2c:b0:99:4a:4a:ca:35:b6:bd:9d:f6:d8:<br>    68:31:db:de:42:ba:93:3f:69:10:a0:78:fb:1e:04:<br>    08:15:98:12:e9:b9:93:0c:2f:9e:20:83:86:cd:c2:<br>    b0:00:a1:f8:2c:ce:d9:62:b2:e4:4a:24:6c:c3:ad:<br>    86:4f:34:03:29:53:a1:c0:4b:25:2f:b1:c8:4b:1a:<br>    33:d6:b8:24:ac:e3:d1:6e:6c:38:97:94:c6:e3:e5:<br>    a1:88:2c:2b:1a:db:eb:25:96:e8:82:c5:f9:97:d6:<br>    7c:de:c7:4f:96:2b:3b:8c:8f:b0:2e:66:8c:7b:b9:<br>    16:57:d2:cb:56:23:cb:08:e2:85:57:2c:90:40:3c:<br>    a3:34:37:fd:20:99:b9:34:a9:3b:5d:cb:b0:ef:a7:<br>    1b:55:78:8c:aa:48:51:3f:d9:ec:f8:d5:20:e4:ce:<br>    8f:92:d8:88:0d:ae:9b:27:37:7d:1f:8e:8f:50:37:<br>    d9:f2:14:aa:d9:18:32:3d:df:02:14:24:24:c8:d8:<br>    a6:4d<br>exponent2:<br>    00:c3:db:46:2b:42:9d:14:83:73:56:36:2b:17:0d:<br>    da:2b:4e:d7:54:43:ef:22:cd:8c:76:1b:54:6b:1e:<br>    f9:a0:4e:e6:63:4b:3a:dc:ca:da:f7:df:45:21:b2:<br>    c4:f7:a2:9b:ac:e3:b1:ac:75:be:47:8f:64:0c:3a:<br>    11:2b:c4:93:22:5a:57:6c:eb:27:8c:0e:6d:15:a4:<br>    25:99:22:c9:20:45:f4:5d:b0:d0:94:79:d1:36:6b:<br>    26:21:42:39:1e:d7:34:fc:96:f1:b0:fd:27:64:23:<br>    f2:27:c3:29:da:0f:a6:ad:36:92:c4:f5:c8:70:3d:<br>    85:e8:b4:2b:86:c2:5f:c0:2d:f3:77:1f:59:05:5e:<br>    e2:5f:b8:74:17:5f:23:ea:bb:5b:09:cd:58:29:02:<br>    b5:6a:34:7d:31:00:77:59:f2:4d:af:06:2d:c2:c3:<br>    d6:12:1b:71:ee:e7:75:21:0a:d1:33:40:cf:19:b0:<br>    a0:28:22:b2:86:a0:8a:ce:71:aa:7b:d7:93:f7:53:<br>    64:58:f1:c7:81:af:54:8d:27:62:7d:af:bc:c5:05:<br>    e7:6a:d6:2f:00:86:74:b1:11:b7:fe:0c:22:31:f6:<br>    07:c2:6d:b9:35:eb:4c:c4:29:f8:74:cb:ac:b9:a9:<br>    da:92:2e:67:19:e3:a2:50:09:77:46:ae:60:0a:19:<br>    23:2f<br>coefficient:<br>    18:01:82:8e:84:28:56:0f:0a:ce:25:4c:06:70:53:<br>    3c:ea:55:b3:13:f4:e3:73:21:b0:5d:e5:e4:81:1d:<br>    09:e2:c8:fe:f8:b1:54:75:a0:79:d7:d6:df:2f:86:<br>    98:f0:c7:2d:38:aa:e9:a8:8a:8b:cf:ad:60:bf:b7:<br>    5e:d7:18:96:be:d6:00:cd:8d:06:62:a0:ec:50:1e:<br>    25:26:44:14:33:b5:28:4a:4e:3b:61:c7:86:05:17:<br>    4c:a4:07:70:88:f0:ee:07:79:c1:0a:5e:a8:3c:4d:<br>    41:4b:8b:98:26:d8:7f:12:75:e2:7c:d8:12:97:c6:<br>    22:d6:e1:39:ec:c7:0a:72:17:ca:6e:75:69:b7:79:<br>    4f:ad:65:1b:8b:b6:5d:c3:65:d3:6b:44:9c:cd:37:<br>    c5:79:c4:a8:6f:75:56:b4:92:c9:db:2b:1f:6a:b5:<br>    34:d8:68:6f:cc:c5:b6:96:6b:30:2c:fa:da:34:26:<br>    62:d3:9c:ee:76:e2:f4:2c:ac:c0:33:76:11:01:cc:<br>    10:c9:d3:af:5c:39:03:2a:66:ca:cc:4a:37:63:05:<br>    e6:45:9a:7e:9e:61:b4:b3:9d:90:2b:a4:fa:ef:f1:<br>    64:aa:f0:8a:de:f6:4c:ca:e8:82:29:02:6a:d5:1b:<br>    d3:5e:95:1a:5c:40:0b:03:1a:3e:12:a4:ea:82:9a:<br>    18<br><br></code></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="Q"><a href="#Q" class="headerlink" title="Q:"></a>Q:</h2><p>What part of the certificate indicates this is a CA’s certificate? </p>
+<p>在证书中，判断是否为CA证书可以查看”Basic Constraints”扩展字段。在这个证书中，存在并标记为关键的”X509v3 Basic Constraints”扩展字段。其取值为”CA:TRUE”，表示这是一张CA证书。该扩展字段用于识别证书是否具有签发其他证书的权限。</p>
+<p>What part of the certificate indicates this is a self-signed certificate? </p>
+<p>要判断证书是否为自签名证书，可以比较主题字段和颁发者字段。在这个证书中，主题和颁发者字段相同：”CN = <a target="_blank" rel="noopener" href="http://www.modelca.com/">www.modelCA.com</a>, O = Model CA LTD., C = US”。当主题和颁发者字段相同的时候，表明证书是自签名的。</p>
+<p>In the RSA algorithm, we have a public exponent e, a private exponent d , a modulus n , and two secret numbers p  and q , such that n = p * q . Please identify the values for these elements in your certificate and key files.</p>
+<ul>
+<li>modulus：模数，由两个素数相乘得到</li>
+<li>publicExponent：公开指数，表示用于加密的公钥指数，这里是65537。</li>
+<li>privateExponent：私有指数，表示用于解密的私钥指数。</li>
+<li>prime1和prime2：两个素数，用于生成模数。</li>
+</ul>
+<h1 id="Task-2-Generating-a-Certificate-Request-for-Your-Web-Server"><a href="#Task-2-Generating-a-Certificate-Request-for-Your-Web-Server" class="headerlink" title="Task 2: Generating a Certificate Request for Your Web Server"></a>Task 2: Generating a Certificate Request for Your Web Server</h1><p>一个名为bank32.com（请将其替换为您自己的Web服务器名称）的公司希望从我们的CA获取公钥证书。首先，它需要生成一个证书签名请求（CSR），其中包括公司的公钥和身份信息。CSR将被发送给CA，CA将验证请求中的身份信息，然后生成一个证书。 生成CSR的命令与我们用于创建CA的自签名证书的命令非常相似，唯一的区别是使用了”-x509”选项。没有该选项，该命令将生成一个请求；而使用该选项，该命令将生成一个自签名证书。</p>
+<figure class="highlight haml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs haml">openssl req -newkey rsa:2048 -sha256 \<br>-<span class="ruby">keyout server.key -out server.csr \</span><br><span class="ruby"></span>-<span class="ruby">subj <span class="hljs-string">&quot;/CN=www.gls23.com/O=gls23 Inc./C=US&quot;</span> \</span><br><span class="ruby"></span>-<span class="ruby">passout <span class="hljs-symbol">pass:</span>dees</span><br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><code>req</code>：指定使用 OpenSSL 的 req 命令。</li>
+<li><code>-newkey rsa:2048</code>：生成一个新的 RSA 密钥对，密钥长度为 2048 位。</li>
+<li><code>-sha256</code>：使用 SHA-256 算法进行摘要计算。</li>
+<li><code>-keyout server.key</code>：将生成的私钥保存到名为 server.key 的文件中。</li>
+<li><code>-out server.csr</code>：将生成的 CSR 保存到名为 server.csr 的文件中。</li>
+<li><code>-subj &quot;/CN=www.chenyang2022.com/O=Chenyang2022 Inc./C=US&quot;</code>：设置 CSR 的主题信息，包括常用名称 (Common Name)、组织名称 (Organization) 和国家/地区 (Country)。</li>
+<li><code>-passout pass:dees</code>：设置私钥文件的加密密码为 “dees”。</li>
+</ul>
+<h2 id="Adding-Alternative-names"><a href="#Adding-Alternative-names" class="headerlink" title="Adding Alternative names"></a>Adding Alternative names</h2><p>浏览器实施的主机名匹配策略要求证书中的通用名称必须与服务器的主机名匹配，否则浏览器将拒绝与服务器通信。为了允许一个证书具有多个名称，X.509 规范定义了附加到证书上的扩展。这个扩展称为主体备用名称（Subject Alternative Name，SAN）。使用 SAN 扩展，可以在证书的 subjectAltName 字段中指定多个主机名。为了生成带有这样一个字段的证书签名请求，我们可以将所有必要的信息放在一个配置文件中或者通过命令行提供。在这个任务中，我们将使用命令行方法（配置文件方法在另一个 SEED 实验室，即 TLS 实验室中使用）。我们可以向 “openssl req” 命令添加以下选项。需要注意的是，subjectAltName 扩展字段还必须包括来自通用名称字段的内容；否则，通用名称将不被接受为有效名称。</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs vim">openssl req -newkey rs<span class="hljs-variable">a:2048</span> -<span class="hljs-built_in">sha256</span> \<br>-keyout server.key -out server.csr \<br>-subj <span class="hljs-string">&quot;/CN=www.gls23.com/O=gls23 Inc./C=US&quot;</span> \<br>-passout pas<span class="hljs-variable">s:dees</span> \<br>-addext <span class="hljs-comment">&quot;subjectAltName = DNS:www.gls2023.com, \</span><br>DNS:www.gls2024.<span class="hljs-keyword">com</span><span class="hljs-comment">&quot;</span><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><code class="hljs scss"><span class="hljs-selector-attr">[06/21/23]</span>seed<span class="hljs-keyword">@VM</span>:~/demoCA$ openssl req -newkey <span class="hljs-attribute">rsa</span>:<span class="hljs-number">2048</span> -sha256 \<br>&gt; -keyout server.key -out server.csr \<br>&gt; -subj <span class="hljs-string">&quot;/CN=www.gls23.com/O=Bank32 Inc./C=US&quot;</span> \<br>&gt; -passout <span class="hljs-attribute">pass</span>:dees \<br>&gt; -addext <span class="hljs-string">&quot;subjectAltName = DNS:www.gls2023.com, \</span><br><span class="hljs-string">&gt; DNS:www.gls2024.com&quot;</span><br>Generating a RSA private key<br>...................+++++<br>..........................................................................................................................+++++<br>writing new private key to <span class="hljs-string">&#x27;server.key&#x27;</span><br><br>[<span class="hljs-number">06</span>/<span class="hljs-number">21</span>/<span class="hljs-number">23</span>]seed<span class="hljs-keyword">@VM</span>:~/demoCA$ openssl req -in server.csr -text -noout<br>Certificate <span class="hljs-attribute">Request</span>:<br>    <span class="hljs-attribute">Data</span>:<br>        <span class="hljs-attribute">Version</span>: <span class="hljs-number">1</span> (<span class="hljs-number">0</span>x0)<br>        <span class="hljs-attribute">Subject</span>: CN = www.gls23.com, O = Bank32 Inc., C = US<br>        Subject Public Key <span class="hljs-attribute">Info</span>:<br>            Public Key <span class="hljs-attribute">Algorithm</span>: rsaEncryption<br>                RSA <span class="hljs-attribute">Public-Key</span>: (<span class="hljs-number">2048</span> bit)<br>                <span class="hljs-attribute">Modulus</span>:<br>                    <span class="hljs-number">00</span>:a4:<span class="hljs-number">10</span>:d3:<span class="hljs-number">4</span><span class="hljs-attribute">d</span>:<span class="hljs-attribute">cf</span>:<span class="hljs-number">98</span>:<span class="hljs-number">01</span>:<span class="hljs-number">14</span>:<span class="hljs-number">4</span><span class="hljs-attribute">e</span>:<span class="hljs-number">5</span><span class="hljs-attribute">f</span>:<span class="hljs-number">6</span><span class="hljs-attribute">c</span>:c1:<span class="hljs-number">2</span><span class="hljs-attribute">b</span>:<span class="hljs-attribute">ba</span>:<br>                    <span class="hljs-number">9</span><span class="hljs-attribute">e</span>:<span class="hljs-number">64</span>:<span class="hljs-attribute">cb</span>:<span class="hljs-number">6</span><span class="hljs-attribute">c</span>:<span class="hljs-number">3</span><span class="hljs-attribute">a</span>:e2:<span class="hljs-number">35</span>:<span class="hljs-number">27</span>:<span class="hljs-number">0</span><span class="hljs-attribute">c</span>:<span class="hljs-number">03</span>:c5:c4:f0:<span class="hljs-number">2</span><span class="hljs-attribute">b</span>:<span class="hljs-number">53</span>:<br>                    f0:<span class="hljs-number">5</span><span class="hljs-attribute">b</span>:<span class="hljs-number">11</span>:<span class="hljs-number">40</span>:e6:<span class="hljs-attribute">ab</span>:<span class="hljs-attribute">df</span>:e1:<span class="hljs-number">56</span>:d5:a7:<span class="hljs-number">4</span><span class="hljs-attribute">c</span>:<span class="hljs-number">56</span>:<span class="hljs-number">25</span>:a8:<br>                    <span class="hljs-number">7</span><span class="hljs-attribute">c</span>:<span class="hljs-number">5</span><span class="hljs-attribute">c</span>:<span class="hljs-number">79</span>:<span class="hljs-number">6</span><span class="hljs-attribute">b</span>:e7:<span class="hljs-number">16</span>:<span class="hljs-number">31</span>:<span class="hljs-number">98</span>:a9:<span class="hljs-number">96</span>:<span class="hljs-number">26</span>:e0:e2:c5:<span class="hljs-number">93</span>:<br>                    <span class="hljs-attribute">ec</span>:d9:b8:<span class="hljs-attribute">cc</span>:<span class="hljs-number">53</span>:<span class="hljs-number">46</span>:e7:<span class="hljs-number">13</span>:<span class="hljs-number">79</span>:<span class="hljs-number">27</span>:<span class="hljs-attribute">cd</span>:<span class="hljs-attribute">be</span>:<span class="hljs-number">33</span>:b0:d1:<br>                    d0:<span class="hljs-number">8</span><span class="hljs-attribute">e</span>:b6:<span class="hljs-number">59</span>:<span class="hljs-number">91</span>:<span class="hljs-number">5</span><span class="hljs-attribute">d</span>:<span class="hljs-number">48</span>:d8:a8:<span class="hljs-number">66</span>:<span class="hljs-number">57</span>:<span class="hljs-number">0</span><span class="hljs-attribute">a</span>:<span class="hljs-number">2</span><span class="hljs-attribute">d</span>:a1:<span class="hljs-attribute">be</span>:<br>                    <span class="hljs-number">82</span>:<span class="hljs-number">61</span>:<span class="hljs-attribute">bb</span>:b5:c4:<span class="hljs-number">4</span><span class="hljs-attribute">f</span>:<span class="hljs-number">7</span><span class="hljs-attribute">e</span>:<span class="hljs-number">78</span>:d5:<span class="hljs-number">6</span><span class="hljs-attribute">b</span>:<span class="hljs-number">56</span>:<span class="hljs-number">51</span>:<span class="hljs-number">43</span>:<span class="hljs-number">78</span>:<span class="hljs-number">95</span>:<br>                    <span class="hljs-number">83</span>:<span class="hljs-number">02</span>:<span class="hljs-number">54</span>:<span class="hljs-number">91</span>:<span class="hljs-number">7</span><span class="hljs-attribute">a</span>:<span class="hljs-number">0</span><span class="hljs-attribute">e</span>:<span class="hljs-number">66</span>:<span class="hljs-attribute">fd</span>:<span class="hljs-number">9</span><span class="hljs-attribute">b</span>:d4:<span class="hljs-number">26</span>:<span class="hljs-attribute">fe</span>:<span class="hljs-number">97</span>:<span class="hljs-number">46</span>:e7:<br>                    <span class="hljs-number">57</span>:<span class="hljs-number">03</span>:<span class="hljs-number">10</span>:<span class="hljs-number">4</span><span class="hljs-attribute">a</span>:<span class="hljs-number">0</span><span class="hljs-attribute">b</span>:<span class="hljs-number">45</span>:<span class="hljs-attribute">bd</span>:b7:<span class="hljs-number">96</span>:<span class="hljs-number">23</span>:<span class="hljs-number">8</span><span class="hljs-attribute">f</span>:<span class="hljs-attribute">be</span>:<span class="hljs-number">14</span>:<span class="hljs-number">57</span>:<span class="hljs-number">84</span>:<br>                    c5:<span class="hljs-number">52</span>:<span class="hljs-number">4</span><span class="hljs-attribute">c</span>:<span class="hljs-number">4</span><span class="hljs-attribute">a</span>:<span class="hljs-number">06</span>:<span class="hljs-number">0</span><span class="hljs-attribute">f</span>:<span class="hljs-number">55</span>:<span class="hljs-number">9</span><span class="hljs-attribute">b</span>:<span class="hljs-number">19</span>:<span class="hljs-number">52</span>:<span class="hljs-number">30</span>:<span class="hljs-number">1</span><span class="hljs-attribute">a</span>:<span class="hljs-number">26</span>:b2:<span class="hljs-attribute">fe</span>:<br>                    <span class="hljs-number">00</span>:<span class="hljs-number">45</span>:e0:<span class="hljs-number">02</span>:<span class="hljs-number">0</span><span class="hljs-attribute">b</span>:a5:<span class="hljs-number">0</span><span class="hljs-attribute">d</span>:<span class="hljs-number">7</span><span class="hljs-attribute">a</span>:<span class="hljs-number">80</span>:<span class="hljs-attribute">df</span>:<span class="hljs-number">73</span>:<span class="hljs-number">55</span>:<span class="hljs-number">65</span>:<span class="hljs-number">84</span>:<span class="hljs-number">28</span>:<br>                    <span class="hljs-number">63</span>:<span class="hljs-number">93</span>:d1:<span class="hljs-number">00</span>:<span class="hljs-number">80</span>:<span class="hljs-number">5</span><span class="hljs-attribute">e</span>:<span class="hljs-number">52</span>:<span class="hljs-number">7</span><span class="hljs-attribute">c</span>:b5:<span class="hljs-number">24</span>:<span class="hljs-number">1</span><span class="hljs-attribute">b</span>:e9:a0:<span class="hljs-number">7</span><span class="hljs-attribute">f</span>:<span class="hljs-number">20</span>:<br>                    <span class="hljs-number">43</span>:<span class="hljs-number">55</span>:e2:<span class="hljs-number">8</span><span class="hljs-attribute">d</span>:<span class="hljs-number">5</span><span class="hljs-attribute">e</span>:<span class="hljs-number">03</span>:<span class="hljs-number">02</span>:<span class="hljs-number">82</span>:<span class="hljs-attribute">aa</span>:<span class="hljs-number">72</span>:<span class="hljs-number">54</span>:<span class="hljs-number">97</span>:<span class="hljs-number">83</span>:<span class="hljs-attribute">cb</span>:<span class="hljs-number">5</span><span class="hljs-attribute">e</span>:<br>                    <span class="hljs-number">8</span><span class="hljs-attribute">b</span>:b5:f9:b8:<span class="hljs-number">41</span>:<span class="hljs-number">11</span>:d7:b9:<span class="hljs-number">9</span><span class="hljs-attribute">c</span>:<span class="hljs-attribute">fd</span>:<span class="hljs-number">5</span><span class="hljs-attribute">c</span>:<span class="hljs-number">9</span><span class="hljs-attribute">b</span>:<span class="hljs-number">51</span>:<span class="hljs-number">6</span><span class="hljs-attribute">d</span>:<span class="hljs-number">73</span>:<br>                    <span class="hljs-number">18</span>:e4:<span class="hljs-number">48</span>:<span class="hljs-number">4</span><span class="hljs-attribute">f</span>:c1:<span class="hljs-number">54</span>:<span class="hljs-number">4</span><span class="hljs-attribute">a</span>:<span class="hljs-number">7</span><span class="hljs-attribute">d</span>:d0:a0:e7:<span class="hljs-attribute">dc</span>:<span class="hljs-number">1</span><span class="hljs-attribute">a</span>:<span class="hljs-number">57</span>:<span class="hljs-attribute">fd</span>:<br>                    <span class="hljs-number">4</span><span class="hljs-attribute">c</span>:<span class="hljs-number">7</span><span class="hljs-attribute">d</span>:<span class="hljs-number">48</span>:<span class="hljs-number">2</span><span class="hljs-attribute">d</span>:b2:<span class="hljs-number">0</span><span class="hljs-attribute">a</span>:<span class="hljs-number">74</span>:<span class="hljs-attribute">bc</span>:<span class="hljs-number">68</span>:<span class="hljs-number">3</span><span class="hljs-attribute">a</span>:<span class="hljs-number">8</span><span class="hljs-attribute">b</span>:<span class="hljs-number">3</span><span class="hljs-attribute">b</span>:<span class="hljs-number">97</span>:<span class="hljs-attribute">ec</span>:<span class="hljs-attribute">bf</span>:<br>                    <span class="hljs-number">12</span>:<span class="hljs-attribute">af</span>:<span class="hljs-number">36</span>:<span class="hljs-number">63</span>:<span class="hljs-number">50</span>:<span class="hljs-number">9</span><span class="hljs-attribute">f</span>:<span class="hljs-number">4</span><span class="hljs-attribute">b</span>:<span class="hljs-number">6</span><span class="hljs-attribute">e</span>:e8:<span class="hljs-number">31</span>:<span class="hljs-number">02</span>:d8:e5:d1:e5:<br>                    <span class="hljs-number">2</span><span class="hljs-attribute">f</span>:ed<br>                <span class="hljs-attribute">Exponent</span>: <span class="hljs-number">65537</span> (<span class="hljs-number">0</span>x10001)<br>        <span class="hljs-attribute">Attributes</span>:<br>        Requested <span class="hljs-attribute">Extensions</span>:<br>            X509v3 Subject Alternative <span class="hljs-attribute">Name</span>: <br>                <span class="hljs-attribute">DNS</span>:www.gls2023.com, <span class="hljs-attribute">DNS</span>:www.gls2024.com<br>    Signature <span class="hljs-attribute">Algorithm</span>: sha256WithRSAEncryption<br>         <span class="hljs-number">4</span><span class="hljs-attribute">c</span>:f5:d9:b2:f7:<span class="hljs-number">4</span><span class="hljs-attribute">c</span>:<span class="hljs-number">8</span><span class="hljs-attribute">d</span>:<span class="hljs-number">19</span>:f1:<span class="hljs-number">57</span>:<span class="hljs-number">7</span><span class="hljs-attribute">e</span>:<span class="hljs-number">6</span><span class="hljs-attribute">c</span>:<span class="hljs-number">57</span>:<span class="hljs-number">3</span><span class="hljs-attribute">d</span>:d6:a9:<span class="hljs-number">89</span>:<span class="hljs-attribute">ad</span>:<br>         <span class="hljs-attribute">cb</span>:<span class="hljs-attribute">cb</span>:<span class="hljs-number">37</span>:c5:<span class="hljs-number">44</span>:<span class="hljs-number">00</span>:c2:<span class="hljs-number">31</span>:<span class="hljs-attribute">cc</span>:<span class="hljs-number">64</span>:a8:<span class="hljs-number">2</span><span class="hljs-attribute">b</span>:<span class="hljs-number">51</span>:<span class="hljs-attribute">ca</span>:<span class="hljs-number">9</span><span class="hljs-attribute">d</span>:<span class="hljs-number">9</span><span class="hljs-attribute">b</span>:<span class="hljs-number">04</span>:d0:<br>         b0:<span class="hljs-number">07</span>:c9:c8:f6:<span class="hljs-attribute">fc</span>:<span class="hljs-number">56</span>:<span class="hljs-attribute">ba</span>:<span class="hljs-number">0</span><span class="hljs-attribute">c</span>:c7:b2:<span class="hljs-attribute">bb</span>:<span class="hljs-attribute">aa</span>:<span class="hljs-number">3</span><span class="hljs-attribute">c</span>:<span class="hljs-number">98</span>:<span class="hljs-number">15</span>:e8:<span class="hljs-number">3</span><span class="hljs-attribute">f</span>:<br>         <span class="hljs-number">8</span><span class="hljs-attribute">f</span>:<span class="hljs-number">4</span><span class="hljs-attribute">d</span>:<span class="hljs-attribute">bc</span>:<span class="hljs-number">4</span><span class="hljs-attribute">e</span>:d5:<span class="hljs-number">32</span>:<span class="hljs-number">41</span>:<span class="hljs-number">69</span>:d5:<span class="hljs-number">83</span>:<span class="hljs-number">6</span><span class="hljs-attribute">f</span>:<span class="hljs-number">8</span><span class="hljs-attribute">c</span>:<span class="hljs-number">68</span>:<span class="hljs-attribute">bd</span>:c1:<span class="hljs-number">22</span>:<span class="hljs-number">35</span>:<span class="hljs-number">9</span><span class="hljs-attribute">a</span>:<br>         <span class="hljs-attribute">fa</span>:<span class="hljs-number">3</span><span class="hljs-attribute">a</span>:<span class="hljs-number">71</span>:<span class="hljs-number">22</span>:c1:<span class="hljs-number">71</span>:<span class="hljs-number">5</span><span class="hljs-attribute">a</span>:<span class="hljs-number">39</span>:<span class="hljs-number">5</span><span class="hljs-attribute">d</span>:<span class="hljs-number">0</span><span class="hljs-attribute">b</span>:<span class="hljs-number">13</span>:<span class="hljs-number">4</span><span class="hljs-attribute">c</span>:d4:<span class="hljs-attribute">bb</span>:d5:b4:d2:<span class="hljs-attribute">eb</span>:<br>         <span class="hljs-attribute">be</span>:e7:<span class="hljs-number">53</span>:c4:<span class="hljs-number">50</span>:<span class="hljs-attribute">da</span>:<span class="hljs-number">77</span>:<span class="hljs-number">00</span>:<span class="hljs-number">23</span>:<span class="hljs-number">14</span>:<span class="hljs-number">86</span>:a6:<span class="hljs-number">98</span>:<span class="hljs-attribute">cd</span>:<span class="hljs-number">80</span>:<span class="hljs-number">9</span><span class="hljs-attribute">d</span>:<span class="hljs-number">4</span><span class="hljs-attribute">b</span>:b7:<br>         <span class="hljs-number">51</span>:<span class="hljs-number">1</span><span class="hljs-attribute">b</span>:f1:<span class="hljs-number">81</span>:<span class="hljs-number">48</span>:e5:<span class="hljs-number">1</span><span class="hljs-attribute">c</span>:<span class="hljs-number">3</span><span class="hljs-attribute">c</span>:<span class="hljs-attribute">dc</span>:f2:<span class="hljs-number">5</span><span class="hljs-attribute">a</span>:b7:a4:<span class="hljs-number">43</span>:a3:<span class="hljs-number">5</span><span class="hljs-attribute">b</span>:<span class="hljs-attribute">ad</span>:<span class="hljs-attribute">bf</span>:<br>         <span class="hljs-number">7</span><span class="hljs-attribute">f</span>:<span class="hljs-number">66</span>:<span class="hljs-number">59</span>:<span class="hljs-attribute">cc</span>:<span class="hljs-number">12</span>:<span class="hljs-attribute">ca</span>:<span class="hljs-number">23</span>:c0:a1:<span class="hljs-attribute">da</span>:<span class="hljs-number">38</span>:<span class="hljs-attribute">ff</span>:c1:e8:<span class="hljs-number">78</span>:<span class="hljs-attribute">cd</span>:b5:<span class="hljs-number">5</span><span class="hljs-attribute">f</span>:<br>         <span class="hljs-number">43</span>:e8:<span class="hljs-number">82</span>:<span class="hljs-number">4</span><span class="hljs-attribute">f</span>:d3:<span class="hljs-number">76</span>:a9:<span class="hljs-number">3</span><span class="hljs-attribute">e</span>:e2:<span class="hljs-number">54</span>:<span class="hljs-attribute">ad</span>:<span class="hljs-number">85</span>:<span class="hljs-number">66</span>:<span class="hljs-number">18</span>:<span class="hljs-attribute">da</span>:<span class="hljs-number">19</span>:<span class="hljs-attribute">bd</span>:c4:<br>         <span class="hljs-number">5</span><span class="hljs-attribute">b</span>:f7:f2:<span class="hljs-number">53</span>:<span class="hljs-number">13</span>:<span class="hljs-attribute">ea</span>:<span class="hljs-number">44</span>:<span class="hljs-number">73</span>:<span class="hljs-attribute">be</span>:<span class="hljs-attribute">bb</span>:<span class="hljs-number">8</span><span class="hljs-attribute">a</span>:<span class="hljs-attribute">cb</span>:<span class="hljs-number">7</span><span class="hljs-attribute">c</span>:<span class="hljs-number">20</span>:<span class="hljs-number">18</span>:b2:<span class="hljs-number">65</span>:<span class="hljs-number">96</span>:<br>         <span class="hljs-number">24</span>:<span class="hljs-number">22</span>:<span class="hljs-number">43</span>:<span class="hljs-attribute">ab</span>:<span class="hljs-number">5</span><span class="hljs-attribute">f</span>:<span class="hljs-number">11</span>:<span class="hljs-number">62</span>:<span class="hljs-number">18</span>:<span class="hljs-number">4</span><span class="hljs-attribute">f</span>:<span class="hljs-number">7</span><span class="hljs-attribute">f</span>:<span class="hljs-number">3</span><span class="hljs-attribute">a</span>:b6:<span class="hljs-number">47</span>:e1:f2:<span class="hljs-number">70</span>:<span class="hljs-number">9</span><span class="hljs-attribute">d</span>:<span class="hljs-number">95</span>:<br>         <span class="hljs-number">3</span><span class="hljs-attribute">c</span>:<span class="hljs-attribute">eb</span>:<span class="hljs-attribute">aa</span>:d5:<span class="hljs-number">0</span><span class="hljs-attribute">a</span>:<span class="hljs-number">5</span><span class="hljs-attribute">c</span>:d9:<span class="hljs-number">0</span><span class="hljs-attribute">d</span>:<span class="hljs-number">83</span>:<span class="hljs-number">7</span><span class="hljs-attribute">f</span>:d0:<span class="hljs-attribute">bd</span>:<span class="hljs-attribute">ae</span>:b4:<span class="hljs-number">76</span>:a3:a8:a6:<br>         <span class="hljs-number">7</span><span class="hljs-attribute">f</span>:<span class="hljs-number">94</span>:<span class="hljs-number">0</span><span class="hljs-attribute">f</span>:<span class="hljs-number">4</span><span class="hljs-attribute">f</span>:<span class="hljs-number">8</span><span class="hljs-attribute">a</span>:<span class="hljs-number">41</span>:<span class="hljs-number">7</span><span class="hljs-attribute">e</span>:e7:<span class="hljs-attribute">fe</span>:<span class="hljs-number">9</span><span class="hljs-attribute">c</span>:<span class="hljs-attribute">bc</span>:<span class="hljs-attribute">ee</span>:<span class="hljs-number">06</span>:<span class="hljs-number">67</span>:<span class="hljs-number">10</span>:<span class="hljs-number">60</span>:<span class="hljs-number">57</span>:<span class="hljs-number">58</span>:<br>         c1:<span class="hljs-number">78</span>:c7:<span class="hljs-number">65</span>:f3:<span class="hljs-number">5</span><span class="hljs-attribute">e</span>:<span class="hljs-number">52</span>:<span class="hljs-number">1</span><span class="hljs-attribute">c</span>:<span class="hljs-number">02</span>:<span class="hljs-number">5</span><span class="hljs-attribute">e</span>:f8:<span class="hljs-number">98</span>:<span class="hljs-number">9</span><span class="hljs-attribute">c</span>:<span class="hljs-number">05</span>:<span class="hljs-number">58</span>:<span class="hljs-number">73</span>:b0:c0:<br>         <span class="hljs-number">56</span>:<span class="hljs-number">82</span>:<span class="hljs-number">52</span>:<span class="hljs-number">34</span><br><br></code></pre></td></tr></table></figure>
+
+<h1 id="Task-3-Generating-a-Certificate-for-your-server"><a href="#Task-3-Generating-a-Certificate-for-your-server" class="headerlink" title="Task 3: Generating a Certificate for your server"></a>Task 3: Generating a Certificate for your server</h1><p>CSR 文件需要有 CA 的签名才能形成证书。在现实世界中，CSR 文件通常被发送到受信任的 CA 以获得签名。在这个lab中，我们将使用我们自己的可信 CA 来生成证书。下面的命令使用 CA 的 CA.crt 和 CA.key 将证书签名请求(server.csr)转换为 X509证书(server.crt) :</p>
+<p>注意我的配置文件在./my_openssl.cnf</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><code class="hljs shell">[06/22/23]seed@VM:~/CA$ openssl ca -config ./my_openssl.cnf -policy policy_anything \<br><span class="hljs-meta">&gt;</span><span class="bash"> -md sha256 -days 3650 \</span><br><span class="bash">&gt; -<span class="hljs-keyword">in</span> server.csr -out server.crt -batch \</span><br><span class="bash">&gt; -cert ./ca.crt -keyfile ./ca.key</span><br>Using configuration from ./my_openssl.cnf<br>Enter pass phrase for ./ca.key:<br>Check that the request matches the signature<br>Signature ok<br>Certificate Details:<br>        Serial Number: 4096 (0x1000)<br>        Validity<br>            Not Before: Jun 22 14:34:08 2023 GMT<br>            Not After : Jun 19 14:34:08 2033 GMT<br>        Subject:<br>            countryName               = US<br>            organizationName          = gls23 Inc.<br>            commonName                = www.gls23.com<br>        X509v3 extensions:<br>            X509v3 Basic Constraints: <br>                CA:FALSE<br>            Netscape Comment: <br>                OpenSSL Generated Certificate<br>            X509v3 Subject Key Identifier: <br>                53:6B:EA:44:75:F5:0D:AE:C1:B7:01:67:E5:E5:0C:EF:42:0E:9F:57<br>            X509v3 Authority Key Identifier: <br>                keyid:85:43:B9:78:0E:00:2C:30:DB:49:AC:E4:00:03:EF:B3:E0:D8:AD:49<br><br>            X509v3 Subject Alternative Name: <br>                DNS:www.gls2023.com, DNS:www.gls2024.com<br>Certificate is to be certified until Jun 19 14:34:08 2033 GMT (3650 days)<br><br>Write out database with 1 new entries<br>Data Base Updated<br><br></code></pre></td></tr></table></figure>
+
+<p>执行之后，文件出现了变化</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs shell">[06/22/23]seed@VM:~/CA$ tree .<br>.<br>├── ca.crt<br>├── ca.key<br>├── demoCA<br>│   ├── certs<br>│   ├── crl<br>│   ├── index.txt<br>│   ├── index.txt.attr<br>│   ├── index.txt.attr.old<br>│   ├── index.txt.old<br>│   ├── newcerts<br>│   │   ├── 1000.pem<br>│   │   └── 1001.pem<br>│   ├── serial<br>│   └── serial.old<br>├── my_openssl.cnf<br>├── server.crt<br>├── server.csr<br>└── server.key<br><br>4 directories, 14 files<br><br></code></pre></td></tr></table></figure>
+
+<p>查看一下server.crt</p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><code class="hljs scss"><span class="hljs-selector-attr">[06/22/23]</span>seed<span class="hljs-keyword">@VM</span>:~/CA$ openssl x509 -in server.crt -text -noout<br><span class="hljs-attribute">Certificate</span>:<br>    <span class="hljs-attribute">Data</span>:<br>        <span class="hljs-attribute">Version</span>: <span class="hljs-number">3</span> (<span class="hljs-number">0</span>x2)<br>        Serial <span class="hljs-attribute">Number</span>: <span class="hljs-number">4097</span> (<span class="hljs-number">0</span>x1001)<br>        Signature <span class="hljs-attribute">Algorithm</span>: sha256WithRSAEncryption<br>        <span class="hljs-attribute">Issuer</span>: CN = www.modelCA.com, O = Model CA LTD., C = US<br>        Validity<br>            <span class="hljs-keyword">Not</span> <span class="hljs-attribute">Before</span>: Jun <span class="hljs-number">22</span> <span class="hljs-number">14</span>:<span class="hljs-number">54</span>:<span class="hljs-number">43</span> <span class="hljs-number">2023</span> GMT<br>            <span class="hljs-keyword">Not</span> After : Jun <span class="hljs-number">19</span> <span class="hljs-number">14</span>:<span class="hljs-number">54</span>:<span class="hljs-number">43</span> <span class="hljs-number">2033</span> GMT<br>        <span class="hljs-attribute">Subject</span>: C = US, O = gls23 Inc., CN = www.gls23.com<br>        Subject Public Key <span class="hljs-attribute">Info</span>:<br>            Public Key <span class="hljs-attribute">Algorithm</span>: rsaEncryption<br>                RSA <span class="hljs-attribute">Public-Key</span>: (<span class="hljs-number">2048</span> bit)<br>                <span class="hljs-attribute">Modulus</span>:<br>                    <span class="hljs-number">00</span>:<span class="hljs-number">95</span>:<span class="hljs-number">72</span>:<span class="hljs-number">09</span>:<span class="hljs-number">22</span>:<span class="hljs-number">45</span>:<span class="hljs-number">48</span>:<span class="hljs-number">33</span>:<span class="hljs-number">58</span>:<span class="hljs-number">7</span><span class="hljs-attribute">a</span>:a3:<span class="hljs-number">9</span><span class="hljs-attribute">b</span>:<span class="hljs-number">27</span>:d5:d8:<br>                    a0:e2:<span class="hljs-number">3</span><span class="hljs-attribute">d</span>:<span class="hljs-number">5</span><span class="hljs-attribute">f</span>:<span class="hljs-number">87</span>:<span class="hljs-number">86</span>:<span class="hljs-number">7</span><span class="hljs-attribute">a</span>:<span class="hljs-number">10</span>:d7:<span class="hljs-number">40</span>:a2:<span class="hljs-number">94</span>:<span class="hljs-number">6</span><span class="hljs-attribute">c</span>:c6:<span class="hljs-number">0</span><span class="hljs-attribute">e</span>:<br>                    <span class="hljs-number">84</span>:<span class="hljs-attribute">ff</span>:e4:<span class="hljs-number">61</span>:<span class="hljs-number">10</span>:<span class="hljs-number">9</span><span class="hljs-attribute">c</span>:<span class="hljs-attribute">fe</span>:f4:a9:<span class="hljs-number">90</span>:<span class="hljs-number">09</span>:c1:a1:d3:<span class="hljs-number">7</span><span class="hljs-attribute">a</span>:<br>                    <span class="hljs-number">59</span>:<span class="hljs-number">10</span>:<span class="hljs-number">9</span><span class="hljs-attribute">a</span>:<span class="hljs-number">2</span><span class="hljs-attribute">e</span>:<span class="hljs-attribute">eb</span>:e2:<span class="hljs-number">29</span>:<span class="hljs-number">9</span><span class="hljs-attribute">c</span>:<span class="hljs-number">04</span>:<span class="hljs-attribute">cc</span>:<span class="hljs-number">48</span>:<span class="hljs-number">17</span>:e4:<span class="hljs-number">1</span><span class="hljs-attribute">b</span>:<span class="hljs-number">06</span>:<br>                    b2:<span class="hljs-number">28</span>:d7:d3:f5:<span class="hljs-number">88</span>:<span class="hljs-number">0</span><span class="hljs-attribute">c</span>:<span class="hljs-number">08</span>:<span class="hljs-attribute">ea</span>:c8:<span class="hljs-attribute">ad</span>:<span class="hljs-number">6</span><span class="hljs-attribute">d</span>:e5:<span class="hljs-attribute">eb</span>:<span class="hljs-number">20</span>:<br>                    f5:<span class="hljs-number">9</span><span class="hljs-attribute">d</span>:<span class="hljs-number">2</span><span class="hljs-attribute">b</span>:<span class="hljs-number">33</span>:<span class="hljs-attribute">bc</span>:<span class="hljs-attribute">ce</span>:<span class="hljs-number">36</span>:<span class="hljs-number">7</span><span class="hljs-attribute">a</span>:c8:<span class="hljs-number">7</span><span class="hljs-attribute">c</span>:<span class="hljs-number">21</span>:<span class="hljs-number">10</span>:<span class="hljs-number">97</span>:<span class="hljs-number">2</span><span class="hljs-attribute">e</span>:<span class="hljs-number">27</span>:<br>                    <span class="hljs-attribute">ea</span>:<span class="hljs-number">24</span>:<span class="hljs-number">5</span><span class="hljs-attribute">b</span>:<span class="hljs-number">5</span><span class="hljs-attribute">b</span>:<span class="hljs-number">07</span>:f6:d9:<span class="hljs-number">90</span>:<span class="hljs-number">1</span><span class="hljs-attribute">d</span>:<span class="hljs-number">8</span><span class="hljs-attribute">f</span>:<span class="hljs-attribute">bf</span>:b6:<span class="hljs-number">00</span>:<span class="hljs-number">3</span><span class="hljs-attribute">a</span>:c9:<br>                    <span class="hljs-number">0</span><span class="hljs-attribute">e</span>:<span class="hljs-number">37</span>:<span class="hljs-number">58</span>:<span class="hljs-attribute">ca</span>:<span class="hljs-number">0</span><span class="hljs-attribute">c</span>:<span class="hljs-number">30</span>:<span class="hljs-number">18</span>:b3:<span class="hljs-number">20</span>:<span class="hljs-number">0</span><span class="hljs-attribute">f</span>:<span class="hljs-number">45</span>:<span class="hljs-number">01</span>:<span class="hljs-number">99</span>:<span class="hljs-number">78</span>:<span class="hljs-attribute">ce</span>:<br>                    <span class="hljs-number">81</span>:b8:<span class="hljs-number">56</span>:<span class="hljs-number">93</span>:<span class="hljs-number">29</span>:<span class="hljs-number">58</span>:<span class="hljs-number">3</span><span class="hljs-attribute">c</span>:<span class="hljs-attribute">ea</span>:e9:<span class="hljs-number">7</span><span class="hljs-attribute">d</span>:a7:<span class="hljs-attribute">cf</span>:d9:f4:<span class="hljs-attribute">dc</span>:<br>                    <span class="hljs-number">37</span>:<span class="hljs-number">58</span>:<span class="hljs-number">75</span>:<span class="hljs-number">34</span>:a6:a5:<span class="hljs-number">9</span><span class="hljs-attribute">b</span>:a5:<span class="hljs-number">1</span><span class="hljs-attribute">f</span>:<span class="hljs-number">64</span>:a0:<span class="hljs-number">70</span>:<span class="hljs-attribute">ca</span>:b7:<span class="hljs-number">24</span>:<br>                    <span class="hljs-number">1</span><span class="hljs-attribute">a</span>:<span class="hljs-number">50</span>:f9:<span class="hljs-number">6</span><span class="hljs-attribute">f</span>:<span class="hljs-number">64</span>:<span class="hljs-number">3</span><span class="hljs-attribute">a</span>:<span class="hljs-number">30</span>:<span class="hljs-number">80</span>:<span class="hljs-number">89</span>:a1:<span class="hljs-attribute">dc</span>:<span class="hljs-attribute">fc</span>:<span class="hljs-number">72</span>:<span class="hljs-attribute">ce</span>:<span class="hljs-number">24</span>:<br>                    <span class="hljs-number">49</span>:<span class="hljs-attribute">eb</span>:c8:b6:<span class="hljs-number">5</span><span class="hljs-attribute">d</span>:b4:e5:<span class="hljs-attribute">bd</span>:f5:<span class="hljs-number">45</span>:<span class="hljs-number">8</span><span class="hljs-attribute">d</span>:c4:a7:c3:e8:<br>                    b2:<span class="hljs-number">28</span>:c2:b4:e3:<span class="hljs-number">7</span><span class="hljs-attribute">e</span>:<span class="hljs-number">8</span><span class="hljs-attribute">a</span>:<span class="hljs-number">48</span>:<span class="hljs-number">75</span>:b3:<span class="hljs-number">81</span>:<span class="hljs-attribute">ab</span>:<span class="hljs-attribute">bc</span>:<span class="hljs-number">0</span><span class="hljs-attribute">f</span>:<span class="hljs-number">6</span><span class="hljs-attribute">d</span>:<br>                    <span class="hljs-number">43</span>:<span class="hljs-number">3</span><span class="hljs-attribute">c</span>:d8:<span class="hljs-number">9</span><span class="hljs-attribute">e</span>:<span class="hljs-number">15</span>:<span class="hljs-number">17</span>:<span class="hljs-attribute">ee</span>:<span class="hljs-number">5</span><span class="hljs-attribute">c</span>:<span class="hljs-number">61</span>:<span class="hljs-number">1</span><span class="hljs-attribute">d</span>:e7:<span class="hljs-number">76</span>:<span class="hljs-number">27</span>:<span class="hljs-number">31</span>:<span class="hljs-number">38</span>:<br>                    <span class="hljs-number">66</span>:<span class="hljs-number">47</span>:<span class="hljs-number">68</span>:<span class="hljs-number">85</span>:e7:b2:<span class="hljs-number">80</span>:<span class="hljs-attribute">fd</span>:e1:<span class="hljs-number">98</span>:<span class="hljs-number">36</span>:<span class="hljs-number">70</span>:<span class="hljs-number">12</span>:<span class="hljs-number">8</span><span class="hljs-attribute">e</span>:<span class="hljs-attribute">ad</span>:<br>                    <span class="hljs-number">85</span>:<span class="hljs-number">00</span>:<span class="hljs-attribute">fc</span>:<span class="hljs-number">45</span>:<span class="hljs-number">1</span><span class="hljs-attribute">b</span>:<span class="hljs-attribute">fe</span>:<span class="hljs-number">72</span>:<span class="hljs-number">6</span><span class="hljs-attribute">b</span>:e9:<span class="hljs-number">2</span><span class="hljs-attribute">e</span>:<span class="hljs-number">3</span><span class="hljs-attribute">f</span>:e6:<span class="hljs-number">6</span><span class="hljs-attribute">f</span>:b1:<span class="hljs-number">45</span>:<br>                    <span class="hljs-number">95</span>:<span class="hljs-attribute">af</span>:<span class="hljs-number">6</span><span class="hljs-attribute">c</span>:<span class="hljs-number">21</span>:<span class="hljs-number">14</span>:<span class="hljs-number">1</span><span class="hljs-attribute">b</span>:<span class="hljs-number">64</span>:<span class="hljs-number">3</span><span class="hljs-attribute">a</span>:f8:<span class="hljs-number">87</span>:<span class="hljs-number">34</span>:<span class="hljs-number">28</span>:b1:<span class="hljs-number">91</span>:<span class="hljs-number">2</span><span class="hljs-attribute">a</span>:<br>                    <span class="hljs-number">2</span><span class="hljs-attribute">f</span>:<span class="hljs-number">3</span>d<br>                <span class="hljs-attribute">Exponent</span>: <span class="hljs-number">65537</span> (<span class="hljs-number">0</span>x10001)<br>        X509v3 <span class="hljs-attribute">extensions</span>:<br>            X509v3 Basic <span class="hljs-attribute">Constraints</span>: <br>                <span class="hljs-attribute">CA</span>:FALSE<br>            Netscape <span class="hljs-attribute">Comment</span>: <br>                OpenSSL Generated Certificate<br>            X509v3 Subject Key <span class="hljs-attribute">Identifier</span>: <br>                <span class="hljs-number">53</span>:<span class="hljs-number">6</span><span class="hljs-attribute">B</span>:<span class="hljs-attribute">EA</span>:<span class="hljs-number">44</span>:<span class="hljs-number">75</span>:F5:<span class="hljs-number">0</span><span class="hljs-attribute">D</span>:<span class="hljs-attribute">AE</span>:C1:B7:<span class="hljs-number">01</span>:<span class="hljs-number">67</span>:E5:E5:<span class="hljs-number">0</span><span class="hljs-attribute">C</span>:<span class="hljs-attribute">EF</span>:<span class="hljs-number">42</span>:<span class="hljs-number">0</span><span class="hljs-attribute">E</span>:<span class="hljs-number">9</span><span class="hljs-attribute">F</span>:<span class="hljs-number">57</span><br>            X509v3 Authority Key <span class="hljs-attribute">Identifier</span>: <br>                <span class="hljs-attribute">keyid</span>:<span class="hljs-number">85</span>:<span class="hljs-number">43</span>:B9:<span class="hljs-number">78</span>:<span class="hljs-number">0</span><span class="hljs-attribute">E</span>:<span class="hljs-number">00</span>:<span class="hljs-number">2</span><span class="hljs-attribute">C</span>:<span class="hljs-number">30</span>:<span class="hljs-attribute">DB</span>:<span class="hljs-number">49</span>:<span class="hljs-attribute">AC</span>:E4:<span class="hljs-number">00</span>:<span class="hljs-number">03</span>:<span class="hljs-attribute">EF</span>:B3:E0:D8:<span class="hljs-attribute">AD</span>:<span class="hljs-number">49</span><br><br>            X509v3 Subject Alternative <span class="hljs-attribute">Name</span>: <br>                <span class="hljs-attribute">DNS</span>:www.gls2023.com, <span class="hljs-attribute">DNS</span>:www.gls2024.com<br>    Signature <span class="hljs-attribute">Algorithm</span>: sha256WithRSAEncryption<br>         <span class="hljs-number">62</span>:b0:a6:<span class="hljs-number">8</span><span class="hljs-attribute">a</span>:<span class="hljs-number">15</span>:<span class="hljs-number">35</span>:b4:<span class="hljs-number">8</span><span class="hljs-attribute">f</span>:<span class="hljs-number">5</span><span class="hljs-attribute">f</span>:<span class="hljs-number">1</span><span class="hljs-attribute">a</span>:<span class="hljs-number">18</span>:<span class="hljs-number">89</span>:d2:<span class="hljs-number">32</span>:<span class="hljs-number">6</span><span class="hljs-attribute">e</span>:<span class="hljs-number">10</span>:<span class="hljs-number">6</span><span class="hljs-attribute">f</span>:<span class="hljs-number">19</span>:<br>         <span class="hljs-number">85</span>:<span class="hljs-number">39</span>:c1:<span class="hljs-attribute">ca</span>:<span class="hljs-number">49</span>:<span class="hljs-number">0</span><span class="hljs-attribute">e</span>:d4:f0:a6:<span class="hljs-number">85</span>:b9:<span class="hljs-attribute">ac</span>:<span class="hljs-number">0</span><span class="hljs-attribute">b</span>:<span class="hljs-number">7</span><span class="hljs-attribute">a</span>:<span class="hljs-number">8</span><span class="hljs-attribute">c</span>:<span class="hljs-number">11</span>:<span class="hljs-number">19</span>:<span class="hljs-number">66</span>:<br>         <span class="hljs-number">7</span><span class="hljs-attribute">f</span>:<span class="hljs-number">9</span><span class="hljs-attribute">d</span>:<span class="hljs-attribute">af</span>:<span class="hljs-number">1</span><span class="hljs-attribute">d</span>:<span class="hljs-number">1</span><span class="hljs-attribute">c</span>:<span class="hljs-number">86</span>:<span class="hljs-number">60</span>:e6:f5:<span class="hljs-attribute">ac</span>:<span class="hljs-number">70</span>:<span class="hljs-number">5</span><span class="hljs-attribute">a</span>:<span class="hljs-attribute">ba</span>:f7:<span class="hljs-number">1</span><span class="hljs-attribute">e</span>:e1:<span class="hljs-number">65</span>:<span class="hljs-number">21</span>:<br>         <span class="hljs-number">31</span>:<span class="hljs-number">4</span><span class="hljs-attribute">d</span>:<span class="hljs-attribute">fe</span>:<span class="hljs-number">33</span>:<span class="hljs-number">74</span>:<span class="hljs-number">64</span>:<span class="hljs-number">16</span>:<span class="hljs-number">66</span>:<span class="hljs-number">9</span><span class="hljs-attribute">a</span>:<span class="hljs-number">2</span><span class="hljs-attribute">b</span>:<span class="hljs-number">02</span>:<span class="hljs-number">74</span>:<span class="hljs-attribute">cf</span>:e3:<span class="hljs-number">93</span>:<span class="hljs-attribute">af</span>:<span class="hljs-number">1</span><span class="hljs-attribute">f</span>:<span class="hljs-number">86</span>:<br>         <span class="hljs-number">05</span>:<span class="hljs-attribute">db</span>:<span class="hljs-number">84</span>:<span class="hljs-number">34</span>:<span class="hljs-number">7</span><span class="hljs-attribute">f</span>:<span class="hljs-number">73</span>:<span class="hljs-number">69</span>:<span class="hljs-number">3</span><span class="hljs-attribute">c</span>:d1:<span class="hljs-attribute">be</span>:f3:f5:<span class="hljs-number">0</span><span class="hljs-attribute">f</span>:<span class="hljs-number">8</span><span class="hljs-attribute">e</span>:e8:<span class="hljs-number">98</span>:<span class="hljs-attribute">bf</span>:<span class="hljs-number">5</span><span class="hljs-attribute">b</span>:<br>         <span class="hljs-number">5</span><span class="hljs-attribute">c</span>:<span class="hljs-number">55</span>:<span class="hljs-number">73</span>:<span class="hljs-number">33</span>:<span class="hljs-number">09</span>:<span class="hljs-number">0</span><span class="hljs-attribute">a</span>:<span class="hljs-number">2</span><span class="hljs-attribute">a</span>:<span class="hljs-number">41</span>:<span class="hljs-attribute">db</span>:<span class="hljs-number">58</span>:d3:<span class="hljs-number">59</span>:e1:<span class="hljs-number">2</span><span class="hljs-attribute">b</span>:e3:<span class="hljs-number">92</span>:<span class="hljs-number">96</span>:d4:<br>         <span class="hljs-number">1</span><span class="hljs-attribute">d</span>:d3:b3:<span class="hljs-number">39</span>:<span class="hljs-number">27</span>:<span class="hljs-number">50</span>:<span class="hljs-number">8</span><span class="hljs-attribute">f</span>:<span class="hljs-number">06</span>:<span class="hljs-number">4</span><span class="hljs-attribute">b</span>:<span class="hljs-number">0</span><span class="hljs-attribute">c</span>:<span class="hljs-number">68</span>:<span class="hljs-number">97</span>:<span class="hljs-number">9</span><span class="hljs-attribute">f</span>:a0:<span class="hljs-attribute">fe</span>:<span class="hljs-number">05</span>:<span class="hljs-number">1</span><span class="hljs-attribute">a</span>:<span class="hljs-number">0</span><span class="hljs-attribute">f</span>:<br>         <span class="hljs-number">95</span>:<span class="hljs-number">95</span>:<span class="hljs-number">24</span>:<span class="hljs-number">3</span><span class="hljs-attribute">d</span>:<span class="hljs-number">4</span><span class="hljs-attribute">f</span>:<span class="hljs-number">70</span>:f2:<span class="hljs-number">69</span>:<span class="hljs-number">6</span><span class="hljs-attribute">a</span>:<span class="hljs-number">0</span><span class="hljs-attribute">e</span>:<span class="hljs-attribute">eb</span>:b8:<span class="hljs-number">00</span>:a3:<span class="hljs-attribute">dc</span>:<span class="hljs-number">29</span>:<span class="hljs-number">43</span>:<span class="hljs-number">28</span>:<br>         <span class="hljs-number">51</span>:<span class="hljs-attribute">df</span>:f5:<span class="hljs-number">8</span><span class="hljs-attribute">d</span>:e6:<span class="hljs-number">89</span>:<span class="hljs-number">79</span>:<span class="hljs-number">2</span><span class="hljs-attribute">c</span>:<span class="hljs-attribute">ef</span>:<span class="hljs-number">50</span>:<span class="hljs-number">22</span>:b1:<span class="hljs-number">9</span><span class="hljs-attribute">e</span>:<span class="hljs-number">17</span>:<span class="hljs-number">09</span>:<span class="hljs-number">76</span>:<span class="hljs-number">75</span>:<span class="hljs-number">30</span>:<br>         c3:<span class="hljs-number">32</span>:<span class="hljs-number">10</span>:f0:<span class="hljs-number">73</span>:<span class="hljs-number">34</span>:<span class="hljs-number">22</span>:<span class="hljs-number">26</span>:<span class="hljs-number">13</span>:<span class="hljs-number">64</span>:<span class="hljs-number">47</span>:<span class="hljs-number">3</span><span class="hljs-attribute">b</span>:<span class="hljs-number">39</span>:<span class="hljs-attribute">ac</span>:c1:<span class="hljs-number">3</span><span class="hljs-attribute">f</span>:<span class="hljs-number">34</span>:<span class="hljs-attribute">ff</span>:<br>         <span class="hljs-number">61</span>:e8:f6:<span class="hljs-number">02</span>:<span class="hljs-attribute">bf</span>:<span class="hljs-number">15</span>:<span class="hljs-number">17</span>:<span class="hljs-number">33</span>:<span class="hljs-number">30</span>:<span class="hljs-number">95</span>:e2:<span class="hljs-number">71</span>:<span class="hljs-number">14</span>:f1:c8:<span class="hljs-attribute">be</span>:<span class="hljs-number">42</span>:b4:<br>         f3:<span class="hljs-number">83</span>:<span class="hljs-attribute">eb</span>:<span class="hljs-attribute">de</span>:<span class="hljs-number">52</span>:<span class="hljs-attribute">ce</span>:d4:c2:<span class="hljs-number">4</span><span class="hljs-attribute">e</span>:<span class="hljs-attribute">ed</span>:<span class="hljs-attribute">bb</span>:<span class="hljs-attribute">cf</span>:<span class="hljs-number">91</span>:<span class="hljs-number">3</span><span class="hljs-attribute">f</span>:<span class="hljs-number">09</span>:<span class="hljs-number">30</span>:<span class="hljs-attribute">ce</span>:<span class="hljs-number">68</span>:<br>         d4:<span class="hljs-number">50</span>:<span class="hljs-number">39</span>:<span class="hljs-number">4</span><span class="hljs-attribute">a</span>:<span class="hljs-number">37</span>:<span class="hljs-number">81</span>:c6:<span class="hljs-attribute">fb</span>:<span class="hljs-number">32</span>:<span class="hljs-attribute">ca</span>:<span class="hljs-attribute">fb</span>:<span class="hljs-number">2</span><span class="hljs-attribute">e</span>:<span class="hljs-attribute">ef</span>:<span class="hljs-number">78</span>:<span class="hljs-number">06</span>:<span class="hljs-number">8</span><span class="hljs-attribute">a</span>:d7:a1:<br>         <span class="hljs-number">69</span>:a8:<span class="hljs-number">1</span><span class="hljs-attribute">f</span>:<span class="hljs-number">6</span><span class="hljs-attribute">b</span>:e3:<span class="hljs-number">14</span>:<span class="hljs-number">59</span>:<span class="hljs-attribute">df</span>:<span class="hljs-number">95</span>:<span class="hljs-number">99</span>:<span class="hljs-attribute">fc</span>:a5:<span class="hljs-number">12</span>:<span class="hljs-number">0</span><span class="hljs-attribute">d</span>:<span class="hljs-number">54</span>:d4:<span class="hljs-number">03</span>:d6:<br>         <span class="hljs-attribute">cf</span>:<span class="hljs-number">1</span><span class="hljs-attribute">f</span>:a0:e1:<span class="hljs-number">1</span><span class="hljs-attribute">d</span>:<span class="hljs-attribute">ae</span>:<span class="hljs-number">66</span>:<span class="hljs-attribute">cd</span>:<span class="hljs-number">03</span>:<span class="hljs-attribute">db</span>:<span class="hljs-number">78</span>:<span class="hljs-number">65</span>:<span class="hljs-number">60</span>:f7:<span class="hljs-number">55</span>:c9:<span class="hljs-number">79</span>:<span class="hljs-number">19</span>:<br>         <span class="hljs-attribute">fd</span>:d2:<span class="hljs-attribute">db</span>:<span class="hljs-number">45</span>:b6:c2:<span class="hljs-number">68</span>:f0:<span class="hljs-number">04</span>:<span class="hljs-number">80</span>:<span class="hljs-number">65</span>:f7:<span class="hljs-number">40</span>:<span class="hljs-number">87</span>:c3:<span class="hljs-attribute">dc</span>:<span class="hljs-number">6</span><span class="hljs-attribute">e</span>:<span class="hljs-number">18</span>:<br>         <span class="hljs-number">9</span><span class="hljs-attribute">f</span>:<span class="hljs-number">82</span>:<span class="hljs-number">7</span><span class="hljs-attribute">d</span>:<span class="hljs-attribute">db</span>:<span class="hljs-number">16</span>:e9:<span class="hljs-number">02</span>:c9:<span class="hljs-number">58</span>:<span class="hljs-number">7</span><span class="hljs-attribute">b</span>:b5:<span class="hljs-attribute">ed</span>:<span class="hljs-number">62</span>:<span class="hljs-number">6</span><span class="hljs-attribute">a</span>:d9:<span class="hljs-number">2</span><span class="hljs-attribute">f</span>:<span class="hljs-number">3</span><span class="hljs-attribute">a</span>:<span class="hljs-attribute">ca</span>:<br>         e0:c4:b2:d4:a1:<span class="hljs-number">35</span>:<span class="hljs-number">2</span><span class="hljs-attribute">d</span>:<span class="hljs-number">3</span><span class="hljs-attribute">e</span>:<span class="hljs-attribute">ae</span>:<span class="hljs-number">9</span><span class="hljs-attribute">f</span>:<span class="hljs-attribute">be</span>:e6:<span class="hljs-attribute">dd</span>:<span class="hljs-attribute">fb</span>:a9:<span class="hljs-attribute">ac</span>:<span class="hljs-number">10</span>:<span class="hljs-attribute">db</span>:<br>         <span class="hljs-number">41</span>:<span class="hljs-number">4</span><span class="hljs-attribute">a</span>:e0:e8:<span class="hljs-number">6</span><span class="hljs-attribute">a</span>:<span class="hljs-number">32</span>:<span class="hljs-number">2</span><span class="hljs-attribute">b</span>:<span class="hljs-number">44</span>:<span class="hljs-number">8</span><span class="hljs-attribute">a</span>:<span class="hljs-number">3</span><span class="hljs-attribute">e</span>:a5:<span class="hljs-number">7</span><span class="hljs-attribute">c</span>:c4:<span class="hljs-number">88</span>:<span class="hljs-number">6</span><span class="hljs-attribute">c</span>:<span class="hljs-attribute">ce</span>:<span class="hljs-attribute">ef</span>:<span class="hljs-number">93</span>:<br>         <span class="hljs-number">48</span>:<span class="hljs-attribute">de</span>:<span class="hljs-number">27</span>:<span class="hljs-number">21</span>:<span class="hljs-attribute">fe</span>:<span class="hljs-attribute">df</span>:a7:<span class="hljs-number">19</span>:f2:<span class="hljs-number">01</span>:b7:d3:<span class="hljs-number">7</span><span class="hljs-attribute">e</span>:<span class="hljs-number">5</span><span class="hljs-attribute">a</span>:<span class="hljs-number">24</span>:<span class="hljs-attribute">fd</span>:<span class="hljs-number">15</span>:<span class="hljs-number">3</span><span class="hljs-attribute">e</span>:<br>         <span class="hljs-number">7</span><span class="hljs-attribute">e</span>:<span class="hljs-number">07</span>:<span class="hljs-number">46</span>:<span class="hljs-number">05</span>:b4:<span class="hljs-number">4</span><span class="hljs-attribute">c</span>:b8:<span class="hljs-number">84</span>:<span class="hljs-number">25</span>:<span class="hljs-number">28</span>:<span class="hljs-attribute">bc</span>:<span class="hljs-number">55</span>:e6:<span class="hljs-number">8</span><span class="hljs-attribute">d</span>:<span class="hljs-number">17</span>:<span class="hljs-number">33</span>:f4:<span class="hljs-number">3</span><span class="hljs-attribute">d</span>:<br>         <span class="hljs-number">36</span>:<span class="hljs-number">84</span>:<span class="hljs-number">5</span><span class="hljs-attribute">b</span>:<span class="hljs-attribute">fe</span>:<span class="hljs-number">56</span>:<span class="hljs-number">61</span>:<span class="hljs-number">54</span>:<span class="hljs-number">7</span><span class="hljs-attribute">c</span>:<span class="hljs-attribute">da</span>:<span class="hljs-number">47</span>:b9:<span class="hljs-number">57</span>:<span class="hljs-attribute">bd</span>:<span class="hljs-number">0</span><span class="hljs-attribute">f</span>:b9:d8:<span class="hljs-number">86</span>:<span class="hljs-number">82</span>:<br>         <span class="hljs-number">65</span>:<span class="hljs-number">70</span>:<span class="hljs-number">95</span>:<span class="hljs-number">6</span><span class="hljs-attribute">e</span>:<span class="hljs-number">38</span>:<span class="hljs-number">5</span><span class="hljs-attribute">b</span>:<span class="hljs-number">98</span>:<span class="hljs-number">17</span>:c6:<span class="hljs-number">01</span>:<span class="hljs-attribute">ac</span>:a0:<span class="hljs-number">4</span><span class="hljs-attribute">a</span>:<span class="hljs-number">01</span>:<span class="hljs-number">5</span><span class="hljs-attribute">d</span>:a8:<span class="hljs-number">82</span>:<span class="hljs-number">92</span>:<br>         <span class="hljs-attribute">ca</span>:<span class="hljs-number">38</span>:<span class="hljs-number">00</span>:<span class="hljs-number">54</span>:<span class="hljs-number">3</span><span class="hljs-attribute">e</span>:<span class="hljs-number">38</span>:<span class="hljs-number">1</span><span class="hljs-attribute">e</span>:<span class="hljs-number">1</span><span class="hljs-attribute">d</span>:<span class="hljs-number">3</span><span class="hljs-attribute">e</span>:<span class="hljs-number">17</span>:<span class="hljs-number">40</span>:c5:<span class="hljs-number">59</span>:<span class="hljs-number">7</span><span class="hljs-attribute">e</span>:<span class="hljs-attribute">ff</span>:<span class="hljs-number">39</span>:<span class="hljs-number">04</span>:<span class="hljs-number">2</span><span class="hljs-attribute">f</span>:<br>         <span class="hljs-number">99</span>:<span class="hljs-attribute">bb</span>:<span class="hljs-number">66</span>:<span class="hljs-number">07</span>:<span class="hljs-number">39</span>:<span class="hljs-attribute">bb</span>:<span class="hljs-number">14</span>:a8:e6:<span class="hljs-number">09</span>:<span class="hljs-number">09</span>:<span class="hljs-attribute">ea</span>:<span class="hljs-number">54</span>:e7:<span class="hljs-number">3</span><span class="hljs-attribute">e</span>:<span class="hljs-number">18</span>:<span class="hljs-number">3</span><span class="hljs-attribute">a</span>:<span class="hljs-number">5</span><span class="hljs-attribute">d</span>:<br>         <span class="hljs-number">72</span>:<span class="hljs-number">44</span>:b0:<span class="hljs-number">5</span><span class="hljs-attribute">b</span>:<span class="hljs-number">48</span>:<span class="hljs-number">92</span>:<span class="hljs-number">69</span>:<span class="hljs-number">81</span>:<span class="hljs-number">05</span>:<span class="hljs-attribute">ec</span>:<span class="hljs-number">94</span>:<span class="hljs-attribute">fb</span>:<span class="hljs-number">6</span><span class="hljs-attribute">f</span>:<span class="hljs-number">56</span>:<span class="hljs-number">4</span><span class="hljs-attribute">e</span>:<span class="hljs-number">5</span><span class="hljs-attribute">f</span>:<span class="hljs-number">88</span>:<span class="hljs-number">4</span><span class="hljs-attribute">f</span>:<br>         <span class="hljs-attribute">fe</span>:<span class="hljs-number">5</span><span class="hljs-attribute">f</span>:<span class="hljs-attribute">ac</span>:<span class="hljs-number">55</span>:<span class="hljs-number">33</span>:<span class="hljs-number">3</span><span class="hljs-attribute">e</span>:e1:<span class="hljs-number">27</span>:e0:c2:<span class="hljs-number">66</span>:<span class="hljs-number">5</span><span class="hljs-attribute">c</span>:<span class="hljs-number">70</span>:<span class="hljs-attribute">ea</span>:b6:d1:<span class="hljs-number">0</span><span class="hljs-attribute">e</span>:<span class="hljs-number">71</span>:<br>         <span class="hljs-number">7</span><span class="hljs-attribute">b</span>:<span class="hljs-number">92</span>:f7:<span class="hljs-number">3</span><span class="hljs-attribute">d</span>:<span class="hljs-number">8</span><span class="hljs-attribute">b</span>:a4:<span class="hljs-number">1</span><span class="hljs-attribute">b</span>:<span class="hljs-number">38</span>:<span class="hljs-number">84</span>:d3:c9:<span class="hljs-attribute">ec</span>:<span class="hljs-attribute">db</span>:f1:<span class="hljs-number">63</span>:<span class="hljs-number">89</span>:<span class="hljs-number">5</span><span class="hljs-attribute">a</span>:<span class="hljs-number">5</span><span class="hljs-attribute">a</span>:<br>         <span class="hljs-number">6</span><span class="hljs-attribute">e</span>:<span class="hljs-number">0</span><span class="hljs-attribute">c</span>:<span class="hljs-number">27</span>:<span class="hljs-number">08</span>:d3:<span class="hljs-number">16</span>:<span class="hljs-number">4</span><span class="hljs-attribute">a</span>:<span class="hljs-number">59</span><br><br></code></pre></td></tr></table></figure>
+
+<h1 id="Task-4-Deploying-Certificate-in-an-Apache-Based-HTTPS-Website"><a href="#Task-4-Deploying-Certificate-in-an-Apache-Based-HTTPS-Website" class="headerlink" title="Task 4: Deploying Certificate in an Apache-Based HTTPS Website"></a>Task 4: Deploying Certificate in an Apache-Based HTTPS Website</h1><p>编辑我们自己网站的apache ssl.conf文件</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs stylus">$ cat apache_ssl<span class="hljs-selector-class">.conf</span> <br>&lt;VirtualHost *:<span class="hljs-number">443</span>&gt; <br>    DocumentRoot /var/www/gls23<br>    ServerName www<span class="hljs-selector-class">.gls23</span><span class="hljs-selector-class">.com</span><br>    ServerAlias www<span class="hljs-selector-class">.gls2023</span><span class="hljs-selector-class">.com</span><br>    ServerAlias www<span class="hljs-selector-class">.gls2024</span><span class="hljs-selector-class">.com</span><br>    DirectoryIndex index<span class="hljs-selector-class">.html</span><br>    SSLEngine On <br>    SSLCertificateFile /certs/server<span class="hljs-selector-class">.crt</span><br>    SSLCertificateKeyFile /certs/server<span class="hljs-selector-class">.key</span><br>&lt;/VirtualHost&gt;<br><span class="hljs-selector-attr">[06/22/23]</span>seed@VM:~/.../image_www$ <br><br></code></pre></td></tr></table></figure>
+
+<p>可以看到第九行、第十行需要文件。因此把server.crt和server.key复制到容器的certs文件夹</p>
+<p>编辑一下容器的Dockerfile，如下</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs gradle"><span class="hljs-keyword">FROM</span> dockerproxy.com<span class="hljs-regexp">/handsonsecurity/</span>seed-server:apache-php<br>  <br>ARG WWWDIR=<span class="hljs-regexp">/var/</span>www/gls23<br><br><span class="hljs-keyword">COPY</span> .<span class="hljs-regexp">/index.html ./i</span>ndex_red.html $WWWDIR/<br><span class="hljs-keyword">COPY</span> .<span class="hljs-regexp">/apache_ssl.conf /</span>etc<span class="hljs-regexp">/apache2/</span>sites-available<br><span class="hljs-keyword">COPY</span> .<span class="hljs-regexp">/certs/</span>server.crt .<span class="hljs-regexp">/certs/</span>server.key  <span class="hljs-regexp">/certs/</span><br><br>RUN  chmod <span class="hljs-number">400</span> <span class="hljs-regexp">/certs/</span>server.key \<br>     &amp;&amp; chmod <span class="hljs-number">644</span> $WWWDIR/index.html \<br>     &amp;&amp; chmod <span class="hljs-number">644</span> $WWWDIR/index_red.html \<br>     &amp;&amp; a2enmod ssl \<br>     &amp;&amp; a2ensite apache_ssl <br>     <br><br>CMD  tail -f <span class="hljs-regexp">/dev/</span><span class="hljs-keyword">null</span><br><br></code></pre></td></tr></table></figure>
+
+<p>下面构建容器镜像、运行容器、进入容器内部、启动Apache服务</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs powershell"><span class="hljs-variable">$</span> dcbuild<br><br><span class="hljs-variable">$</span> dcup<br><br><span class="hljs-variable">$</span> docker image <span class="hljs-built_in">ls</span> <br><br><span class="hljs-variable">$</span> docker <span class="hljs-built_in">ps</span> <br><br><span class="hljs-variable">$</span> docksh <span class="hljs-comment"># 进入容器内部</span><br><br><span class="hljs-variable">$</span> service apache2 <span class="hljs-built_in">start</span> <br></code></pre></td></tr></table></figure>
+
+<p><img src="https://img.gls.show/img/image-20230623155309100.png" srcset="/img/loading.gif" lazyload></p>
+<p>在Firefox中输入about:preferences#privacy，在Authorities tab导入我们的CA并选择Trust this CA to identify web sites，最后访问<a target="_blank" rel="noopener" href="https://www.example.com/">https://www.example.com</a>  即可</p>
+<h1 id="Task-5-Launching-a-Man-In-The-Middle-Attack"><a href="#Task-5-Launching-a-Man-In-The-Middle-Attack" class="headerlink" title="Task 5: Launching a Man-In-The-Middle Attack"></a>Task 5: Launching a Man-In-The-Middle Attack</h1><blockquote>
+<p>中间人攻击通常发生在安全通信的建立阶段，例如使用SSL/TLS加密的HTTPS连接。攻击者会冒充服务器与客户端建立连接，同时与服务器和客户端分别建立独立的连接。攻击者可以生成自己的伪造证书，与客户端建立安全连接并将自己的伪造证书发送给客户端，同时与服务器建立另一个安全连接并将客户端的请求发送给服务器。这样，攻击者就能够在客户端和服务器之间的通信中拦截、查看和修改数据。</p>
+<p>为了防止中间人攻击，通常使用证书颁发机构（CA）签发的可信证书来验证服务器的身份。客户端会对服务器的证书进行验证，包括验证证书的有效性、合法性和所属的颁发机构等。</p>
+</blockquote>
+<p>几种方法可以让用户的 HTTPS 请求到达我们的 Web 服务器。</p>
+<ul>
+<li>一种方法是攻击路由，这样用户的 HTTPS 请求就被路由到我们的 Web 服务器。</li>
+<li>另一种方法是攻击 DNS，所以当受害者的机器试图找出目标网络服务器的 IP 地址，它得到我们的网络服务器的 IP 地址。</li>
+</ul>
+<p>在这个任务中，我们模拟了攻击-DNS 的方法。我们只需修改受害者机器的/etc/hosts 文件，通过将主机名 <a target="_blank" rel="noopener" href="http://www.example.com/">www.example.com</a> 映射到我们的恶意网络服务器，来模拟 DNS 缓存定位攻击的结果，而不是启动一个实际的 DNS 域名服务器缓存污染。</p>
+<p>task4中，已经建立了一个 HTTPS 网站，这个任务中使用相同的 Apache 服务器来模拟 <a target="_blank" rel="noopener" href="http://www.example.com/">www.example.com</a> 。方法类似按照 Task 4中的指令向 Apache 的 SSL 配置文件添加一个 VirtualHost 条目: ServerName 应该是 <a target="_blank" rel="noopener" href="http://www.example.com/">www.example.com</a></p>
+<p>举个例子，可以将baidu.com映射到我们自己的服务器上，让受害者以为自己访问了百度，但是其实是访问了我们的恶意服务器</p>
+<p>我们可以使用之前生成的自签名CA给百度签一个证书，如果浏览器加载了我们的CA，那么受害者访问百度的时候，就会显示https正常，通过了证书核验</p>
+<h1 id="Task-6-Launching-a-Man-In-The-Middle-Attack-with-a-Compromised-CA"><a href="#Task-6-Launching-a-Man-In-The-Middle-Attack-with-a-Compromised-CA" class="headerlink" title="Task 6: Launching a Man-In-The-Middle Attack with a Compromised CA"></a>Task 6: Launching a Man-In-The-Middle Attack with a Compromised CA</h1><blockquote>
+<p>在这个任务中，我们假设在 Task 1中创建的根 CA 受到攻击者的攻击，并且它的私钥被盗取了。因此，攻击者可以使用此 CA 的私钥生成任意证书。在这项任务中，我们将看到这种妥协的后果。请设计一个实验来证明攻击者可以成功地在任何 HTTPS 网站上启动 MITM 攻击。您可以使用在 Task 5中创建的相同设置，但是这一次，您需要证明 MITM 攻击是成功的，也就是说，当受害者试图访问一个网站但是登录到 MITM 攻击者的假网站时，浏览器不会引起任何怀疑。</p>
+</blockquote>
+<p>在task5中的叙述描述了我们使用自己的<strong>自签名CA导入到浏览器</strong>的情况，但是如果<strong>根CA私钥</strong>被盗取了会有更严重的后果：</p>
+<ol>
+<li>伪造证书：攻击者可以使用根证书的私钥签发伪造的证书，模拟合法的网站或服务，使其看起来具有合法的身份和可信的安全性。这将导致用户误认为与真实网站或服务进行通信，从而暴露他们的敏感信息。</li>
+<li>中间人攻击：通过拦截通信并使用伪造的证书，攻击者可以进行中间人攻击，监视和修改通信内容，窃取敏感信息或注入恶意内容。这对用户、网站和系统的安全性构成了严重威胁。</li>
+<li>篡改和劫持：攻击者可以篡改通过伪造证书进行加密的通信内容，例如修改下载文件、注入恶意代码或劫持用户的会话。</li>
+<li>信任破裂：如果根证书的私钥被盗取，信任链中的所有证书都将受到威胁，导致整个系统的信任破裂。这将对证书基础设施的安全性和可信度产生长期的负面影响。</li>
+</ol>
+<p>实验步骤与之前类似，使用根CA签名证书，伪造证书在浏览器进行访问时不许任何设置都会被信任</p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/SEED-lab/" class="category-chain-item">SEED-lab</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>SEED-lab：Public-Key Infrastructure (PKI) Lab</div>
+      <div>http://gls.show/p/135735d/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年6月24日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/e32f19d0/" title="hvv面试知识点扫盲">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">hvv面试知识点扫盲</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/2c54864f/" title="CSAPP-lab：malloc lab">
+                        <span class="hidden-mobile">CSAPP-lab：malloc lab</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

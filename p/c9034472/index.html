@@ -1,0 +1,1235 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="David Wheeler有一句名言：“计算机科学中的任何问题 都可以通过增加一个中间层来解决。”  数字逻辑电路-》汇编-》C语言。从机器码、汇编语言到C语言，再 到高级语言，其本质就是一个不断虚拟的过程，将底层复杂的接口转变成了上层容易使用的接口。 硬盘由柱面、磁道、扇区构成。应用程序能够通过文件管理的接口方便地创建、读取、写入文件 TCP&#x2F;IP协议栈模型。经过网络层、传输层的抽象之后，应用程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《qemu kvm源码解析与应用》学习笔记">
+<meta property="og:url" content="http://gls.show/p/c9034472/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="David Wheeler有一句名言：“计算机科学中的任何问题 都可以通过增加一个中间层来解决。”  数字逻辑电路-》汇编-》C语言。从机器码、汇编语言到C语言，再 到高级语言，其本质就是一个不断虚拟的过程，将底层复杂的接口转变成了上层容易使用的接口。 硬盘由柱面、磁道、扇区构成。应用程序能够通过文件管理的接口方便地创建、读取、写入文件 TCP&#x2F;IP协议栈模型。经过网络层、传输层的抽象之后，应用程">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/default.png">
+<meta property="article:published_time" content="2023-08-13T14:47:46.471Z">
+<meta property="article:modified_time" content="2023-09-21T06:16:28.964Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/default.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>《qemu kvm源码解析与应用》学习笔记 - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="《qemu kvm源码解析与应用》学习笔记"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-08-13 22:47" pubdate>
+          2023年8月13日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          39k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          122 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">《qemu kvm源码解析与应用》学习笔记</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2023年9月21日 下午
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <p>David Wheeler有一句名言：“计算机科学中的任何问题 都可以通过增加一个中间层来解决。”</p>
+<ul>
+<li>数字逻辑电路-》汇编-》C语言。从机器码、汇编语言到C语言，再 到高级语言，其本质就是一个不断虚拟的过程，将底层复杂的接口转变成了上层容易使用的接口。</li>
+<li>硬盘由柱面、磁道、扇区构成。应用程序能够通过文件管理的接口方便地创建、读取、写入文件</li>
+<li>TCP/IP协议栈模型。经过网络层、传输层的抽象之后，应用程序不需要直接跟网络数据包的收发细节打交道</li>
+<li>每一个进程都是对计算机的抽象，进程都认为自己独占整个计算机系统的资源，有着独立的CPU和内存</li>
+</ul>
+<p>虚拟机（VirtualMachine，VM）</p>
+<ul>
+<li>最简单的虚拟机是进程。进程可以看作是一组资源的集合，有自己独立的进程地址空间以及独立的CPU和寄存器。一个进程在执行指令、访问内存的时候并不会影响其他进程。</li>
+<li>模拟器是另一种形式的虚拟机。它可以使为一种硬件指令集（Instruction Set Architecture，ISA）编译的程序运行在另一种硬件指令集上。模拟器可以通过解释来实现，即对程序的源ISA指令一条一条进行分析，然后执行相应的ISA指令上的操作。模拟器也可以通过二进制翻译实现，即首先将程序中所有的源ISA指令翻译成目标ISA上具有同样功能的指令，然后在目标ISA指令机器上执行。</li>
+</ul>
+<p>管理全局物理资源的软 件叫作虚拟机监控器（Virtual Machine Monitor，VMM），VMM之于虚拟机 就如同操作系统之于进程，VMM利用时分复用或者空分复用的办法将硬件资 源在各个虚拟机之间进行分配</p>
+<p>系统虚拟化模拟指的是QEMU能够模拟一个完整的系统虚拟机，该虚拟机有自己的虚拟 CPU、芯片组、虚拟内存以及各种虚拟外部设备，能够为虚拟机中运行的操作系统和应用软件呈现出与物理计算机完全一致的硬件视图。</p>
+<p>早期的QEMU都是软件模拟的，很明显其在性能上是不能满足要求的。所以早期的云计算平台通常使用 Xen作为其底层虚拟化平台。前面提到过，Xen早期是在x86架构上直接完成 的虚拟化，这需要修改虚拟机内部的操作系统，也使得Xen的整个VMM非常复 杂，缺陷比较多。</p>
+<h2 id="4-1-CPU虚拟化介绍"><a href="#4-1-CPU虚拟化介绍" class="headerlink" title="4.1 CPU虚拟化介绍"></a>4.1 CPU虚拟化介绍</h2><h3 id="4-1-1-CPU虚拟化简介"><a href="#4-1-1-CPU虚拟化简介" class="headerlink" title="4.1.1 CPU虚拟化简介"></a>4.1.1 CPU虚拟化简介</h3><p>在物理机中，操作系统和应用程序都是直接运行在硬件上</p>
+<ul>
+<li>操作系统的代码运行在ring0</li>
+<li>应用程序的代码运行在ring3</li>
+<li>应用程序需要执行一些敏感操作、访问一些系统资源时，需要执行特殊的指令陷入到操作系统内核，由内核进行一些安全检查，代替应用程序访问这些资源</li>
+</ul>
+<p>指令</p>
+<ul>
+<li>能够在ring3执行的指令叫作非特权指令</li>
+<li>只能够在ring0执行的指令叫作特权指令</li>
+<li>如果指令会影响到整个系统，叫作敏感指令，如果只影响自身所在的进程，就叫作非敏感指令<ul>
+<li>典型的敏感指令包括读写时钟、读写中断寄存器等</li>
+</ul>
+</li>
+</ul>
+<p>存在一些属于敏感指令但不是特权指令的指令，也就是说用户程序能够运行一些可以改变/获取全局资源的指令，这造成了x86虚拟化难的问题</p>
+<p>一些虚拟化方式</p>
+<ul>
+<li>Bochs与QEMU（不含KVM）类的纯软件模拟严格来讲并不算是虚拟化软件，应该叫作模拟器，因为它们都是一条一条指令地解析，然后执行的</li>
+<li>VMWare早期的方案，虚拟化用户态的程序直接在CPU上执行，但是一些特权指令会通过动态的二进制翻译去执行</li>
+<li>Xen方案，该方案修改了虚拟机操作系统内核的代码，使虚拟机内核运行在ring1，并且对虚拟机中操作系统内核的敏感指令进行替换进而使其陷入到ring0的Xen内核</li>
+<li>各个方案都有缺点，如纯软件模拟的性能非常差，Xen方案又只能支持有源码的操作系统，VMware的Workstation综合来看相对不错。</li>
+</ul>
+<h3 id="4-1-2-VMX架构简介"><a href="#4-1-2-VMX架构简介" class="headerlink" title="4.1.2 VMX架构简介"></a>4.1.2 VMX架构简介</h3><p>CPU虚拟化的VT-x技术增加VMX架构来实现CPU的硬件虚拟化</p>
+<ul>
+<li>虚拟机监控器（VMM）以及虚拟机（VM）<ul>
+<li>VMM对整个系统的CPU和硬件有完全的控制权，它抽象出虚拟的CPU给各个VM，并且能够将VM的CPU直接调度到物理CPU上运行。VMM需要对各个VM进行管理，包括创建、配置、删除VM实例、为其分配资源、确保各个VM之间的隔离与独立，还需要处理VM对资源的访问、确保公平，所有这些都需要VMM运行的权限高于VM</li>
+<li>VM本身不会意识到其处在虚拟化环境中。每一个VM都相互独立，有自己独立的CPU、内核、中断和设备等，这些资源都是VMM提供的</li>
+</ul>
+</li>
+<li>VMM执行的模式叫作VMX <strong>root</strong> operation模式，VM执行的模式叫作VMX <strong>non-root</strong> operation模式，每种模式都有自己的ring0和ring3结构。这两种模式之间的转换叫作VMX转换。从VMX root转换到VMX non-root叫作VM Entry，而从VMX non-root转换到VMXroot则叫作VM Exit</li>
+<li>在VMX non-root模式中，执行一些特殊的指令（如之前所说的影响系统全局的指令）或者发生一些特殊的事件都会导致VMExit，使VM退出到VMM</li>
+<li>VMX operation让虚拟机的操作系统不需要修改就能够运行</li>
+</ul>
+<p><img src="https://img.gls.show/img/20230810222845.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://img.gls.show/img/Pasted%20image%2020230801165150.png" srcset="/img/loading.gif" lazyload><br><img src="https://img.gls.show/img/Pasted%20image%2020230801200334.png" srcset="/img/loading.gif" lazyload><br><img src="https://img.gls.show/img/Pasted%20image%2020230801202743.png" srcset="/img/loading.gif" lazyload><br>要让CPU进入VMX operation，首先需要执行一个VMXON的指令，因为VMM本身也需要记录一些数据，所以在执行VMXON之前，需要先分配一个VMXON的区域，并进行初始化，VMM可以通过执行VMXOFF指令退出VMX operation。</p>
+<p>每一个VM都会有一个对应的虚拟机控制结构（Virtual Machine Control Structure，<strong>VMCS</strong>）区域与之对应，用来保存该VM的相关信息。在进行VMLAUNCH之前需要提前对VMCS进行<strong>分配并初始化</strong></p>
+<p>VMM可以通过VM Entry使一个VM进入到运行状态，首次进入VM是通过执行VMLAUNCH指令发起的</p>
+<h3 id="4-1-3-VMCS介绍"><a href="#4-1-3-VMCS介绍" class="headerlink" title="4.1.3 VMCS介绍"></a>4.1.3 VMCS介绍</h3><p>每个虚拟机的VCPU都有一个对应的VMCS,VMCS区域的大小为4KB，VMM通过它的64位地址来对该区域进行访问。<strong>VMCS之于VCPU的作用类似于进程描述符之于进程的作用</strong>。传统上操作系统的进程会共享物理CPU资源，操作系统负责在多个进程之间分配CPU，每个进程都有进程描述符来保存进程的信息，并且在进程切换时保存硬件上下文，使得进程能够在下次被调度的时候正常运行。同样，VCPU之间会共享物理CPU，VMM负责在多个VCPU之间分配物理CPU，每个VCPU都有自己的描述符，当VMM在切换VCPU运行时需要保存此刻的VCPU状态，从而在下次的VCPU调度中使得VCPU能够从被中断的那个点开始正常运行。</p>
+<p>操作VMCS的指令包括VMCLEAR、VMPTRLD、VMREAD和VMWRITE</p>
+<p>VMCS的格式</p>
+<ul>
+<li>前8个字节是固定的，比如标识不同vmcs版本信息</li>
+<li>其余为VMCS数据区。这个区域的格式是由实现决定的，VMM通过VMREAD和MWRITE指令在这里读写（书上有对应的信息区域图示）<ul>
+<li>Guest-state区域，有各个寄存器的状态以及一些处理器的状态。进行VM Entry时，虚拟机处理器的状态信息从这个区域加载，进行VM Exit时，虚拟机的当前状态信息写入到这个区域。</li>
+<li>Host-state区域。当发生VM Exit的时候，需要切换到VMM的上下文运行，此时处理器的状态信息从这个区域加载</li>
+<li>VM Exit控制区域。这个区域用来指定虚拟机在发生VM Exit时的行为，如一些寄存器的保存。</li>
+<li>VM Exit信息区域。这个区域包含了最近产生的VM Exit信息，典型的信息包括退出的原因以及相应的数据，如指令执行的退出会记录指令的长度等。</li>
+<li>VM Entry控制区域。这个区域用来指定虚拟机在发生VM Entry时的行为，如一些寄存器的加载，还有一些虚拟机的事件注入</li>
+<li>VM-execution控制区域。这个区域用来控制处理器在进入VM Entry之后的处理器行为，这个区域很庞大，包含了多种控制，如哪些时间会引起VM Exit，一个异常位图指示哪些异常会发生VM Exit，APIC的虚拟化控制等</li>
+</ul>
+</li>
+</ul>
+<h2 id="4-2-KVM模块初始化介绍"><a href="#4-2-KVM模块初始化介绍" class="headerlink" title="4.2 KVM模块初始化介绍"></a>4.2 KVM模块初始化介绍</h2><h3 id="4-2-1-KVM源码组织"><a href="#4-2-1-KVM源码组织" class="headerlink" title="4.2.1 KVM源码组织"></a>4.2.1 KVM源码组织</h3><p>KVM</p>
+<ul>
+<li>一个用于 Linux 内核的虚拟化解决方案，允许在同一硬件平台上运行多个虚拟机，充分地重用了内核的诸多功能</li>
+<li>以色列初创公司Qumranet在CPU推出硬件虚拟化之后开发的一个<strong>基于内核的虚拟机监控器</strong></li>
+</ul>
+<p>代码结构</p>
+<ul>
+<li>kvm主体代码位于内核树<strong>virt/kvm目录</strong>下面，表示所有CPU架构的<strong>公共代码</strong>，这也是内核kvm.ko对应的源码</li>
+<li>x86的架构相关的代码在<strong>arch/x86/kvm</strong>下，同一个架构可能会有多种不同的实现，vmx.c（对应intel VM-X方案），svm.c（对应AMD-V方案），这也是intel-kvm.ko和amd-kvm.ko的来源</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs c">Mode                LastWriteTime         Length Name<br>----                -------------         ------ ----<br>d----        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>                  arch<br>d----        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>                  block<br>d----        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>                  certs<br>d----        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>                  crypto<br>d----        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>                  Documentation<br>d----        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>                  drivers<br>d----        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>                  firmware<br>d----        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>                  fs<br>d----        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>                  include<br>d----        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>                  init<br>d----        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>                  ipc<br>d----        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>                  kernel<br>d----        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>                  lib<br>d----        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>                  mm<br>d----        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>                  net<br>d----        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>                  samples<br>d----        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>                  scripts<br>d----        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>                  security<br>d----        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>                  sound<br>d----        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>                  tools<br>d----        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>                  usr<br>d----        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>                  virt<br>-a---        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>             <span class="hljs-number">31</span>   .get_maintainer.ignore<br>-a---        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>           <span class="hljs-number">1280</span>   .gitignore<br>-a---        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>           <span class="hljs-number">5537</span>   .mailmap<br>-a---        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>          <span class="hljs-number">18693</span>   COPYING<br>-a---        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>          <span class="hljs-number">97181</span>   CREDITS<br>-a---        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>           <span class="hljs-number">2622</span>   Kbuild<br>-a---        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>            <span class="hljs-number">252</span>   Kconfig<br>-a---        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>         <span class="hljs-number">337034</span>   MAINTAINERS<br>-a---        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>          <span class="hljs-number">56302</span>   Makefile<br>-a---        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>          <span class="hljs-number">18599</span> 󰪷  README<br>-a---        <span class="hljs-number">2018</span>/<span class="hljs-number">10</span>/<span class="hljs-number">13</span>     <span class="hljs-number">15</span>:<span class="hljs-number">11</span>           <span class="hljs-number">7485</span>   REPORTING-BUGS<br></code></pre></td></tr></table></figure>
+
+<ol>
+<li><strong>arch：</strong> 包含特定硬件架构的代码，如x86、ARM、MIPS等。不同的硬件架构在这个目录下有各自的子目录，包含了与架构相关的代码和配置文件。</li>
+<li><strong>block：</strong> 包含块设备层的代码，处理块设备（硬盘等）的I/O操作和管理。</li>
+<li><strong>certs：</strong> 包含用于签名Linux内核代码的证书文件，用于确保代码的可信度和完整性。</li>
+<li><strong>crypto：</strong> 包含加密相关的代码，用于提供Linux内核中的加密和密码学功能。</li>
+<li><strong>Documentation：</strong> 包含Linux内核的文档，提供开发者和用户的详细说明、使用指南和文档。</li>
+<li><strong>drivers：</strong> 包含各种设备驱动的代码，涵盖了多种硬件设备，如网络适配器、显卡、声卡等。<strong>可以发现驱动文件夹占了源码中绝大多数的空间</strong></li>
+<li><strong>firmware：</strong> 包含一些硬件设备的固件文件，这些文件在启动时或设备初始化时可能会用到。</li>
+<li><strong>fs：</strong> 包含文件系统相关的代码，包括各种文件系统的实现，如EXT4、FAT、NTFS等。</li>
+<li><strong>include：</strong> 包含用于编译Linux内核的头文件，这些头文件定义了内核中使用的结构体、宏等。</li>
+<li><strong>init：</strong> 包含系统初始化和引导过程相关的代码，包括内核初始化和启动。</li>
+<li><strong>ipc：</strong> 包含进程间通信（IPC）相关的代码，用于实现进程之间的通信和同步。</li>
+<li><strong>kernel：</strong> 包含核心内核代码，包括调度器、中断处理、系统调用等。</li>
+<li><strong>lib：</strong> 包含一些通用的库函数和工具函数，用于帮助内核开发。</li>
+<li><strong>mm：</strong> 包含内存管理相关的代码，用于管理系统的物理内存和虚拟内存。</li>
+<li><strong>net：</strong> 包含网络协议栈的代码，用于处理网络数据包的收发和处理。</li>
+<li><strong>samples：</strong> 包含示例代码，用于演示某些功能的用法和实现。</li>
+<li><strong>scripts：</strong> 包含一些用于构建和配置内核的脚本文件。</li>
+<li><strong>security：</strong> 包含与系统安全性相关的代码，如访问控制、权限管理等。</li>
+<li><strong>sound：</strong> 包含声音子系统的代码，用于处理声卡和音频相关的功能。</li>
+<li><strong>tools：</strong> 包含一些辅助工具和调试工具，用于内核开发和调试。</li>
+<li><strong>usr：</strong> 包含用户空间工具和应用程序的代码，这些工具可以在用户空间使用。</li>
+<li><strong>virt：</strong> 包含虚拟化相关的代码，用于支持虚拟化技术。</li>
+<li><code>.gitignore</code>、<code>.mailmap</code>、<code>COPYING</code>、<code>CREDITS</code>、<code>Kconfig</code>、<code>MAINTAINERS</code>、<code>Makefile</code>、<code>README</code> 等，这些文件包含了一些关于版权、许可证、贡献者、配置和文档等信息</li>
+</ol>
+<p>比较重要的目录</p>
+<table>
+<thead>
+<tr>
+<th>目录</th>
+<th>关注点和重要性</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>arch</td>
+<td>硬件架构相关的代码，不同的硬件架构有各自的子目录。硬件架构和底层硬件的研究、实现和优化</td>
+</tr>
+<tr>
+<td>kernel</td>
+<td>核心内核代码，调度器、中断处理、系统调用等。操作系统内核功能和设计的研究和实现</td>
+</tr>
+<tr>
+<td>drivers</td>
+<td>各种设备驱动的代码，硬件设备的交互、优化和性能。设备驱动和硬件交互的研究和实现</td>
+</tr>
+<tr>
+<td>mm</td>
+<td>内存管理相关的代码，物理内存、虚拟内存的管理和优化。内存管理、内存优化和分配策略的研究</td>
+</tr>
+<tr>
+<td>net</td>
+<td>网络协议栈的代码，网络数据包的收发、协议实现和网络性能优化。网络协议、性能和优化的研究</td>
+</tr>
+<tr>
+<td>security</td>
+<td>系统安全性相关的代码，访问控制、权限管理和安全策略。操作系统安全性和安全策略的研究和实现</td>
+</tr>
+<tr>
+<td>Documentation</td>
+<td>Linux内核的文档，开发者和用户指南，理解和使用内核的重要资源。文档对于内核的理解和使用非常重要。</td>
+</tr>
+</tbody></table>
+<p>KVM的不同虚拟化实现（Intel和AMD）都会<strong>向KVM模块注册一个kvm_x86_ops结构体</strong>。KVM中的一些函数可能<strong>首先会调用kvm_arch_xxx函数</strong>，xxx是架构类型，比如x86，则会调用kvm_x86_ops结构中的相关回调函数。<strong>kvm_x86_ops</strong>是一个结构体，包含了一组函数指针，用于处理在 x86 架构下的虚拟化操作。这些函数指针实际上是回调函数，它们实现了特定的虚拟化功能。</p>
+<ul>
+<li><strong>回调函数：</strong> 在 <code>kvm_x86_ops</code> 结构体中的每个函数指针都指向一个回调函数，这些函数是实际执行虚拟化操作的地方。</li>
+<li><strong><code>kvm_arch_xxx</code> 函数：</strong> 这些是架构特定的函数，其名称中的 <code>xxx</code> 表示具体的架构类型，比如 <code>x86</code>。这些函数在 KVM 模块的实现中可能首先被调用，然后再根据具体的架构类型调用相应的<code>kvm_x86_ops</code> 中的函数。这样的架构分离使得 KVM 能够支持多种不同的硬件架构。</li>
+<li><strong><code>kvm_x86_ops</code> 结构体：</strong> 这是一个包含一组函数指针的结构体，用于在 x86 架构下处理虚拟化操作。每个函数指针指向一个特定的函数，实现了特定的虚拟化功能。这些函数定义了 KVM 在 x86 架构下的行为和处理方式，可以根据需要进行扩展和定制。</li>
+</ul>
+<p>kvm.ko和kvm-intel.ko是两个内核模块，它们协同工作以实现KVM虚拟化</p>
+<ol>
+<li>kvm.ko：这是<strong>KVM的通用代码生成的内核模块</strong>。它本身在初始化阶段并不执行实际虚拟化任务，只是<strong>将通用的KVM代码加载到内存中，为KVM的其他组件提供支持</strong>。它<strong>导出了KVM的接口</strong>，这些接口将会暴露给用户空间，供用户程序调用。</li>
+<li>kvm-intel.ko：这是针对Intel CPU架构的特定代码生成的内核模块。它<strong>负责实际的虚拟化功能</strong>，包括<strong>创建、管理和运行虚拟机</strong>。kvm-intel.ko会在KVM初始化完成后负责启动和关闭虚拟化，以及处理与Intel CPU架构相关的虚拟化任务。</li>
+<li>当<strong>用户程序调用KVM接口</strong>来执行虚拟化任务时，<strong>kvm.ko中的通用代码将会调用kvm-intel.ko</strong>中的架构相关代码来<strong>处理实际的虚拟化操作</strong>。这包括在虚拟机中执行指令、管理虚拟设备等任务。</li>
+</ol>
+<p><img src="https://img.gls.show/img/20230813152054.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="4-2-2-KVM模块初始化"><a href="#4-2-2-KVM模块初始化" class="headerlink" title="4.2.2 KVM模块初始化"></a>4.2.2 KVM模块初始化</h3><p>KVM模块的初始化主要包括初始化CPU与架构无关的数据以及设置与架构相关的虚拟化支持</p>
+<p>VMM只有在CPU处于保护模式并且开启分页时才能进入VMX模式</p>
+<p>开启VMX模式需要做的事情</p>
+<ol>
+<li><p><strong>CPU支持检测：</strong> 通过CPUID指令的ECX寄存器的第5位来检测CPU是否支持VMX。</p>
+</li>
+<li><p><strong>VMX能力检测：</strong> 通过读取相关的MSR寄存器，如IA32_VMX_BASIC、IA32_VMX_PINBASED_CTLS和IA32_VMX_PROCBASED_CTLS，来检测CPU所支持的VMX能力。</p>
+</li>
+<li><p><strong>分配VMXON区域：</strong> 分配一段4KB对齐的内存作为VMXON区域，大小通过读取IA32_VMX_BASIC MSR寄存器确定。</p>
+</li>
+<li><p><strong>VMXON区域初始化：</strong> 通过MSR寄存器初始化VMXON区域，包括设置版本标识等信息。</p>
+</li>
+<li><p><strong>CR0和CR4寄存器设置：</strong> 确保当前CPU运行模式的CR0和CR4寄存器满足进入VMX的条件，需要满足的设置通过IA32_VMX_CR0_FIXED0和IA32_VMX_CR0_FIXED1、IA32_VMX_CR4_FIXED0和IA32_VMX_CR4_FIXED1寄存器报告。</p>
+</li>
+<li><p><strong>开启VMX模式：</strong> 设置CR4寄存器中的CR4.VMXE位为1，开启VMX模式。</p>
+</li>
+<li><p><strong>IA32_FEATURE_CONTROL寄存器设置：</strong> 确保IA32_FEATURE_CONTROL寄存器的锁定位（0位）为1，通常由BIOS进行设置。</p>
+</li>
+<li><p><strong>执行VMXON指令：</strong> 使用VMXON区域的物理地址作为操作数，调用VMXON指令以开启VMX模式。</p>
+</li>
+<li><p><strong>VMX模式的启动和关闭：</strong> 一旦进入VMX模式，可以在VMX root模式（CPL=0）下执行VMXOFF指令来关闭VMX模式。</p>
+</li>
+</ol>
+<p>在VMX（Virtual Machine Extensions）模式下，VMX root操作模式是指处理器运行在特权级别0（CPL = 0）下的状态，即内核态。VMXOFF指令用于关闭VMX模式，将处理器从VMX操作模式切换回到非虚拟化的操作模式。为了确认VMX模式是否已经成功关闭，可以通过检查RFLAGS寄存器的CF（Carry Flag）和ZF（Zero Flag）位的值。</p>
+<p>具体来说，在执行VMXOFF指令后，如果RFLAGS寄存器的CF和ZF都为0，这表示VMX模式已经成功关闭。这种情况下的解释如下：</p>
+<ul>
+<li>CF = 0：表示VMXOFF指令成功执行，没有发生错误。</li>
+<li>ZF = 0：表示VMX模式已经成功退出，处理器不再处于虚拟化模式。</li>
+</ul>
+<p><strong>intel-kvm.ko的模块注册函数是vmx_init</strong>，其主要任务为<strong>调用架构无关函数kvm_init进行KVM模块的初始化</strong></p>
+<p>vmx_init调用了kvm_init</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">static</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">kvm_x86_ops</span> <span class="hljs-title">vmx_x86_ops</span> =</span> &#123;<br>	.cpu_has_kvm_support = cpu_has_kvm_support,<br>	.disabled_by_bios = vmx_disabled_by_bios,<br><br>...<br><br>	.vcpu_create = vmx_create_vcpu,<br><br>...<br><br>    .run = vmx_vcpu_run,<br><br>    .handle_exit = vmx_handle_exit,<br>...<br><br>&#125;;<br><br><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> __init <span class="hljs-title">vmx_init</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span><br><span class="hljs-function"></span>&#123;<br>	<span class="hljs-keyword">int</span> r = kvm_init(&amp;vmx_x86_ops, <span class="hljs-keyword">sizeof</span>(struct vcpu_vmx),<br>                     __alignof__(struct vcpu_vmx), THIS_MODULE);<br>	<span class="hljs-keyword">if</span> (r)<br>		<span class="hljs-keyword">return</span> r;<br><br><span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> CONFIG_KEXEC_CORE</span><br>	rcu_assign_pointer(crash_vmclear_loaded_vmcss,<br>			   crash_vmclear_local_loaded_vmcss);<br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span><br><br>	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br><br><br></code></pre></td></tr></table></figure>
+
+<p>这段代码初始化KVM虚拟化，提供了VMX虚拟化实现的回调函数和相关参数，为后续的虚拟化操作做好了准备。在KVM初始化后，可以使用其他API来创建虚拟机、分配VCPU、设置寄存器等，以实现虚拟化功能</p>
+<ol>
+<li><code>kvm_init</code>: 这是一个用于初始化KVM的函数。它会执行一系列操作来启动KVM虚拟化，并返回一个整数结果以指示是否成功初始化。</li>
+<li><code>&amp;vmx_x86_ops</code>: 这个参数是一个指向包含Intel VT-x虚拟化实现回调函数的结构体的指针（<strong>是kvm_x86_ops类型</strong>）。这个结构体包含了一系列回调函数，用于处理不同的虚拟化操作，如硬件检测、虚拟机创建、寄存器设置等。这些函数是特定于硬件的，用于实现VMX（Virtual Machine Extensions）虚拟化技术的支持。</li>
+<li><code>sizeof(struct vcpu_vmx)</code>: 这是第二个参数，表示VMX实现的VCPU（Virtual CPU）结构体的大小。VCPU结构体包含了与虚拟CPU相关的信息和状态。</li>
+<li><code>__alignof__(struct vcpu_vmx)</code>: 这是对VCPU结构体的对齐要求。这个参数通常用于确保结构体按照正确的字节对齐方式分配内存，以优化访问和操作。</li>
+<li><code>THIS_MODULE</code>: 这是一个表示当前模块的标识符，用于标记KVM模块的所属。</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">kvm_init</span><span class="hljs-params">(<span class="hljs-keyword">void</span> *opaque, <span class="hljs-keyword">unsigned</span> vcpu_size, <span class="hljs-keyword">unsigned</span> vcpu_align,</span></span><br><span class="hljs-params"><span class="hljs-function">		  struct <span class="hljs-keyword">module</span> *<span class="hljs-keyword">module</span>)</span></span><br><span class="hljs-function"></span>&#123;<br>	<span class="hljs-keyword">int</span> r;<br>	<span class="hljs-keyword">int</span> cpu;<br><br>	r = kvm_arch_init(opaque);<br>	<span class="hljs-keyword">if</span> (r)<br>		<span class="hljs-keyword">goto</span> out_fail;<br><br>	<span class="hljs-comment">/*</span><br><span class="hljs-comment">	 * kvm_arch_init makes sure there&#x27;s at most one caller</span><br><span class="hljs-comment">	 * for architectures that support multiple implementations,</span><br><span class="hljs-comment">	 * like intel and amd on x86.</span><br><span class="hljs-comment">	 * kvm_arch_init must be called before kvm_irqfd_init to avoid creating</span><br><span class="hljs-comment">	 * conflicts in case kvm is already setup for another implementation.</span><br><span class="hljs-comment">	 */</span><br>	r = kvm_irqfd_init();<br>	<span class="hljs-keyword">if</span> (r)<br>		<span class="hljs-keyword">goto</span> out_irqfd;<br><br>	<span class="hljs-keyword">if</span> (!zalloc_cpumask_var(&amp;cpus_hardware_enabled, GFP_KERNEL)) &#123;<br>		r = -ENOMEM;<br>		<span class="hljs-keyword">goto</span> out_free_0;<br>	&#125;<br><br>	r = kvm_arch_hardware_setup();<br>	<span class="hljs-keyword">if</span> (r &lt; <span class="hljs-number">0</span>)<br>		<span class="hljs-keyword">goto</span> out_free_0a;<br><br>	for_each_online_cpu(cpu) &#123;<br>		smp_call_function_single(cpu,<br>				kvm_arch_check_processor_compat,<br>				&amp;r, <span class="hljs-number">1</span>);<br>		<span class="hljs-keyword">if</span> (r &lt; <span class="hljs-number">0</span>)<br>			<span class="hljs-keyword">goto</span> out_free_1;<br>	&#125;<br><br>	r = register_cpu_notifier(&amp;kvm_cpu_notifier);<br>	<span class="hljs-keyword">if</span> (r)<br>		<span class="hljs-keyword">goto</span> out_free_2;<br>	register_reboot_notifier(&amp;kvm_reboot_notifier);<br><br>	<span class="hljs-comment">/* A kmem cache lets us meet the alignment requirements of fx_save. */</span><br>	<span class="hljs-keyword">if</span> (!vcpu_align)<br>		vcpu_align = __alignof__(struct kvm_vcpu);<br>	kvm_vcpu_cache = kmem_cache_create(<span class="hljs-string">&quot;kvm_vcpu&quot;</span>, vcpu_size, vcpu_align,<br>					   <span class="hljs-number">0</span>, <span class="hljs-literal">NULL</span>);<br>	<span class="hljs-keyword">if</span> (!kvm_vcpu_cache) &#123;<br>		r = -ENOMEM;<br>		<span class="hljs-keyword">goto</span> out_free_3;<br>	&#125;<br><br>	r = kvm_async_pf_init();<br>	<span class="hljs-keyword">if</span> (r)<br>		<span class="hljs-keyword">goto</span> out_free;<br><br>	kvm_chardev_ops.owner = <span class="hljs-keyword">module</span>;<br>	kvm_vm_fops.owner = <span class="hljs-keyword">module</span>;<br>	kvm_vcpu_fops.owner = <span class="hljs-keyword">module</span>;<br><br>	r = misc_register(&amp;kvm_dev);<br>	<span class="hljs-keyword">if</span> (r) &#123;<br>		pr_err(<span class="hljs-string">&quot;kvm: misc device register failed\n&quot;</span>);<br>		<span class="hljs-keyword">goto</span> out_unreg;<br>	&#125;<br><br>	register_syscore_ops(&amp;kvm_syscore_ops);<br><br>	kvm_preempt_ops.sched_in = kvm_sched_in;<br>	kvm_preempt_ops.sched_out = kvm_sched_out;<br><br>	r = kvm_init_debug();<br>	<span class="hljs-keyword">if</span> (r) &#123;<br>		pr_err(<span class="hljs-string">&quot;kvm: create debugfs files failed\n&quot;</span>);<br>		<span class="hljs-keyword">goto</span> out_undebugfs;<br>	&#125;<br><br>	r = kvm_vfio_ops_init();<br>	WARN_ON(r);<br><br>	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br><br>out_undebugfs:<br>	unregister_syscore_ops(&amp;kvm_syscore_ops);<br>	misc_deregister(&amp;kvm_dev);<br>out_unreg:<br>	kvm_async_pf_deinit();<br>out_free:<br>	kmem_cache_destroy(kvm_vcpu_cache);<br>out_free_3:<br>	unregister_reboot_notifier(&amp;kvm_reboot_notifier);<br>	unregister_cpu_notifier(&amp;kvm_cpu_notifier);<br>out_free_2:<br>out_free_1:<br>	kvm_arch_hardware_unsetup();<br>out_free_0a:<br>	free_cpumask_var(cpus_hardware_enabled);<br>out_free_0:<br>	kvm_irqfd_exit();<br>out_irqfd:<br>	kvm_arch_exit();<br>out_fail:<br>	<span class="hljs-keyword">return</span> r;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>函数调用分析</p>
+<table>
+<thead>
+<tr>
+<th>函数名</th>
+<th>功能描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>kvm_arch_init</td>
+<td>初始化架构相关的代码。</td>
+</tr>
+<tr>
+<td>kvm_irqfd_init</td>
+<td>初始化irqfd相关的数据，主要是创建一个线程。</td>
+</tr>
+<tr>
+<td>kvm_arch_hardware_setup</td>
+<td>创建启动KVM时所需的数据结构，初始化硬件特性。</td>
+</tr>
+<tr>
+<td>kvm_arch_check_processor_compat</td>
+<td>检测所有CPU的特性是否一致。</td>
+</tr>
+<tr>
+<td>注册通知对象</td>
+<td>- kvm_cpu_notifier：用于CPU的热插拔时通知。<br>- kvm_reboot_notifier：系统重启时通知。</td>
+</tr>
+<tr>
+<td>缓存VCPU结构体</td>
+<td>将创建VCPU所需的cache赋值给kvm_vcpu_cache，用于快速分配VCPU空间。</td>
+</tr>
+<tr>
+<td>设置file_operations的owner</td>
+<td>将3个file_operations的owner设置为当前模块，分别对应不同的设备。</td>
+</tr>
+<tr>
+<td>调用misc_register创建设备</td>
+<td>创建名为kvm_dev的misc设备，将其file_operations设置为kvm_chardev_ops。</td>
+</tr>
+<tr>
+<td>设置kvm_preempt_ops</td>
+<td>设置kvm_preempt_ops的sched_in和sched_out，用于虚拟机VCPU所在线程被抢占或调度时的处理。</td>
+</tr>
+</tbody></table>
+<p>kvm_arch_init作为通用代码一般都会调用kvm_arch_xxx这种与架构相关的代码，所以这个函数定义在arch/x86/kvm目录的x86.c中</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">kvm_arch_init</span><span class="hljs-params">(<span class="hljs-keyword">void</span> *opaque)</span></span><br><span class="hljs-function"></span>&#123;<br>	<span class="hljs-keyword">int</span> r;<br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">kvm_x86_ops</span> *<span class="hljs-title">ops</span> =</span> opaque;<br><br>	<span class="hljs-keyword">if</span> (kvm_x86_ops) &#123;<br>		printk(KERN_ERR <span class="hljs-string">&quot;kvm: already loaded the other module\n&quot;</span>);<br>		r = -EEXIST;<br>		<span class="hljs-keyword">goto</span> out;<br>	&#125;<br><br>	<span class="hljs-keyword">if</span> (!ops-&gt;cpu_has_kvm_support()) &#123;<br>		printk(KERN_ERR <span class="hljs-string">&quot;kvm: no hardware support\n&quot;</span>);<br>		r = -EOPNOTSUPP;<br>		<span class="hljs-keyword">goto</span> out;<br>	&#125;<br>	<span class="hljs-keyword">if</span> (ops-&gt;disabled_by_bios()) &#123;<br>		printk(KERN_ERR <span class="hljs-string">&quot;kvm: disabled by bios\n&quot;</span>);<br>		r = -EOPNOTSUPP;<br>		<span class="hljs-keyword">goto</span> out;<br>	&#125;<br><br>	r = -ENOMEM;<br>	shared_msrs = alloc_percpu(struct kvm_shared_msrs);<br>	<span class="hljs-keyword">if</span> (!shared_msrs) &#123;<br>		printk(KERN_ERR <span class="hljs-string">&quot;kvm: failed to allocate percpu kvm_shared_msrs\n&quot;</span>);<br>		<span class="hljs-keyword">goto</span> out;<br>	&#125;<br><br>	r = kvm_mmu_module_init();<br>	<span class="hljs-keyword">if</span> (r)<br>		<span class="hljs-keyword">goto</span> out_free_percpu;<br><br>	kvm_set_mmio_spte_mask();<br><br>	kvm_x86_ops = ops;<br><br>	kvm_mmu_set_mask_ptes(PT_USER_MASK, PT_ACCESSED_MASK,<br>			PT_DIRTY_MASK, PT64_NX_MASK, <span class="hljs-number">0</span>);<br><br>	kvm_timer_init();<br><br>	perf_register_guest_info_callbacks(&amp;kvm_guest_cbs);<br><br>	<span class="hljs-keyword">if</span> (cpu_has_xsave)<br>		host_xcr0 = xgetbv(XCR_XFEATURE_ENABLED_MASK);<br><br>	kvm_lapic_init();<br><span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> CONFIG_X86_64</span><br>	pvclock_gtod_register_notifier(&amp;pvclock_gtod_notifier);<br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span><br><br>	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br><br>out_free_percpu:<br>	free_percpu(shared_msrs);<br>out:<br>	<span class="hljs-keyword">return</span> r;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+<ul>
+<li>首先，函数接受一个参数<code>opaque</code>，其中存储了KVM实现的结构体（例如，<code>vmx_x86_ops</code>），这些结构体包含了实现的回调函数等信息。</li>
+<li>代码开始执行检查，确保只有一个KVM实现能够加载到内核。如果<code>kvm_x86_ops</code>已经存在，表示已加载其他模块，则打印错误并返回。</li>
+<li>接着，通过调用<code>ops-&gt;cpu_has_kvm_support()</code>函数检测CPU是否支持VMX模式（对应开启条件1）。如果不支持，则打印错误并返回。</li>
+<li>然后，通过调用<code>ops-&gt;disabled_by_bios()</code>函数检测是否被BIOS关闭（对应开启条件7）。如果被关闭，则打印错误并返回。</li>
+<li>如果通过上述检查，首先分配一个percpu变量<code>shared_msrs</code>，用于存储共享的MSR寄存器数据。</li>
+<li>调用<code>kvm_mmu_module_init()</code>函数初始化内存虚拟化工作。</li>
+<li>调用<code>kvm_set_mmio_spte_mask()</code>函数设置MMIO内存的标识符。</li>
+<li>将传递进来的KVM实现的结构体赋值给全局变量<code>kvm_x86_ops</code>。</li>
+<li>执行一些初始化操作，如设置页表项的掩码、初始化计时器等。</li>
+<li>注册性能回调函数，以便在性能分析中获取客户机信息。</li>
+<li>如果CPU支持XSAVE指令集，获取主机的XCR0值。</li>
+<li>最后，执行LAPIC（Local Advanced Programmable Interrupt Controller）的初始化，注册一个pvclock_gtod_notifier通知。</li>
+</ul>
+<p>kvm_arch_hardware_setup，同样，其主要调用了实现相关的vmx_x86_ops的hardware_setup成员</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// kvm_arch_hardware_setup 函数是KVM在硬件初始化阶段的架构特定部分。</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">kvm_arch_hardware_setup</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">int</span> r;<br><br>    <span class="hljs-comment">// 调用Intel虚拟化实现的 hardware_setup 函数进行硬件初始化操作。</span><br>    r = kvm_x86_ops-&gt;hardware_setup();<br>    <span class="hljs-keyword">if</span> (r != <span class="hljs-number">0</span>)<br>        <span class="hljs-keyword">return</span> r;<br><br>    <span class="hljs-comment">// 如果支持TSC控制，进行TSC相关的配置。</span><br>    <span class="hljs-keyword">if</span> (kvm_has_tsc_control) &#123;<br>        <span class="hljs-comment">/*</span><br><span class="hljs-comment">         * 确保用户只能配置适合于有符号整数的 tsc_khz 值。</span><br><span class="hljs-comment">         * 最小值不需要计算，因为对于所有机器，它将始终为 1。</span><br><span class="hljs-comment">         */</span><br>        u64 max = min(<span class="hljs-number">0x7fffffff</span>ULL,<br>                      __scale_tsc(kvm_max_tsc_scaling_ratio, tsc_khz));<br>        <br>        <span class="hljs-comment">// 将计算得到的最大值存储在 kvm_max_guest_tsc_khz 变量中。</span><br>        kvm_max_guest_tsc_khz = max;<br><br>        <span class="hljs-comment">// 计算并设置默认的 TSC 缩放比例。</span><br>        kvm_default_tsc_scaling_ratio = <span class="hljs-number">1ULL</span> &lt;&lt; kvm_tsc_scaling_ratio_frac_bits;<br>    &#125;<br><br>    <span class="hljs-comment">// 初始化 MSR 列表，用于处理特定的模型相关寄存器。</span><br>    kvm_init_msr_list();<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<ol>
+<li>该函数首先调用了架构特定的 <code>hardware_setup</code> 函数，进行硬件初始化操作，以确保虚拟化的相关硬件支持得以正确配置。</li>
+<li>如果支持 TSC 控制，代码会对 TSC 进行相关配置，计算并设置合适的 TSC 缩放比例，并将其存储在相关变量中。</li>
+<li>最后，函数进行 MSR 列表的初始化，这些 MSR 用于处理特定的模型相关寄存器。</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> __init <span class="hljs-title">vmx_check_processor_compat</span><span class="hljs-params">(<span class="hljs-keyword">void</span> *rtn)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">vmcs_config</span> <span class="hljs-title">vmcs_conf</span>;</span><br><br>    *(<span class="hljs-keyword">int</span> *)rtn = <span class="hljs-number">0</span>;<br>    <br>    <span class="hljs-comment">// 设置并获取当前CPU的 VMCS 配置</span><br>    <span class="hljs-keyword">if</span> (setup_vmcs_config(&amp;vmcs_conf) &lt; <span class="hljs-number">0</span>)<br>        *(<span class="hljs-keyword">int</span> *)rtn = -EIO;<br>    <br>    <span class="hljs-comment">// 检查当前CPU的 VMCS 配置是否与预期的配置相符</span><br>    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">memcmp</span>(&amp;vmcs_config, &amp;vmcs_conf, <span class="hljs-keyword">sizeof</span>(struct vmcs_config)) != <span class="hljs-number">0</span>) &#123;<br>        printk(KERN_ERR <span class="hljs-string">&quot;kvm: CPU %d feature inconsistency!\n&quot;</span>,<br>               smp_processor_id());<br>        *(<span class="hljs-keyword">int</span> *)rtn = -EIO;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<ol>
+<li><code>vmx_check_processor_compat</code> 是一个初始化函数，用于检查当前CPU的虚拟化兼容性。</li>
+<li><code>*(int *)rtn = 0;</code> 初始化返回值为0，表示兼容性检查通过。</li>
+<li><code>setup_vmcs_config(&amp;vmcs_conf)</code> 调用 <code>setup_vmcs_config</code> 函数，获取当前CPU的 VMCS 配置信息，存储在 <code>vmcs_conf</code> 结构中。</li>
+<li>如果获取配置失败，则设置返回值为 <code>-EIO</code>，表示I/O错误。</li>
+<li><code>memcmp(&amp;vmcs_config, &amp;vmcs_conf, sizeof(struct vmcs_config)) != 0</code> 对比当前CPU的 VMCS 配置与预期的配置是否一致。</li>
+<li>如果配置不一致，输出错误信息，并设置返回值为 <code>-EIO</code>，表示兼容性检查失败。</li>
+<li>在hardware_setup函数中调用setup_vmcs_config这一步骤的目的是确保在不同的物理CPU上，使用相同的虚拟机配置（<code>vmcs_config</code>），以确保 VCPIU 在不同物理 CPU 上调度时的一致性和稳定性。因为不同的硬件特性可能会导致不同的虚拟化行为，而通过比较并保持一致的 VMCS 配置，可以尽量减少在不同硬件间出现问题的可能性。</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">static</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">file_operations</span> <span class="hljs-title">kvm_chardev_ops</span> =</span> &#123;<br>	.unlocked_ioctl = kvm_dev_ioctl,<br>	.compat_ioctl   = kvm_dev_ioctl,<br>	.llseek		= noop_llseek,<br>&#125;;<br><br><span class="hljs-keyword">static</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">miscdevice</span> <span class="hljs-title">kvm_dev</span> =</span> &#123;<br>	KVM_MINOR,<br>	<span class="hljs-string">&quot;kvm&quot;</span>,<br>	&amp;kvm_chardev_ops,<br>&#125;;<br><br><br></code></pre></td></tr></table></figure>
+
+<p>kvm_init的最后一个重要工作是创建一个misc设备“/dev/kvm”</p>
+<p>可以看到，该设备只支持ioctl系统调用，当然，open和close这些系统调用会被misc设备框架处理。kvm_dev_ioctl代码如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">long</span> <span class="hljs-title">kvm_dev_ioctl</span><span class="hljs-params">(struct file *filp,</span></span><br><span class="hljs-params"><span class="hljs-function">			  <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> ioctl, <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">long</span> arg)</span></span><br><span class="hljs-function"></span>&#123;<br>	<span class="hljs-keyword">long</span> r = -EINVAL;<br><br>	<span class="hljs-keyword">switch</span> (ioctl) &#123;<br>	<span class="hljs-keyword">case</span> KVM_GET_API_VERSION:<br>		<span class="hljs-keyword">if</span> (arg)<br>			<span class="hljs-keyword">goto</span> out;<br>		r = KVM_API_VERSION;<br>		<span class="hljs-keyword">break</span>;<br>	<span class="hljs-keyword">case</span> KVM_CREATE_VM:<br>		r = kvm_dev_ioctl_create_vm(arg);<br>		<span class="hljs-keyword">break</span>;<br>	<span class="hljs-keyword">case</span> KVM_CHECK_EXTENSION:<br>		r = kvm_vm_ioctl_check_extension_generic(<span class="hljs-literal">NULL</span>, arg);<br>		<span class="hljs-keyword">break</span>;<br>	<span class="hljs-keyword">case</span> KVM_GET_VCPU_MMAP_SIZE:<br>		<span class="hljs-keyword">if</span> (arg)<br>			<span class="hljs-keyword">goto</span> out;<br>		r = PAGE_SIZE;     <span class="hljs-comment">/* struct kvm_run */</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> CONFIG_X86</span><br>		r += PAGE_SIZE;    <span class="hljs-comment">/* pio data page */</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> KVM_COALESCED_MMIO_PAGE_OFFSET</span><br>		r += PAGE_SIZE;    <span class="hljs-comment">/* coalesced mmio ring page */</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span><br>		<span class="hljs-keyword">break</span>;<br>	<span class="hljs-keyword">case</span> KVM_TRACE_ENABLE:<br>	<span class="hljs-keyword">case</span> KVM_TRACE_PAUSE:<br>	<span class="hljs-keyword">case</span> KVM_TRACE_DISABLE:<br>		r = -EOPNOTSUPP;<br>		<span class="hljs-keyword">break</span>;<br>	<span class="hljs-keyword">default</span>:<br>		<span class="hljs-keyword">return</span> kvm_arch_dev_ioctl(filp, ioctl, arg);<br>	&#125;<br>out:<br>	<span class="hljs-keyword">return</span> r;<br>&#125;<br></code></pre></td></tr></table></figure>
+<ul>
+<li><code>kvm_dev_ioctl</code> 函数是用于处理 <code>/dev/kvm</code> 设备的 ioctl 请求的主要函数。</li>
+<li>根据不同的 ioctl 请求，函数执行相应的操作。</li>
+<li>对于通用接口，比如 <code>KVM_GET_API_VERSION</code>、<code>KVM_CREATE_VM</code> 和 <code>KVM_CHECK_EXTENSION</code>，执行相应的处理，并返回相应的结果。</li>
+<li>对于架构相关的接口，调用 <code>kvm_arch_dev_ioctl</code> 函数进行处理，该函数会根据架构不同，进一步处理 ioctl 请求。</li>
+<li>对于其他一些 ioctl 请求，如 <code>KVM_GET_VCPU_MMAP_SIZE</code>，计算并返回与虚拟机运行有关的内存大小。</li>
+<li>如果是不支持的操作，返回错误码 -EOPNOTSUPP。</li>
+<li>处理了 KVM 设备的 ioctl 请求，根据不同的请求类型，执行相应的操作</li>
+</ul>
+<p><strong>总结一下kvm模块初始化到底做了什么：</strong></p>
+<ol>
+<li><strong>硬件检查：</strong> 初始化过程首先会进行硬件检查，确保主机的硬件支持虚拟化扩展，如 Intel VT-x 或 AMD-V。这些硬件扩展允许虚拟机在更加隔离的环境中运行，提高性能和安全性。</li>
+<li><strong>分配结构缓存：</strong> KVM 初始化过程分配了一些常用的数据结构的缓存，这些结构将用于管理虚拟机和虚拟 CPU 的状态。</li>
+<li><strong>创建设备节点：</strong> 通过创建 <code>/dev/kvm</code> 设备节点，用户空间程序可以通过这个设备与 KVM 内核模块进行通信，发起虚拟化请求和操作。</li>
+<li><strong>获取 VMCS 配置：</strong> 在初始化过程中，KVM 模块会获取 VMCS（Virtual Machine Control Structure）的配置信息，这些信息用于初始化 VMCS 结构。VMCS 是一个关键的数据结构，用于控制虚拟机运行的各个方面。</li>
+<li><strong>设置全局变量：</strong> 根据主机 CPU 的特性和支持，KVM 模块会设置一些全局变量，以适应不同的硬件环境。例如，根据 CPU 是否支持 EPT（Extended Page Tables）等特性，设置相应的全局标志。</li>
+<li><strong>为每个物理 CPU 分配 VMCS：</strong> KVM 初始化过程会为每个物理 CPU 分配一个 VMCS 结构，并将这些结构保存在 percpu 变量中。这为虚拟机在不同的物理 CPU 上切换和调度提供了支持。</li>
+<li><strong>进入 VMX 模式：</strong> 在初始化过程中，并没有将 CPU 设置为 VMX 模式。VMX 模式是虚拟机扩展的一种硬件虚拟化模式，需要通过设置 CR4 寄存器的 VMXE 位并分配 VMXON 区域来开启。然而，在创建第一个虚拟机之前，这些步骤不会执行。这是一种惰性策略，只有在实际需要创建虚拟机时才会启用 VMX 模式，以避免不必要的开销。</li>
+</ol>
+<p>综上所述，KVM 模块的初始化过程主要包括硬件检查、资源分配、设备节点创建、全局变量设置、VMCS 配置等步骤。该过程确保了在虚拟化环境下能够准备好必要的数据结构和配置，以便在创建和管理虚拟机时进行有效的虚拟化操作。真正的 VMX 模式开启是在创建第一个虚拟机时才会执行，以避免不必要的性能损耗。</p>
+<h2 id="4-3-虚拟机的创建"><a href="#4-3-虚拟机的创建" class="headerlink" title="4.3 虚拟机的创建"></a>4.3 虚拟机的创建</h2><p>要创建一个KVM虚拟机，需要用户侧的QEMU发起请求，下面从QEMU和KVM两个方面来考察KVM虚拟机创建过程</p>
+<h3 id="4-3-1-QEMU侧虚拟机的创建"><a href="#4-3-1-QEMU侧虚拟机的创建" class="headerlink" title="4.3.1 QEMU侧虚拟机的创建"></a>4.3.1 QEMU侧虚拟机的创建</h3><p>当在QEMU命令行加入–enable-kvm时，解析会进入下面的case分支，给machine optslist这个参数项加了一个accel=kvm参数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">case</span> QEMU_OPTION_enable_kvm:<br>    olist = qemu_find_opts(<span class="hljs-string">&quot;machine&quot;</span>);<br>    qemu_opts_parse_noisily(olist, <span class="hljs-string">&quot;accel=kvm&quot;</span>, <span class="hljs-literal">false</span>);<br>    <span class="hljs-keyword">break</span>;<br></code></pre></td></tr></table></figure>
+
+<p>该case处理命令行选项<code>QEMU_OPTION_enable_kvm</code>，这个选项是在命令行中加入了<code>--enable-kvm</code>时触发的</p>
+<p>在这个分支中，首先声明了一个<code>olist</code>变量，它指向一个<code>QemuOptsList</code>对象。这是一个用于存储QEMU选项的列表，这里的<code>olist</code>用于查找名为<code>&quot;machine&quot;</code>的选项。</p>
+<p><strong><code>qemu_find_opts</code>函数：</strong> 这个函数用于查找与给定选项名匹配的<code>QemuOptsList</code>对象。在这里，它用于查找名为<code>&quot;machine&quot;</code>的选项对应的<code>QemuOptsList</code>对象。</p>
+<p><code>qemu_opts_parse_noisily</code>函数目的是在给定的<code>QemuOptsList</code>列表中创建一个新的<code>QemuOpts</code>对象，并从提供的参数字符串中解析选项值<br><strong>参数说明：</strong></p>
+<ul>
+<li><code>list</code>：指向一个<code>QemuOptsList</code>对象，表示要在其中创建新的<code>QemuOpts</code>对象。</li>
+<li><code>params</code>：一个包含参数字符串的C风格字符数组，其中包含要解析的选项及其值。</li>
+<li><code>permit_abbrev</code>：一个布尔值，如果为<code>true</code>，则允许第一个<code>key=value</code>在参数字符串中省略<code>key=</code>，并且会被视为<code>list-&gt;implied_opt_name</code>的键值对。</li>
+</ul>
+<p>一个QEMU命令行实例：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">qemu</span>-system-x<span class="hljs-number">86</span>_<span class="hljs-number">64</span> --enable-kvm -machine accel=kvm -m <span class="hljs-number">2</span>G -cpu host -hda ubuntu.img<br></code></pre></td></tr></table></figure>
+<ul>
+<li>使用了<code>--enable-kvm</code>参数来启用KVM虚拟化加速</li>
+<li>使用了<code>-machine accel=kvm</code>选项来指定虚拟机的加速方式为KVM</li>
+<li><code>-m 2G</code>用于分配2GB内存给虚拟机</li>
+<li><code>-cpu host</code>用于使用宿主机的CPU特性</li>
+<li><code>-hda ubuntu.img</code>指定虚拟机的硬盘镜像</li>
+</ul>
+<p>之后main函数会在4360行调用<code>configure_accelerator(current_machine)</code>，该函数会从machine的参数列表中取出accel的值，找出所属的类型，<strong>然后调用accel_init_machine</strong>。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">configure_accelerator</span><span class="hljs-params">(MachineState *ms)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *p;<br>    <span class="hljs-keyword">char</span> buf[<span class="hljs-number">10</span>];<br>    <span class="hljs-keyword">int</span> ret;<br>    <span class="hljs-keyword">bool</span> accel_initialised = <span class="hljs-literal">false</span>;<br>    <span class="hljs-keyword">bool</span> init_failed = <span class="hljs-literal">false</span>;<br>    AccelClass *acc = <span class="hljs-literal">NULL</span>;<br><br>    p = qemu_opt_get(qemu_get_machine_opts(), <span class="hljs-string">&quot;accel&quot;</span>);<br>    <span class="hljs-keyword">if</span> (p == <span class="hljs-literal">NULL</span>) &#123;<br>        <span class="hljs-comment">/* Use the default &quot;accelerator&quot;, tcg */</span><br>        p = <span class="hljs-string">&quot;tcg&quot;</span>;<br>    &#125;<br><br>    <span class="hljs-keyword">while</span> (!accel_initialised &amp;&amp; *p != <span class="hljs-string">&#x27;\0&#x27;</span>) &#123;<br>        <span class="hljs-keyword">if</span> (*p == <span class="hljs-string">&#x27;:&#x27;</span>) &#123;<br>            p++;<br>        &#125;<br>        p = get_opt_name(buf, <span class="hljs-keyword">sizeof</span>(buf), p, <span class="hljs-string">&#x27;:&#x27;</span>);<br>        acc = accel_find(buf);<br>        <span class="hljs-keyword">if</span> (!acc) &#123;<br>            <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;\&quot;%s\&quot; accelerator not found.\n&quot;</span>, buf);<br>            <span class="hljs-keyword">continue</span>;<br>        &#125;<br>        <span class="hljs-keyword">if</span> (acc-&gt;available &amp;&amp; !acc-&gt;available()) &#123;<br>            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%s not supported for this target\n&quot;</span>,<br>                   acc-&gt;name);<br>            <span class="hljs-keyword">continue</span>;<br>        &#125;<br>        ret = accel_init_machine(acc, ms);<br>        <span class="hljs-keyword">if</span> (ret &lt; <span class="hljs-number">0</span>) &#123;<br>            init_failed = <span class="hljs-literal">true</span>;<br>            <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;failed to initialize %s: %s\n&quot;</span>,<br>                    acc-&gt;name,<br>                    strerror(-ret));<br>        &#125; <span class="hljs-keyword">else</span> &#123;<br>            accel_initialised = <span class="hljs-literal">true</span>;<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-keyword">if</span> (!accel_initialised) &#123;<br>        <span class="hljs-keyword">if</span> (!init_failed) &#123;<br>            <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;No accelerator found!\n&quot;</span>);<br>        &#125;<br>        <span class="hljs-built_in">exit</span>(<span class="hljs-number">1</span>);<br>    &#125;<br><br>    <span class="hljs-keyword">if</span> (init_failed) &#123;<br>        <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;Back to %s accelerator.\n&quot;</span>, acc-&gt;name);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>accel_init_machine这段代码实现了加速器的初始化过程，特别是针对 KVM 加速器，它会创建一个新的 <code>KVMState</code> 对象，将其赋值给虚拟机的 <code>accelerator</code> 成员，并调用加速器的初始化回调函数。如果初始化失败，则会清除相应的状态。这样，在虚拟机运行时，KVM 加速器将能够根据加速器状态进行加速操作</p>
+<ol>
+<li>首先，<code>accel_init_machine</code> 函数被调用，用于初始化特定的加速器（AccelClass）。</li>
+<li>在此函数中，首先获取了加速器的类对象（<code>ObjectClass</code>）和类名（<code>cname</code>）。</li>
+<li>接下来，通过调用 <code>object_new(cname)</code> 创建了一个新的 <code>AccelState</code> 对象，该对象是特定加速器的状态数据结构，对于 KVM 加速器来说，实际上是一个 <code>KVMState</code> 对象。</li>
+<li>然后，将新创建的 <code>AccelState</code>（即 <code>KVMState</code>）对象赋值给虚拟机的 <code>accelerator</code> 成员，即 <code>ms-&gt;accelerator = accel;</code>。</li>
+<li>设置 <code>acc-&gt;allowed</code> 为 <code>true</code>，表示允许使用此加速器。</li>
+<li>调用加速器的 <code>init_machine</code> 回调函数，对于 KVM 加速器来说，这是 <code>kvm_init</code> 函数。<ol>
+<li>如果 <code>init_machine</code> 函数返回值小于 0，表示初始化失败，于是清空虚拟机的 <code>accelerator</code> 成员，并将 <code>acc-&gt;allowed</code> 设置为 <code>false</code>，同时释放之前创建的 <code>AccelState</code> 对象（<code>object_unref(OBJECT(accel));</code>）。</li>
+</ol>
+</li>
+<li>最后，返回 <code>init_machine</code> 的返回值。</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> <span class="hljs-title">accel_init_machine</span><span class="hljs-params">(AccelClass *acc, MachineState *ms)</span></span><br><span class="hljs-function"></span>&#123;<br>    ObjectClass *oc = OBJECT_CLASS(acc);<br>    <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *cname = object_class_get_name(oc);<br>    AccelState *accel = ACCEL(object_new(cname));  <span class="hljs-comment">// KVMState</span><br>    <span class="hljs-keyword">int</span> ret;<br>    ms-&gt;accelerator = accel;<br>    *(acc-&gt;allowed) = <span class="hljs-literal">true</span>;<br>    ret = acc-&gt;init_machine(ms); <span class="hljs-comment">//对于 KVM 加速器来说，这是 `kvm_init` 函数</span><br>    <span class="hljs-keyword">if</span> (ret &lt; <span class="hljs-number">0</span>) &#123;<br>        ms-&gt;accelerator = <span class="hljs-literal">NULL</span>;<br>        *(acc-&gt;allowed) = <span class="hljs-literal">false</span>;<br>        object_unref(OBJECT(accel));<br>    &#125;<br>    <span class="hljs-keyword">return</span> ret;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+<blockquote>
+<p>在 QEMU 中，使用 <code>KVMState</code> 结构体来表示与 KVM 相关的数据结构</p>
+</blockquote>
+<p>kvm_init函数通过 KVM 在硬件层面提供加速功能，以提高虚拟机的性能和效率。它会检查 KVM 是否支持所需的功能，然后创建虚拟机并进行一些初始化工作，确保虚拟机能够正确运行在 KVM 加速器上</p>
+<ol>
+<li><strong>打开 KVM 设备</strong>：首先，函数尝试打开 “/dev/kvm” 设备，通过系统调用 <code>qemu_open</code>。如果打开失败，会输出错误信息并返回错误码。</li>
+<li><strong>检查 KVM 版本</strong>：使用 <code>KVM_GET_API_VERSION</code> ioctl 查询 KVM API 版本，并与代码中定义的 <code>KVM_API_VERSION</code> 进行比较，以确保 KVM 版本支持。如果版本检查失败，会输出相应的错误信息。</li>
+<li><strong>创建虚拟机（VM）</strong>：通过 <code>KVM_CREATE_VM</code> ioctl 在 KVM 层面创建一个虚拟机，并将文件描述符保存到 <code>KVMState</code> 结构体的成员变量中。这个虚拟机将用于承载客户机的运行。</li>
+<li><strong>检查扩展支持</strong>：使用不同的 <code>kvm_check_extension</code> 函数检查 KVM 是否支持各种特性和扩展，如内存插槽数量、虚拟 CPU 事件、协同 MMIO、IRQ 路由等。如果不支持某些扩展，会输出相应的错误信息。</li>
+<li><strong>初始化架构相关内容</strong>：调用 <code>kvm_arch_init</code> 函数，完成一些与特定架构相关的初始化工作，如对于 x86 架构，需要设置支持 vm86 模式的一些 IOCTL。</li>
+<li><strong>创建 IRQCHIP</strong>：如果允许使用 IRQCHIP，调用 <code>kvm_irqchip_create</code> 函数创建 IRQ 控制器。</li>
+<li><strong>注册监听器</strong>：注册 MEMORY 和 IO 监听器，用于处理内存和 I/O 的事件，例如内存区域的读写。</li>
+<li><strong>设置中断处理函数</strong>：将中断处理函数指向 <code>kvm_handle_interrupt</code>，该函数用于处理中断事件。</li>
+<li><strong>其他功能设置</strong>：设置一些其他的参数和功能，如多个 IOEVENTFD 支持等。</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> <span class="hljs-title">kvm_init</span><span class="hljs-params">(MachineState *ms)</span></span><br><span class="hljs-function"></span>&#123;<br>    MachineClass *mc = MACHINE_GET_CLASS(ms);<br>    <span class="hljs-keyword">static</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> upgrade_note[] =<br>        <span class="hljs-string">&quot;Please upgrade to at least kernel 2.6.29 or recent kvm-kmod\n&quot;</span><br>        <span class="hljs-string">&quot;(see http://sourceforge.net/projects/kvm).\n&quot;</span>;<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> &#123;</span><br>        <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *name;<br>        <span class="hljs-keyword">int</span> num;<br>    &#125; num_cpus[] = &#123;<br>        &#123; <span class="hljs-string">&quot;SMP&quot;</span>,          smp_cpus &#125;,        <span class="hljs-comment">// 数量</span><br>        &#123; <span class="hljs-string">&quot;hotpluggable&quot;</span>, max_cpus &#125;,        <span class="hljs-comment">// 可热插拔</span><br>        &#123; <span class="hljs-literal">NULL</span>, &#125;<br>    &#125;, *nc = num_cpus;<br>    <span class="hljs-keyword">int</span> soft_vcpus_limit, hard_vcpus_limit;<br>    KVMState *s;<br>    <span class="hljs-keyword">const</span> KVMCapabilityInfo *missing_cap;<br>    <span class="hljs-keyword">int</span> ret;<br>    <span class="hljs-keyword">int</span> type = <span class="hljs-number">0</span>;<br>    <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *kvm_type;<br><br>    s = KVM_STATE(ms-&gt;accelerator);<br><br>    <span class="hljs-comment">// 确保目标页大小不大于主机页大小</span><br>    assert(TARGET_PAGE_SIZE &lt;= getpagesize());<br><br>    s-&gt;sigmask_len = <span class="hljs-number">8</span>;<br><br><span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> KVM_CAP_SET_GUEST_DEBUG</span><br>    QTAILQ_INIT(&amp;s-&gt;kvm_sw_breakpoints);<br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span><br>    QLIST_INIT(&amp;s-&gt;kvm_parked_vcpus);<br>    s-&gt;vmfd = <span class="hljs-number">-1</span>;<br>    s-&gt;fd = qemu_open(<span class="hljs-string">&quot;/dev/kvm&quot;</span>, O_RDWR);  <span class="hljs-comment">// 打开 KVM 设备文件</span><br>    <span class="hljs-keyword">if</span> (s-&gt;fd == <span class="hljs-number">-1</span>) &#123;<br>        <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;Could not access KVM kernel module: %m\n&quot;</span>);<br>        ret = -errno;<br>        <span class="hljs-keyword">goto</span> err;<br>    &#125;<br><br>    <span class="hljs-comment">// 获取 KVM API 版本并进行版本检查</span><br>    ret = kvm_ioctl(s, KVM_GET_API_VERSION, <span class="hljs-number">0</span>);<br>    <span class="hljs-keyword">if</span> (ret &lt; KVM_API_VERSION) &#123;<br>        <span class="hljs-keyword">if</span> (ret &gt;= <span class="hljs-number">0</span>) &#123;<br>            ret = -EINVAL;<br>        &#125;<br>        <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;kvm version too old\n&quot;</span>);<br>        <span class="hljs-keyword">goto</span> err;<br>    &#125;<br><br>    <span class="hljs-keyword">if</span> (ret &gt; KVM_API_VERSION) &#123;<br>        ret = -EINVAL;<br>        <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;kvm version not supported\n&quot;</span>);<br>        <span class="hljs-keyword">goto</span> err;<br>    &#125;<br><br>    <span class="hljs-comment">// 检查支持的内存插槽数量</span><br>    s-&gt;nr_slots = kvm_check_extension(s, KVM_CAP_NR_MEMSLOTS);<br><br>    <span class="hljs-comment">// 如果未指定，则使用默认值</span><br>    <span class="hljs-keyword">if</span> (!s-&gt;nr_slots) &#123;<br>        s-&gt;nr_slots = <span class="hljs-number">32</span>;<br>    &#125;<br><br>    <span class="hljs-comment">// 检查虚拟 CPU 限制</span><br>    soft_vcpus_limit = kvm_recommended_vcpus(s);<br>    hard_vcpus_limit = kvm_max_vcpus(s);<br><br>    <span class="hljs-comment">// 检查每种类型 CPU 的数量限制</span><br>    <span class="hljs-keyword">while</span> (nc-&gt;name) &#123;<br>        <span class="hljs-keyword">if</span> (nc-&gt;num &gt; soft_vcpus_limit) &#123;<br>            <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>,<br>                    <span class="hljs-string">&quot;Warning: Number of %s cpus requested (%d) exceeds &quot;</span><br>                    <span class="hljs-string">&quot;the recommended cpus supported by KVM (%d)\n&quot;</span>,<br>                    nc-&gt;name, nc-&gt;num, soft_vcpus_limit);<br><br>            <span class="hljs-keyword">if</span> (nc-&gt;num &gt; hard_vcpus_limit) &#123;<br>                <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;Number of %s cpus requested (%d) exceeds &quot;</span><br>                        <span class="hljs-string">&quot;the maximum cpus supported by KVM (%d)\n&quot;</span>,<br>                        nc-&gt;name, nc-&gt;num, hard_vcpus_limit);<br>                <span class="hljs-built_in">exit</span>(<span class="hljs-number">1</span>);<br>            &#125;<br>        &#125;<br>        nc++;<br>    &#125;<br><br>    <span class="hljs-comment">// 获取 kvm-type 选项并根据机器类型确定 type 值</span><br>    kvm_type = qemu_opt_get(qemu_get_machine_opts(), <span class="hljs-string">&quot;kvm-type&quot;</span>);<br>    <span class="hljs-keyword">if</span> (mc-&gt;kvm_type) &#123;<br>        type = mc-&gt;kvm_type(kvm_type);<br>    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (kvm_type) &#123;<br>        ret = -EINVAL;<br>        <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;Invalid argument kvm-type=%s\n&quot;</span>, kvm_type);<br>        <span class="hljs-keyword">goto</span> err;<br>    &#125;<br><br>    <span class="hljs-comment">// 创建 KVM 虚拟机</span><br>    <span class="hljs-keyword">do</span> &#123;<br>        ret = kvm_ioctl(s, KVM_CREATE_VM, type);<br>    &#125; <span class="hljs-keyword">while</span> (ret == -EINTR);<br><br>    <span class="hljs-keyword">if</span> (ret &lt; <span class="hljs-number">0</span>) &#123;<br>        <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;ioctl(KVM_CREATE_VM) failed: %d %s\n&quot;</span>, -ret,<br>                strerror(-ret));<br><br><span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> TARGET_S390X</span><br>        <span class="hljs-keyword">if</span> (ret == -EINVAL) &#123;<br>            <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>,<br>                    <span class="hljs-string">&quot;Host kernel setup problem detected. Please verify:\n&quot;</span>);<br>            <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;- for kernels supporting the switch_amode or&quot;</span><br>                    <span class="hljs-string">&quot; user_mode parameters, whether\n&quot;</span>);<br>            <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>,<br>                    <span class="hljs-string">&quot;  user space is running in primary address space\n&quot;</span>);<br>            <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>,<br>                    <span class="hljs-string">&quot;- for kernels supporting the vm.allocate_pgste sysctl, &quot;</span><br>                    <span class="hljs-string">&quot;whether it is enabled\n&quot;</span>);<br>        &#125;<br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span><br>        <span class="hljs-keyword">goto</span> err;<br>    &#125;<br><br>    <span class="hljs-comment">// 设置 vmfd 并检查支持的扩展</span><br>    s-&gt;vmfd = ret;<br>    missing_cap = kvm_check_extension_list(s, kvm_required_capabilites);<br>    <span class="hljs-keyword">if</span> (!missing_cap) &#123;<br>        missing_cap =<br>            kvm_check_extension_list(s, kvm_arch_required_capabilities);<br>    &#125;<br>    <span class="hljs-keyword">if</span> (missing_cap) &#123;<br>        ret = -EINVAL;<br>        <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;kvm does not support %s\n%s&quot;</span>,<br>                missing_cap-&gt;name, upgrade_note);<br>        <span class="hljs-keyword">goto</span> err;<br>    &#125;<br><br>    <span class="hljs-comment">// 检查是否支持协同 MMIO</span><br>    s-&gt;coalesced_mmio = kvm_check_extension(s, KVM_CAP_COALESCED_MMIO);<br><br>    <span class="hljs-comment">// 检查是否支持合并内存区域</span><br>    s-&gt;broken_set_mem_region = <span class="hljs-number">1</span>;<br>    ret = kvm_check_extension(s, KVM_CAP_JOIN_MEMORY_REGIONS_WORKS);<br>    <span class="hljs-keyword">if</span> (ret &gt; <span class="hljs-number">0</span>) &#123;<br>        s-&gt;broken_set_mem_region = <span class="hljs-number">0</span>;<br>    &#125;<br><br>    <span class="hljs-comment">// 检查是否支持虚拟 CPU 事件</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> KVM_CAP_VCPU_EVENTS</span><br>    s-&gt;vcpu_events = kvm_check_extension(s, KVM_CAP_VCPU_EVENTS);<br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span><br><br>    <span class="hljs-comment">// 检查是否支持 X86 ROBUST SINGLESTEP</span><br>    s-&gt;robust_singlestep =<br>        kvm_check_extension(s, KVM_CAP_X86_ROBUST_SINGLESTEP);<br><br>    <span class="hljs-comment">// 检查是否支持调试寄存器</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> KVM_CAP_DEBUGREGS</span><br>    s-&gt;debugregs = kvm_check_extension(s, KVM_CAP_DEBUGREGS);<br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span><br><br>    <span class="hljs-comment">// 检查是否支持 IRQ 路由</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> KVM_CAP_IRQ_ROUTING</span><br>    kvm_direct_msi_allowed = (kvm_check_extension(s, KVM_CAP_SIGNAL_MSI) &gt; <span class="hljs-number">0</span>);<br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span><br><br>    <span class="hljs-comment">// 检查是否支持 PCI 2.3</span><br>    s-&gt;intx_set_mask = kvm_check_extension(s, KVM_CAP_PCI_2_3);<br><br>    <span class="hljs-comment">// 设置 IRQ 设置方式</span><br>    s-&gt;irq_set_ioctl = KVM_IRQ_LINE;<br>    <span class="hljs-keyword">if</span> (kvm_check_extension(s, KVM_CAP_IRQ_INJECT_STATUS)) &#123;<br>        s-&gt;irq_set_ioctl = KVM_IRQ_LINE_STATUS;<br>    &#125;<br><br>    <span class="hljs-comment">// 检查是否支持只读内存</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> KVM_CAP_READONLY_MEM</span><br>    kvm_readonly_mem_allowed =<br>        (kvm_check_extension(s, KVM_CAP_READONLY_MEM) &gt; <span class="hljs-number">0</span>);<br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span><br><br>    <span class="hljs-comment">// 检查是否支持 IOEVENTFD</span><br>    kvm_eventfds_allowed =<br>        (kvm_check_extension(s, KVM_CAP_IOEVENTFD) &gt; <span class="hljs-number">0</span>);<br><br>    <span class="hljs-comment">// 检查是否支持 IRQFD</span><br>    kvm_irqfds_allowed =<br>        (kvm_check_extension(s, KVM_CAP_IRQFD) &gt; <span class="hljs-number">0</span>);<br><br>    <span class="hljs-comment">// 检查是否支持 IRQFD RESAMPLE</span><br>    kvm_resamplefds_allowed =<br>        (kvm_check_extension(s, KVM_CAP_IRQFD_RESAMPLE) &gt; <span class="hljs-number">0</span>);<br><br>    <span class="hljs-comment">// 检查是否支持 VM 属性</span><br>    kvm_vm_attributes_allowed =<br>        (kvm_check_extension(s, KVM_CAP_VM_ATTRIBUTES) &gt; <span class="hljs-number">0</span>);<br><br>    <span class="hljs-comment">// 检查是否支持任意长度的 IOEVENTFD</span><br>    kvm_ioeventfd_any_length_allowed =<br>        (kvm_check_extension(s, KVM_CAP_IOEVENTFD_ANY_LENGTH) &gt; <span class="hljs-number">0</span>);<br><br>    <span class="hljs-comment">// 初始化架构相关内容</span><br>    ret = kvm_arch_init(ms, s);<br>    <span class="hljs-keyword">if</span> (ret &lt; <span class="hljs-number">0</span>) &#123;<br>        <span class="hljs-keyword">goto</span> err;<br>    &#125;<br><br>    <span class="hljs-comment">// 如果允许使用 IRQCHIP，则创建 IRQCHIP</span><br>    <span class="hljs-keyword">if</span> (machine_kernel_irqchip_allowed(ms)) &#123;<br>        kvm_irqchip_create(ms, s);<br>    &#125;<br><br>    <span class="hljs-comment">// 设置 KVM 状态</span><br>    kvm_state = s;<br><br>    <span class="hljs-comment">// 如果支持 EVENTFD，则设置 MEMORY 监听器的 eventfd 操作</span><br>    <span class="hljs-keyword">if</span> (kvm_eventfds_allowed) &#123;<br>        s-&gt;memory_listener.listener.eventfd_add = kvm_mem_ioeventfd_add;<br>        s-&gt;memory_listener.listener.eventfd_del = kvm_mem_ioeventfd_del;<br>    &#125;<br>    s-&gt;memory_listener.listener.coalesced_mmio_add = kvm_coalesce_mmio_region;<br>    s-&gt;memory_listener.listener.coalesced_mmio_del = kvm_uncoalesce_mmio_region;<br><br>    <span class="hljs-comment">// 注册 MEMORY 和 IO 监听器</span><br>    kvm_memory_listener_register(s, &amp;s-&gt;memory_listener,<br>                                 &amp;address_space_memory, <span class="hljs-number">0</span>);<br>    memory_listener_register(&amp;kvm_io_listener,<br>                             &amp;address_space_io);<br><br>    <span class="hljs-comment">// 检查是否支持多个 IOEVENTFD</span><br>    s-&gt;many_ioeventfds = kvm_check_many_ioeventfds();<br><br>    <span class="hljs-comment">// 设置 CPU 中断处理函数</span><br>    cpu_interrupt_handler = kvm_handle_interrupt;<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br><br>err:<br>    assert(ret &lt; <span class="hljs-number">0</span>);<br>    <span class="hljs-keyword">if</span> (s-&gt;vmfd &gt;= <span class="hljs-number">0</span>) &#123;<br>        close(s-&gt;vmfd);<br>    &#125;<br>    <span class="hljs-keyword">if</span> (s-&gt;fd != <span class="hljs-number">-1</span>) &#123;<br>        close(s-&gt;fd);<br>    &#125;<br>    g_free(s-&gt;memory_listener.slots);<br><br>    <span class="hljs-keyword">return</span> ret;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<h3 id="4-3-2-KVM侧虚拟机的创建"><a href="#4-3-2-KVM侧虚拟机的创建" class="headerlink" title="4.3.2 KVM侧虚拟机的创建"></a>4.3.2 KVM侧虚拟机的创建</h3><p>kvm_init最重要的作用是调用“/dev/kvm”设备的ioclt(KVM_CREATE_VM)接口在KVM模块中创建一台虚拟机。本质上一个QEMU进程就是一台虚拟机。KVM中用结构体kvm表示虚拟机</p>
+<p>4.2节中提到，KVM在初始化的时候会注册“/dev/kvm”设备，该设备在内核对应的ioctl函数为kvm_dev_ioctl，该函数实现了所有KVM层面的ioctl，对于KVM_CREATE_VM，其处理函数是kvm_dev_ioctl_create_vm，代码如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs c"><br><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> <span class="hljs-title">kvm_dev_ioctl_create_vm</span><span class="hljs-params">(<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">long</span> type)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">int</span> r;<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">kvm</span> *<span class="hljs-title">kvm</span>;</span><br><br>    <span class="hljs-comment">// 调用 kvm_create_vm 函数创建一个虚拟机实例，并将其保存在 kvm 结构中</span><br>    kvm = kvm_create_vm(type);<br>    <span class="hljs-keyword">if</span> (IS_ERR(kvm))<br>        <span class="hljs-keyword">return</span> PTR_ERR(kvm);<br><br><span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> KVM_COALESCED_MMIO_PAGE_OFFSET</span><br>    <span class="hljs-comment">// 如果支持合并 MMIO，调用 kvm_coalesced_mmio_init 进行初始化</span><br>    r = kvm_coalesced_mmio_init(kvm);<br>    <span class="hljs-keyword">if</span> (r &lt; <span class="hljs-number">0</span>) &#123;<br>        kvm_put_kvm(kvm);<br>        <span class="hljs-keyword">return</span> r;<br>    &#125;<br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span><br><br>    <span class="hljs-comment">// 创建一个匿名的文件描述符（file descriptor），表示虚拟机实例</span><br>    <span class="hljs-comment">// 将 kvm_vm_fops 作为 file_operations，私有数据设置为刚刚创建的 kvm 结构</span><br>    r = anon_inode_getfd(<span class="hljs-string">&quot;kvm-vm&quot;</span>, &amp;kvm_vm_fops, kvm, O_RDWR | O_CLOEXEC);<br>    <span class="hljs-keyword">if</span> (r &lt; <span class="hljs-number">0</span>)<br>        kvm_put_kvm(kvm);<br><br>    <span class="hljs-keyword">return</span> r;<br>&#125;<br><br><br></code></pre></td></tr></table></figure>
+
+<p>这段代码实现了在 KVM 模块中创建虚拟机的流程。它首先调用 <code>kvm_create_vm</code> 函数创建虚拟机实例，然后根据支持合并 MMIO 的情况进行初始化，最后通过 <code>anon_inode_getfd</code> 创建一个匿名文件描述符，将虚拟机实例与文件描述符关联，以便后续通过该文件描述符进行虚拟机操作</p>
+<p>kvm_create_vm是创建虚拟机的核心函数，代码如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">static</span> struct kvm *<span class="hljs-title">kvm_create_vm</span><span class="hljs-params">(<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">long</span> type)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">int</span> r, i;<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">kvm</span> *<span class="hljs-title">kvm</span> =</span> kvm_arch_alloc_vm();<br><br>    <span class="hljs-keyword">if</span> (!kvm)<br>        <span class="hljs-keyword">return</span> ERR_PTR(-ENOMEM);<br><br>    <span class="hljs-comment">// 初始化虚拟机的锁、计数等成员</span><br>    spin_lock_init(&amp;kvm-&gt;mmu_lock);<br>    atomic_inc(&amp;current-&gt;mm-&gt;mm_count);<br>    kvm-&gt;mm = current-&gt;mm;<br>    kvm_eventfd_init(kvm);<br>    mutex_init(&amp;kvm-&gt;lock);<br>    mutex_init(&amp;kvm-&gt;irq_lock);<br>    mutex_init(&amp;kvm-&gt;slots_lock);<br>    atomic_set(&amp;kvm-&gt;users_count, <span class="hljs-number">1</span>);<br>    INIT_LIST_HEAD(&amp;kvm-&gt;devices);<br><br>    <span class="hljs-comment">// 调用架构相关的初始化函数</span><br>    r = kvm_arch_init_vm(kvm, type);<br>    <span class="hljs-keyword">if</span> (r)<br>        <span class="hljs-keyword">goto</span> out_err_no_disable;<br><br>    <span class="hljs-comment">// 开启硬件虚拟化</span><br>    r = hardware_enable_all();<br>    <span class="hljs-keyword">if</span> (r)<br>        <span class="hljs-keyword">goto</span> out_err_no_disable;<br><br>    <span class="hljs-comment">// 初始化其他数据结构和成员</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> CONFIG_HAVE_KVM_IRQFD</span><br>    INIT_HLIST_HEAD(&amp;kvm-&gt;irq_ack_notifier_list);<br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span><br><br>    <span class="hljs-comment">// 分配内存槽等数据结构</span><br>    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; KVM_ADDRESS_SPACE_NUM; i++) &#123;<br>        kvm-&gt;memslots[i] = kvm_alloc_memslots();<br>        <span class="hljs-keyword">if</span> (!kvm-&gt;memslots[i])<br>            <span class="hljs-keyword">goto</span> out_err_no_srcu;<br>    &#125;<br><br>    <span class="hljs-comment">// 初始化 srcu 结构</span><br>    <span class="hljs-keyword">if</span> (init_srcu_struct(&amp;kvm-&gt;srcu))<br>        <span class="hljs-keyword">goto</span> out_err_no_srcu;<br>    <span class="hljs-keyword">if</span> (init_srcu_struct(&amp;kvm-&gt;irq_srcu))<br>        <span class="hljs-keyword">goto</span> out_err_no_irq_srcu;<br><br>    <span class="hljs-comment">// 分配总线数据结构</span><br>    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; KVM_NR_BUSES; i++) &#123;<br>        kvm-&gt;buses[i] = kzalloc(<span class="hljs-keyword">sizeof</span>(struct kvm_io_bus),<br>                                GFP_KERNEL);<br>        <span class="hljs-keyword">if</span> (!kvm-&gt;buses[i])<br>            <span class="hljs-keyword">goto</span> out_err;<br>    &#125;<br><br>    <span class="hljs-comment">// 初始化 MMU 通知机制</span><br>    r = kvm_init_mmu_notifier(kvm);<br>    <span class="hljs-keyword">if</span> (r)<br>        <span class="hljs-keyword">goto</span> out_err;<br><br>    <span class="hljs-comment">// 将虚拟机加入全局虚拟机链表</span><br>    spin_lock(&amp;kvm_lock);<br>    list_add(&amp;kvm-&gt;vm_list, &amp;vm_list);<br>    spin_unlock(&amp;kvm_lock);<br><br>    preempt_notifier_inc();<br><br>    <span class="hljs-keyword">return</span> kvm;<br><br><span class="hljs-comment">// 出错处理</span><br>out_err:<br>    cleanup_srcu_struct(&amp;kvm-&gt;irq_srcu);<br>out_err_no_irq_srcu:<br>    cleanup_srcu_struct(&amp;kvm-&gt;srcu);<br>out_err_no_srcu:<br>    hardware_disable_all();<br>out_err_no_disable:<br>    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; KVM_NR_BUSES; i++)<br>        kfree(kvm-&gt;buses[i]);<br>    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; KVM_ADDRESS_SPACE_NUM; i++)<br>        kvm_free_memslots(kvm, kvm-&gt;memslots[i]);<br>    kvm_arch_free_vm(kvm);<br>    mmdrop(current-&gt;mm);<br>    <span class="hljs-keyword">return</span> ERR_PTR(r);<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>这段代码主要完成了以下操作：</p>
+<ol>
+<li>分配并初始化 <code>kvm</code> 结构体，表示一个虚拟机。</li>
+<li>初始化虚拟机的各种锁、计数等成员。</li>
+<li>调用架构相关的初始化函数，如 <code>kvm_arch_init_vm</code>。</li>
+<li>开启硬件虚拟化功能。</li>
+<li>初始化内存槽等数据结构。</li>
+<li>初始化 MMU 通知机制。</li>
+<li>将虚拟机添加到全局虚拟机链表中。</li>
+<li>返回创建的虚拟机实例。</li>
+</ol>
+<p>尤其需要注意的是：</p>
+<ul>
+<li>kvm_create_vm接着会初始化KVM的相关成员，如这里的mmu_lock成员表示操作虚拟机MMU数据的锁，由于虚拟机的内存其实也就是QEMU进程的虚拟内存，所以这里需要引用到当前QEMU进程的mm_struct。对应代码<code>atomic_inc(&amp;current-&gt;mm-&gt;mm_count);</code></li>
+<li>KVM有个类型为kvm_arch的arch成员，用于存放与架构相关的数据，kvm_arch_init_vm用来初始化这些数据。对应<code>r = kvm_arch_init_vm(kvm, type);//初始化类型为kvm_arch的arch成员</code></li>
+<li>接下来kvm_create_vm调用hardware_enable_all来最终开启VMX模式，hardware_enable_all会<strong>在创建第一个虚拟机的时候</strong>对每个CPU调用hardware_enable_nolock，后者会调用kvm_arch_hardware_enable函数。<ul>
+<li>r = hardware_enable_all();</li>
+<li>on_each_cpu(hardware_enable_nolock, NULL, 1);</li>
+<li>hardware_enable_nolock调用kvm_arch_hardware_enable函数</li>
+<li>kvm_arch_hardware_enable主要<strong>调用Intel VMX实现的hardware_enable回调函数</strong>，该函数的主要作用就是<strong>设置CR4的VMXE位并且调用VMXON指令开启VMX</strong></li>
+</ul>
+</li>
+</ul>
+<h2 id="4-4-QEMU-CPU的创建"><a href="#4-4-QEMU-CPU的创建" class="headerlink" title="4.4 QEMU CPU的创建"></a>4.4 QEMU CPU的创建</h2><h3 id="4-4-1-CPU模型定义"><a href="#4-4-1-CPU模型定义" class="headerlink" title="4.4.1 CPU模型定义"></a>4.4.1 CPU模型定义</h3><p>QEMU（Quick Emulator）的CPU模型继承结构</p>
+<ul>
+<li>QEMU是一个能够模拟多种硬件架构的工具，它可以在宿主机上模拟运行不同架构的CPU</li>
+<li>为了支持不同的CPU模型和架构，需要建立一种继承结构来表示这些CPU对象</li>
+<li>TYPE_X86_CPU，它表示x86架构下的通用CPU功能。在这个类型的基础上，根据具体的物理CPU或虚拟CPU模型，创建了不同的CPU类型，例如”pentium”、”Haswell”等。这些具体的CPU类型会在基本的TYPE_X86_CPU类型的基础上添加特定的功能和属性，以模拟各种不同的CPU行为</li>
+<li>存在一个名为”qemu-x86_64-cpu”的虚拟CPU模型，它是默认情况下在x86_64架构下使用的CPU模型</li>
+</ul>
+<p>QEMU支持的x86 CPU都定义在一个builtin_x86_defs数组中，该数组的类型为X86CPUDefinition，定义如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs c"><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">X86CPUDefinition</span> &#123;</span><br>    <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *name;<br>    <span class="hljs-keyword">uint32_t</span> level;<br>    <span class="hljs-keyword">uint32_t</span> xlevel;<br>    <span class="hljs-comment">/* vendor is zero-terminated, 12 character ASCII string */</span><br>    <span class="hljs-keyword">char</span> vendor[CPUID_VENDOR_SZ + <span class="hljs-number">1</span>];<br>    <span class="hljs-keyword">int</span> family;<br>    <span class="hljs-keyword">int</span> model;<br>    <span class="hljs-keyword">int</span> stepping;<br>    FeatureWordArray features;<br>    <span class="hljs-keyword">char</span> model_id[<span class="hljs-number">48</span>];<br>&#125;;<br><br></code></pre></td></tr></table></figure>
+
+<ol>
+<li><code>const char *name;</code>：这是一个指向表示CPU名称的字符串的指针。它用于标识特定的CPU模型，例如 “pentium”、”Haswell” 等。</li>
+<li><code>uint32_t level;</code>：这个字段表示CPUID指令支持的最大功能号。CPUID是一个指令，用于查询处理器的特性和功能。</li>
+<li><code>uint32_t xlevel;</code>：这个字段表示CPUID扩展功能支持的最大功能号。xlevel对应于CPUID中的扩展功能。</li>
+<li><code>char vendor[CPUID_VENDOR_SZ + 1];</code>：这是一个包含CPU制造商信息的字符数组。它是一个12字节的ASCII字符串，以NULL结尾，用于标识CPU的制造商。</li>
+<li><code>int family;</code>：这个字段表示CPU家族（family）的标识。家族在x86体系结构中是一个较大的分类，用于标识CPU在某个系列中的归属。</li>
+<li><code>int model;</code>：这个字段表示CPU型号（model）。型号用于更细致地标识CPU在特定家族中的具体型号。</li>
+<li><code>int stepping;</code>：这个字段表示CPU的步进信息，用于进一步区分同一型号中的不同版本。</li>
+<li><code>FeatureWordArray features;</code>：这是一个记录CPU特性的数组。它可能是一个位数组，每个位对应一个特定的CPU特性，用于描述CPU的功能和支持的扩展。</li>
+<li><code>char model_id[48];</code>：这个字段包含了CPU的全名或模型标识符。它是一个字符串，用于提供更详细的CPU型号信息。</li>
+</ol>
+<p>builtin_x86_defs是一个非常大的数组，每一项表示一种模拟的CPU模型。QEMU既模拟了一些实际的CPU，比如pentium和SandyBridge，也模拟了一些虚拟机的CPU类型，比如qemu64和kvm64等。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">static</span> X86CPUDefinition builtin_x86_defs[] = &#123;<br>    &#123;<br>        .name = <span class="hljs-string">&quot;qemu64&quot;</span>,<br>        .level = <span class="hljs-number">0xd</span>,<br>        .vendor = CPUID_VENDOR_AMD,<br>        .family = <span class="hljs-number">6</span>,<br>        .model = <span class="hljs-number">6</span>,<br>        .stepping = <span class="hljs-number">3</span>,<br>        .features[FEAT_1_EDX] =<br>            PPRO_FEATURES |<br>            CPUID_MTRR | CPUID_CLFLUSH | CPUID_MCA |<br>            CPUID_PSE36,<br>        .features[FEAT_1_ECX] =<br>            CPUID_EXT_SSE3 | CPUID_EXT_CX16,<br>        .features[FEAT_8000_0001_EDX] =<br>            CPUID_EXT2_LM | CPUID_EXT2_SYSCALL | CPUID_EXT2_NX,<br>        .features[FEAT_8000_0001_ECX] =<br>            CPUID_EXT3_LAHF_LM | CPUID_EXT3_SVM,<br>        .xlevel = <span class="hljs-number">0x8000000A</span>,<br>        .model_id = <span class="hljs-string">&quot;QEMU Virtual CPU version &quot;</span> QEMU_HW_VERSION,<br>    &#125;,<br><br>....<br><br><br></code></pre></td></tr></table></figure>
+
+
+<p>x86_cpu_register_types 在 QEMU 中注册 x86 CPU 类型和模型</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><code class="hljs c"><br><br><br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * TypeInfo:</span><br><span class="hljs-comment"> * @name: The name of the type.</span><br><span class="hljs-comment"> * @parent: The name of the parent type.</span><br><span class="hljs-comment"> * @instance_size: The size of the object (derivative of #Object).  If</span><br><span class="hljs-comment"> *   @instance_size is 0, then the size of the object will be the size of the</span><br><span class="hljs-comment"> *   parent object.</span><br><span class="hljs-comment"> * @instance_init: This function is called to initialize an object.  The parent</span><br><span class="hljs-comment"> *   class will have already been initialized so the type is only responsible</span><br><span class="hljs-comment"> *   for initializing its own members.</span><br><span class="hljs-comment"> * @instance_post_init: This function is called to finish initialization of</span><br><span class="hljs-comment"> *   an object, after all @instance_init functions were called.</span><br><span class="hljs-comment"> * @instance_finalize: This function is called during object destruction.  This</span><br><span class="hljs-comment"> *   is called before the parent @instance_finalize function has been called.</span><br><span class="hljs-comment"> *   An object should only free the members that are unique to its type in this</span><br><span class="hljs-comment"> *   function.</span><br><span class="hljs-comment"> * @abstract: If this field is true, then the class is considered abstract and</span><br><span class="hljs-comment"> *   cannot be directly instantiated.</span><br><span class="hljs-comment"> * @class_size: The size of the class object (derivative of #ObjectClass)</span><br><span class="hljs-comment"> *   for this object.  If @class_size is 0, then the size of the class will be</span><br><span class="hljs-comment"> *   assumed to be the size of the parent class.  This allows a type to avoid</span><br><span class="hljs-comment"> *   implementing an explicit class type if they are not adding additional</span><br><span class="hljs-comment"> *   virtual functions.</span><br><span class="hljs-comment"> * @class_init: This function is called after all parent class initialization</span><br><span class="hljs-comment"> *   has occurred to allow a class to set its default virtual method pointers.</span><br><span class="hljs-comment"> *   This is also the function to use to override virtual methods from a parent</span><br><span class="hljs-comment"> *   class.</span><br><span class="hljs-comment"> * @class_base_init: This function is called for all base classes after all</span><br><span class="hljs-comment"> *   parent class initialization has occurred, but before the class itself</span><br><span class="hljs-comment"> *   is initialized.  This is the function to use to undo the effects of</span><br><span class="hljs-comment"> *   memcpy from the parent class to the descendents.</span><br><span class="hljs-comment"> * @class_finalize: This function is called during class destruction and is</span><br><span class="hljs-comment"> *   meant to release and dynamic parameters allocated by @class_init.</span><br><span class="hljs-comment"> * @class_data: Data to pass to the @class_init, @class_base_init and</span><br><span class="hljs-comment"> *   @class_finalize functions.  This can be useful when building dynamic</span><br><span class="hljs-comment"> *   classes.</span><br><span class="hljs-comment"> * @interfaces: The list of interfaces associated with this type.  This</span><br><span class="hljs-comment"> *   should point to a static array that&#x27;s terminated with a zero filled</span><br><span class="hljs-comment"> *   element.</span><br><span class="hljs-comment"> */</span><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">TypeInfo</span></span><br><span class="hljs-class">&#123;</span><br>    <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *name;<br>    <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *parent;<br><br>    <span class="hljs-keyword">size_t</span> instance_size;<br>    <span class="hljs-keyword">void</span> (*instance_init)(Object *obj);<br>    <span class="hljs-keyword">void</span> (*instance_post_init)(Object *obj);<br>    <span class="hljs-keyword">void</span> (*instance_finalize)(Object *obj);<br><br>    <span class="hljs-keyword">bool</span> abstract;<br>    <span class="hljs-keyword">size_t</span> class_size;<br><br>    <span class="hljs-keyword">void</span> (*class_init)(ObjectClass *klass, <span class="hljs-keyword">void</span> *data);<br>    <span class="hljs-keyword">void</span> (*class_base_init)(ObjectClass *klass, <span class="hljs-keyword">void</span> *data);<br>    <span class="hljs-keyword">void</span> (*class_finalize)(ObjectClass *klass, <span class="hljs-keyword">void</span> *data);<br>    <span class="hljs-keyword">void</span> *class_data;<br><br>    InterfaceInfo *interfaces;<br>&#125;;<br><br><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">x86_cpu_register_types</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">int</span> i;<br><br>    type_register_static(&amp;x86_cpu_type_info);<br>    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; ARRAY_SIZE(builtin_x86_defs); i++) &#123;<br>        x86_register_cpudef_type(&amp;builtin_x86_defs[i]);<br>    &#125;<br><span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> CONFIG_KVM</span><br>    type_register_static(&amp;host_x86_cpu_type_info);<br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span><br>&#125;<br><br><br></code></pre></td></tr></table></figure>
+
+
+<ol>
+<li><code>x86_cpu_type_info</code> 和 <code>host_x86_cpu_type_info</code>：这些变量是用于定义 x86 CPU 类型的 TypeInfo 结构。<code>x86_cpu_type_info</code> 是用于 QEMU 内部的虚拟 CPU 类型，而 <code>host_x86_cpu_type_info</code> 是用于与宿主机上的 CPU 特性保持一致的宿主 CPU 类型。</li>
+<li><code>x86_register_cpudef_type</code>：这是一个函数，用于根据给定的 <code>X86CPUDefinition</code> 结构构建一个 <code>TypeInfo</code> 结构，并通过 <code>type_register</code> 函数将这个类型注册到 QEMU 类型系统中。它为每个不同的 CPU 模型创建一个类型，并提供必要的信息，例如 CPU 名称、特性、家族、型号等。</li>
+<li><code>x86_cpu_register_types</code>：这个函数是用于注册 x86 CPU 类型和模型的主要函数。它首先注册了虚拟的 x86 CPU 类型 <code>x86_cpu_type_info</code>，然后通过遍历 <code>builtin_x86_defs</code> 数组中的 CPU 模型定义，为每个模型调用 <code>x86_register_cpudef_type</code> 函数，将其注册为 QEMU 类型。在这个过程中，也根据需要注册了宿主机的 CPU 类型 <code>host_x86_cpu_type_info</code>。</li>
+</ol>
+<p><img src="https://img.gls.show/img/20230821173738.png" srcset="/img/loading.gif" lazyload></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">X86CPU</span> &#123;</span><br>    <span class="hljs-comment">/*&lt; private &gt;*/</span><br>    CPUState parent_obj;<br>    <span class="hljs-comment">/*&lt; public &gt;*/</span><br><br>    CPUX86State env;<br><br>.....<br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>一个X86CPU表示一个x86虚拟CPU</p>
+<ol>
+<li>CPUState包含所有CPU类型都会有的数据，如CPU的核数、线程数以及对应的线程，由于历史原因，也会有诸如TCG和KVM等模拟器相关的数据，如kvm_fd、kvm_state、kvm_run等KVM相关的数据。CPUState中有一个env_ptr指针，指向的是其CPU架构的CPU状态信息。</li>
+<li><strong>env_ptr：</strong> 这是 CPUState 中的一个指针，指向特定 CPU 架构的 CPU 状态信息。它的作用是为了方便地从通用的 CPUState 结构中获取特定架构的具体 CPU 数据，使得不同架构的 CPU 可以在同一个通用结构中共存。例如，对于 x86 架构的 CPU，env_ptr 指向的就是 CPUX86State 结构。</li>
+<li><strong>X86CPUState（env）：</strong> 这是 X86 架构特定的 CPU 数据结构。在 X86CPU 结构中，会包含一个指向 X86CPUState 的指针（env），这个指针指向了包含了重要的 x86 架构 CPU 数据的结构。CPUX86State 中包含了通用寄存器、EIP、EFLAGS、段寄存器等寄存器的值，还包含了 KVM 相关的异常、中断信息以及 CPUID 的信息。在模拟过程中，这些数据用于模拟 x86 架构 CPU 的状态和行为。</li>
+</ol>
+<h3 id="4-4-2-CPU对象的初始化"><a href="#4-4-2-CPU对象的初始化" class="headerlink" title="4.4.2 CPU对象的初始化"></a>4.4.2 CPU对象的初始化</h3><p>CPU类型的初始化基本都是设置一系列的回调函数，但类型TYPE_X86_CPU的初始化函数x86_cpu_common_class_init较为特殊</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">x86_cpu_common_class_init</span><span class="hljs-params">(ObjectClass *oc, <span class="hljs-keyword">void</span> *data)</span></span><br><span class="hljs-function"></span>&#123;<br>    X86CPUClass *xcc = X86_CPU_CLASS(oc);<br>    CPUClass *cc = CPU_CLASS(oc);<br>    DeviceClass *dc = DEVICE_CLASS(oc);<br><br>    xcc-&gt;parent_realize = dc-&gt;realize;<br>    xcc-&gt;parent_unrealize = dc-&gt;unrealize;<br>    dc-&gt;realize = x86_cpu_realizefn;<br>    dc-&gt;unrealize = x86_cpu_unrealizefn;<br>    .....<br></code></pre></td></tr></table></figure>
+
+<ol>
+<li><code>x86_cpu_common_class_init</code> 函数：这是用于初始化 x86 CPU 类的共享属性和方法的函数。它通过参数 <code>oc</code>（ObjectClass 结构指针）和 <code>data</code>来进行初始化。在这个函数中，它首先获取了 x86 CPU 类和父类（CPU 类和设备类）的指针。</li>
+<li><code>X86_CPU_CLASS(oc)</code>：这是一个宏，用于将 <code>oc</code> 转换为 <code>X86CPUClass</code> 类型的指针，以便可以访问 x86 CPU 类的属性和方法。</li>
+<li><code>CPU_CLASS(oc)</code>：这是一个宏，用于将 <code>oc</code> 转换为 <code>CPUClass</code> 类型的指针，以便可以访问通用 CPU 类的属性和方法。</li>
+<li><code>DEVICE_CLASS(oc)</code>：这是一个宏，用于将 <code>oc</code> 转换为 <code>DeviceClass</code> 类型的指针，以便可以访问设备类的属性和方法。</li>
+<li><code>xcc-&gt;parent_realize = dc-&gt;realize;</code> 和 <code>xcc-&gt;parent_unrealize = dc-&gt;unrealize;</code>：<ol>
+<li>这两行代码将设备类的 <code>realize</code> 和 <code>unrealize</code> 函数赋值给 x86 CPU 类中的 <code>parent_realize</code> 和 <code>parent_unrealize</code> 成员。</li>
+<li>这是为了在 x86 CPU 类的具现化和销毁过程中，能够在执行特定的 <code>x86_cpu_realizefn</code> 和 <code>x86_cpu_unrealizefn</code> 函数之前，执行通用的设备类的具现化和销毁函数。</li>
+</ol>
+</li>
+<li><code>dc-&gt;realize = x86_cpu_realizefn;</code> 和 <code>dc-&gt;unrealize = x86_cpu_unrealizefn;</code>：<ol>
+<li>这两行代码将设备类的 <code>realize</code> 和 <code>unrealize</code> X86CPU<br>子对象的 <code>x86_cpu_realizefn</code> 和 <code>x86_cpu_unrealizefn</code> 函数。</li>
+<li>这是为了确保在具现化和销毁过程中执行 x86 CPU 类的特定函数。</li>
+</ol>
+</li>
+</ol>
+<blockquote>
+<p>这一块关于CPU类型在初始化时设置的<strong>具现函数</strong>，后面再仔细看看</p>
+</blockquote>
+<p>接下来详细分析CPU对象的创建过程</p>
+<p>按照继承关系，首先调用TYPE_CPU的对象初始化函数cpu_common_initfn。这个函数是在所有CPU类型（比如x86、ARM等）共享的TYPE_CPU的初始化函数。它会在每个CPU对象创建时被调用，无论具体是什么类型的CPU。这个函数通常设置一些通用的初始值，用于在CPU对象创建时进行初始化。由于不同CPU类型可能有不同的特性和需求，这个函数通常只涉及通用的初始设置。</p>
+<p><strong>x86_cpu_initfn函数：</strong> 这个函数是在具体的x86 CPU类型（TYPE_X86_CPU）的初始化函数。每次创建x86 CPU对象时都会调用这个函数，它的主要作用是为特定的x86架构CPU对象创建各种属性和数据。</p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>《qemu kvm源码解析与应用》学习笔记</div>
+      <div>http://gls.show/p/c9034472/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年8月13日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/12488d05/" title="Hardware and Software Support for Virtualization 学习笔记">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Hardware and Software Support for Virtualization 学习笔记</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/b3b5f6b7/" title="一个简短的虚拟化学习路线">
+                        <span class="hidden-mobile">一个简短的虚拟化学习路线</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

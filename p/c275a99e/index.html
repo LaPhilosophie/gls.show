@@ -1,0 +1,1080 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="一、CPU虚拟化1.1 x86CPU虚拟化论文“Formal Requirements for Virtualizable Third GenerationArchitectures”中提出了虚拟化的3个条件：  等价性，即VMM需要在宿主机上为虚拟机模拟出一个本质上与物理机一致的环境 高效性，即虚拟机指令执行的性能与其在物理机上运行相比并无明显损耗 资源控制，即VMM可以完全控制系统资源。由VM">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《深度探索Linux系统虚拟化》学习笔记">
+<meta property="og:url" content="http://gls.show/p/c275a99e/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="一、CPU虚拟化1.1 x86CPU虚拟化论文“Formal Requirements for Virtualizable Third GenerationArchitectures”中提出了虚拟化的3个条件：  等价性，即VMM需要在宿主机上为虚拟机模拟出一个本质上与物理机一致的环境 高效性，即虚拟机指令执行的性能与其在物理机上运行相比并无明显损耗 资源控制，即VMM可以完全控制系统资源。由VM">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/default.png">
+<meta property="article:published_time" content="2023-10-30T03:23:19.000Z">
+<meta property="article:modified_time" content="2023-10-30T03:23:19.000Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/default.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>《深度探索Linux系统虚拟化》学习笔记 - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="《深度探索Linux系统虚拟化》学习笔记"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-10-30 11:23" pubdate>
+          2023年10月30日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          31k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          98 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">《深度探索Linux系统虚拟化》学习笔记</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2023年10月30日 上午
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <h1 id="一、CPU虚拟化"><a href="#一、CPU虚拟化" class="headerlink" title="一、CPU虚拟化"></a>一、CPU虚拟化</h1><h2 id="1-1-x86CPU虚拟化"><a href="#1-1-x86CPU虚拟化" class="headerlink" title="1.1 x86CPU虚拟化"></a>1.1 x86CPU虚拟化</h2><p>论文“Formal Requirements for Virtualizable Third GenerationArchitectures”中提出了虚拟化的3个条件：</p>
+<ul>
+<li><strong>等价性</strong>，即VMM需要在宿主机上为虚拟机模拟出一个本质上<strong>与物理机一致的环境</strong></li>
+<li><strong>高效性</strong>，即虚拟机指令执行的性能与其在物理机上运行相比并<strong>无明显损耗</strong></li>
+<li><strong>资源控制</strong>，即<strong>VMM可以完全控制系统资源</strong>。由VMM控制协调宿主机资源给各个虚拟机，而不能由虚拟机控制了宿主机的资源。</li>
+</ul>
+<h3 id="1-1-1陷入和模拟"><a href="#1-1-1陷入和模拟" class="headerlink" title="1.1.1陷入和模拟"></a>1.1.1陷入和模拟</h3><p>满足上述虚拟化的一个解决方案是<strong>陷入和模拟（Trap and Emulate）模型</strong></p>
+<blockquote>
+<p>处理器分为两种运行模式：<strong>系统模式和用户模式</strong><br>CPU的指令也分为：<strong>特权指令和非特权指令</strong><br>特权指令只能在系统模式运行，如果在用户模式运行就将触发处理器异常。内核运行在系统模式</p>
+</blockquote>
+<p>在陷入和模拟模型下，虚拟机的用户程序仍然运行在用户模式，但是<strong>虚拟机的内核也将运行在用户模式</strong>，这种方式称为特权级压缩（Ring Compression）。在这种方式下，虚拟机中的<strong>非特权指令直接运行在处理器上</strong>。这样的好处就是高效，指令无需vmm干预可以直接运行在处理器上</p>
+<p>对于<strong>虚拟机中的特权指令，因为是在用户模式下运行，将触发处理器异常，从而陷入VMM</strong>中，由VMM代理虚拟机完成系统资源的访问，即所谓的模拟（emulate）</p>
+<h3 id="1-1-2-x86架构虚拟化的障碍"><a href="#1-1-2-x86架构虚拟化的障碍" class="headerlink" title="1.1.2 x86架构虚拟化的障碍"></a>1.1.2 x86架构虚拟化的障碍</h3><p>修改系统资源的，或者在不同模式下行为有不同表现的，都属于<strong>敏感指令</strong></p>
+<p>在虚拟化场景下，VMM需要监测这些敏感指令。<strong>一个支持虚拟化的体系架构的敏感指<br>令都应该属于特权指令</strong>，即<strong>在非特权级别执行这些敏感指令时CPU会抛出异常</strong>，进入VMM的异常处理函数，从而实现了控制VM访问敏感资源的目的</p>
+<p><strong>x86架构并不是所有的敏感指令都是特权指令，有些敏感指令在非特权模式下执行时并不会抛出异常，此时VMM就无法拦截处理VM的行为了</strong></p>
+<p>那么问题来了，为什么既要有敏感指令，又要有特权指令，这是出于什么考虑呢？或者说直接简单粗暴的把所有的敏感指令都归为特权指令不就可以了？</p>
+<ol>
+<li><strong>提高性能和效率：</strong> 敏感指令允许一些敏感操作在用户态下执行，从而提高性能和效率。在某些情况下，将敏感操作作为普通指令执行可以减少特权级别的切换和开销，提高应用程序的执行效率。</li>
+<li><strong>灵活性和可编程性：</strong> 敏感指令允许应用程序在用户态下执行一些低级的硬件操作，以实现更灵活的编程和功能。这可以使应用程序更加自由地控制硬件，实现一些特定的功能或优化。</li>
+</ol>
+<p>以修改FLAGS寄存器中的IF（Interrupt Flag）为例：</p>
+<ul>
+<li>首先使用指令pushf将FLAGS寄存器的内容压到栈中</li>
+<li>然后将栈顶的IF清零</li>
+<li>最后使用popf指令从栈中恢复FLAGS寄存器<br>如果虚拟机内核没有运行在ring 0，x86的CPU并不会抛出异常，而只是忽略指令popf</li>
+</ul>
+<p>解决方案：试用xen的方式，修改操作系统源码（也即是半虚拟化方式）；另一种是软件层面的二进制翻译</p>
+<p>静态翻译：</p>
+<ul>
+<li>运行前扫描整个可执行文件，对敏感指令进行翻译，形成一个新的文件</li>
+<li>缺点：必须提前处理，而且对于有些指令只有在运行时才会产生的副作用，无法静态处理</li>
+</ul>
+<p>动态翻译：</p>
+<ul>
+<li>在运行时以代码块为单元动态地修改二进制代码<ul>
+<li>在很多VMM中得到应用，而且优化的效果非常不错</li>
+</ul>
+</li>
+</ul>
+<h3 id="1-1-3vmx"><a href="#1-1-3vmx" class="headerlink" title="1.1.3vmx"></a>1.1.3vmx</h3><blockquote>
+<p>Intel开发了VT技术以支持虚拟化，为CPU增加了Virtual-Machine<br>Extensions，简称VMX</p>
+</blockquote>
+<p>由于之前的软件解决方案引入了巨大开销和复杂性，于是，Intel尝试从硬件层面解决这个问题（nm英特尔终于下场了）</p>
+<blockquote>
+<p>控制寄存器 CR3 在 x86 架构中是页目录表的基地址，用于确定当前正在执行的虚拟机的页表。</p>
+</blockquote>
+<p>当使用影子页表（Shadow Page Table）进行虚拟地址（GVA）到物理地址（HPA）的映射时，**虚拟机监控器（VMM）模块需要捕获虚拟机（Guest）每一次设置控制寄存器 CR3 的操作，并将它重定向到影子页表。CR3 寄存器是x86体系结构中的控制寄存器，用于指向页表的物理地址。</p>
+<blockquote>
+<p>GVA（Guest Virtual Address，客户虚拟地址）和 HPA（Host Physical Address，宿主物理地址）之间的映射是指将虚拟机中的内存地址映射到底层物理主机上的内存地址</p>
+</blockquote>
+<p>通过捕获并重定向CR3寄存器的设置操作，VMM能够截获Guest的页表访问并更改其映射方式。<strong>VMM会创建和维护一个与Guest页表类似的影子页表，其中包含与真实物理页表相对应的影子页表项</strong>。VMM使用影子页表来追踪和管理GVA到HPA的映射，并在必要时进行转换和修改，以提供虚拟化环境的安全隔离和管理。</p>
+<blockquote>
+<p><strong>EPT（Extended Page Tables）：</strong> EPT 是一种硬件辅助虚拟化技术，由支持虚拟化的处理器提供。它允许虚拟机直接在物理主机上运行，而不需要额外的转换层。在启用 EPT 支持后，<strong>处理器会直接处理 GVA 到 HPA 的映射，绕过了 VMM。这意味着 <code>CR3</code> 寄存器仍然指向虚拟机的原始页表，而无需引入影子页表</strong>。<br>而当启用了硬件层面的EPT支持后，cr3寄存器不再需要指向影子页表，其仍然指向Guest的进程的页表。因此，VMM无须再捕捉Guest设置cr3寄存器的操作，也就是说，虽然写cr3寄存器是一个特权操作，但这个操作不需要陷入VMM。</p>
+</blockquote>
+<p>一旦启动了CPU的VMX支持，CPU将提供两种运行模式：<strong>VMX Root Mode和VMX non-Root Mode</strong>，每一种模式都支持ring 0～ring 3。VMM运行在VMX Root Mode，除了支持VMX外，VMXRoot Mode和普通的模式并无本质区别。VM运行在VMX non-Root Mode，Guest无须再采用特权级压缩方式，Guest kernel可以直接运行在VMX non-Root Mode的ring 0中<br><img src="https://img.gls.show/img/Pasted%20image%2020230801165150.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://img.gls.show/img/Pasted%20image%2020230801200334.png" srcset="/img/loading.gif" lazyload></p>
+<p>VM entry：</p>
+<ul>
+<li>处于VMX Root Mode的VMM可以通过执行CPU提供的虚拟化指令<strong>VMLaunch切换到VMX non-Root Mode</strong>，因为这个过程相当于<strong>进入Guest</strong>，所以通常也被称为<strong>VM entry</strong><br>VM exit</li>
+<li>当Guest内部执行了敏感指令，比如某些I/O操作后，将触发CPU发生陷入的动作，从VMX non-Root Mode切换回VMX Root Mode，这个过程相当于退出VM，所以也称为VM exit</li>
+<li>然后VMM将对Guest的操作进行模拟</li>
+</ul>
+<p>支持VMX的CPU有以下3点不同：</p>
+<p>1）运行于Guest模式时，<strong>Guest用户空间的系统调用直接陷入Guest模式的内核空间</strong>，而<strong>不再是陷入Host模式的内核空间</strong>。</p>
+<blockquote>
+<p>系统调用处理：在VMX支持的虚拟化环境中，当Guest运行用户空间程序并进行系统调用时，系统调用不再直接陷入Host模式的内核空间，而是陷入Guest模式的内核空间。这样，<strong>Guest内核可以直接处理系统调用，而无需VMM（虚拟机监控器）介入</strong>，从而提高了性能</p>
+</blockquote>
+<p>2）对于外部中断，因为需要由VMM控制系统的资源，所以处于Guest模式的CPU收到外部中断后，触发CPU从Guest模式退出到Host模式，<strong>由Host内核处理外部中断。处理完中断后，再重新切入Guest模式</strong>。为了提高I/O效率，Intel支持外设<strong>透传模式</strong>，在这种模式下，Guest<strong>不必产生VM exit</strong>。在“设备虚拟化”一章将讨论这种特殊方式。</p>
+<p>3）不再是所有的特权指令都会导致处于Guest模式的CPU发生VM exit。<strong>仅当运行敏感指令时才会导致CPU从Guest模式陷入Host模式</strong>，因为有的特权指令并不需要由VMM介入处理。</p>
+<blockquote>
+<p><strong>对于一些无需VMM介入的特权指令，CPU可以在Guest模式下直接执行，从而提高虚拟机的性能。</strong></p>
+</blockquote>
+<p>VMX（Virtual Machine Extensions）是Intel处理器的虚拟化扩展技术，它引入了VMCS（Virtual Machine Control Structure）这一数据结构。<strong>VMCS用于保存虚拟机的上下文信息，每个Guest虚拟机都有一个对应的VMCS实例。</strong></p>
+<p>VMCS记录了虚拟机的状态和配置信息，包括虚拟处理器的寄存器值、控制寄存器设置、虚拟机执行的状态、中断处理、VM exit和VM entry的设置等。VMCS在虚拟化过程中扮演着重要的角色，用于控制虚拟机的<strong>运行</strong>、实现虚拟机的<strong>切换</strong>、以及在VM exit和VM entry时<strong>保存和恢复虚拟机的状态</strong>。</p>
+<p>每个Guest虚拟机都有一个对应的VMCS，这些VMCS实例是独立的，彼此之间隔离。当VMM（虚拟机监控器）在宿主机上运行多个虚拟机时，每个虚拟机的VMCS会在VMM的管理下进行创建和维护。VMCS的管理涉及VM entry和VM exit的操作，用于实现Guest和宿主机之间的转换和切换。</p>
+<p><strong>注意：每个虚拟机都会有一个唯一的 VMCS，但是每个虚拟机可以有一个或多个 vCPU</strong></p>
+<blockquote>
+<p>在KVM（Kernel-based Virtual Machine）模块中，对于每个虚拟CPU（VCPU），会为其创建一个VMCS（Virtual Machine Control Structure）实例。VMCS用于保存虚拟机的状态信息和控制虚拟机的行为。每个VCPU都有自己独立的VMCS，这样可以实现对不同虚拟机的隔离和管理。</p>
+</blockquote>
+<p><img src="https://img.gls.show/img/Pasted%20image%2020230801202743.png" srcset="/img/loading.gif" lazyload><br>VMCS中主要保存着两大类数据:</p>
+<ul>
+<li>状态（Host的状态和Guest的状态）</li>
+<li>行为（控制Guest运行时的行为）</li>
+</ul>
+<p>一些数据：</p>
+<p>1）<strong>Guest-state</strong> area（客户机状态区域）：该区域保存着虚拟机（Guest）的状态信息。当虚拟机发生VM exit时，Guest的状态会自动保存到这个区域。当虚拟机再次进入（VM entry）时，这些保存的状态会被自动装载到CPU中，使得虚拟机能够从离开状态继续执行，这是硬件层面的自动行为，无需VMM编码干预。</p>
+<p>2）<strong>Host-state</strong> area（宿主机状态区域）：该区域保存着宿主机（Host）的状态信息。当虚拟机发生VM entry时，CPU会自动将宿主机状态保存到这个区域。而当虚拟机发生VM exit时，CPU会自动从VMCS中恢复宿主机状态到物理CPU，使得虚拟机退出后宿主机能够继续执行。</p>
+<p>3）VM-<strong>exit information</strong> fields（虚拟机退出信息区域）：在虚拟机发生VM exit时，VMM需要知道导致VM exit的原因，以便根据具体情况进行相应的处理。为此，CPU会自动将导致VM exit的原因和一些相关信息保存在这个区域中，供VMM使用。</p>
+<p>4）VM-<strong>execution control</strong> fields（虚拟机执行控制区域）：该区域中的各种字段用于<strong>控制虚拟机运行时的行为</strong>。例如，可以设置是否在Guest访问CR3寄存器时触发VM exit。VM-entry control fields和VM-exit control fields也包含在这个区域中，它们用于控制虚拟机进入（VM entry）和退出（VM exit）时的行为。</p>
+<blockquote>
+<p>在每次准备将物理CPU<strong>切换</strong>到虚拟机的Guest模式（VM entry）时，KVM会<strong>设置物理CPU的VMCS指针，使其指向即将切换到的Guest虚拟机对应的VMCS实例</strong>。这样，当物理CPU进入Guest模式后，它会自动使用该VMCS中保存的虚拟机状态信息，并按照VMCS中的配置执行虚拟机的行为。</p>
+</blockquote>
+<blockquote>
+<p>通过每个VCPU拥有自己的独立VMCS实例，并在切换到Guest模式时设置正确的VMCS指针，KVM能够高效地管理多个虚拟机，并确保虚拟机之间的隔离和资源管理。</p>
+</blockquote>
+<p>在创建VCPU时，KVM模块将<strong>为每个VCPU申请一个VMCS</strong>，每次CPU准备切入Guest模式时，将设置其VMCS指针<strong>指向</strong>即将切入的<strong>Guest对应的VMCS实例</strong>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs c">commit <span class="hljs-number">6</span>aa8b732ca01c3d7a54e93f4d701b8aabbe60fb7<br>[PATCH] kvm: userspace interface<br>linux.git/drivers/kvm/vmx.c<br><br><span class="hljs-comment">// 定义vmx_vcpu_load函数，用于加载虚拟CPU的VMCS</span><br><span class="hljs-function"><span class="hljs-keyword">static</span> struct kvm_vcpu *<span class="hljs-title">vmx_vcpu_load</span><span class="hljs-params">(struct kvm_vcpu *vcpu)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-comment">// 将vcpu-&gt;vmcs的虚拟地址转换为物理地址，并存储在phys_addr变量中</span><br>    u64 phys_addr = __pa(vcpu-&gt;vmcs);<br>    <span class="hljs-keyword">int</span> cpu;<br>    <br>    <span class="hljs-comment">// 获取当前CPU的编号</span><br>    cpu = get_cpu();<br>    <br>    <span class="hljs-comment">// ... 其他代码 ...</span><br>    <br>    <span class="hljs-comment">// 检查当前活动的VMCS是否与将要加载的vcpu-&gt;vmcs相同</span><br>    <span class="hljs-keyword">if</span> (per_cpu(current_vmcs, cpu) != vcpu-&gt;vmcs) &#123;<br>        <span class="hljs-comment">// 设置当前活动的VMCS为vcpu-&gt;vmcs，表示正在加载该VMCS</span><br>        per_cpu(current_vmcs, cpu) = vcpu-&gt;vmcs;<br>        <br>        <span class="hljs-comment">// 执行VMCS的加载操作（VMPTRLD），将vcpu-&gt;vmcs指向的VMCS加载到CPU中</span><br>        <span class="hljs-comment">/*</span><br><span class="hljs-comment">        这是一个内联汇编代码，用于执行VMCS的加载操作（VMPTRLD）。`ASM_VMX_VMPTRLD_RAX`是一个宏，展开后是VMX指令`VMPTRLD`，用于加载VMCS。`&quot;=g&quot;(error)`表示将错误码保存在`error`变量中，`&quot;a&quot;(&amp;phys_addr)`表示将`phys_addr`的地址传递给寄存器RAX，`&quot;m&quot;(phys_addr)`表示将`phys_addr`作为内存操作数，`&quot;cc&quot;`表示该内联汇编代码可能影响标志寄存器。</span><br><span class="hljs-comment">        */</span><br>        <span class="hljs-function"><span class="hljs-keyword">asm</span> <span class="hljs-title">volatile</span> <span class="hljs-params">(ASM_VMX_VMPTRLD_RAX <span class="hljs-string">&quot;; setna %0&quot;</span></span></span><br><span class="hljs-params"><span class="hljs-function">                      : <span class="hljs-string">&quot;=g&quot;</span>(error) : <span class="hljs-string">&quot;a&quot;</span>(&amp;phys_addr), <span class="hljs-string">&quot;m&quot;</span>(phys_addr)</span></span><br><span class="hljs-params"><span class="hljs-function">                      : <span class="hljs-string">&quot;cc&quot;</span>)</span></span>;<br>        <br>        <span class="hljs-comment">// ... 其他代码 ...</span><br>    &#125;<br>    <br>    <span class="hljs-comment">// ... 其他代码 ...</span><br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<ol>
+<li>代码中的<code>vmx_vcpu_load</code>函数用于加载虚拟CPU的VMCS（虚拟机控制结构）。</li>
+<li><code>phys_addr</code>变量存储了<code>vcpu-&gt;vmcs</code>的虚拟地址转换后的物理地址。</li>
+<li><code>get_cpu()</code>函数用于获取当前CPU的编号。</li>
+<li><code>per_cpu(current_vmcs, cpu)</code>是指向当前CPU上活动的VMCS的指针，检查当前活动的VMCS是否与即将加载的<code>vcpu-&gt;vmcs</code>相同。</li>
+<li>如果当前活动的VMCS与将要加载的<code>vcpu-&gt;vmcs</code>不同，那么将设置当前活动的VMCS为<code>vcpu-&gt;vmcs</code>，表示正在加载该VMCS。</li>
+<li><code>asm volatile (ASM_VMX_VMPTRLD_RAX &quot;; setna %0&quot; ...)</code>是一个内联汇编代码，执行VMCS的加载操作（VMPTRLD），将<code>vcpu-&gt;vmcs</code>指向的VMCS加载到CPU中。</li>
+</ol>
+<blockquote>
+<p><code>per_cpu</code>是Linux内核中用于访问特定CPU本地数据的宏。它是Linux内核中用于多处理器（Multiprocessor，简称MP）和多核（Multicore）系统的一种机制。<br> 在多处理器系统中，每个CPU拥有自己的本地数据，例如线程私有数据或本地缓存。由于多个CPU之间共享内存，直接访问这些本地数据可能会导致数据的不一致性。为了解决这个问题，Linux内核提供了<code>per_cpu</code>宏，它允许开发者声明和使用CPU本地的变量，并根据当前CPU的编号来访问这些变量的正确实例。<br> <code>per_cpu</code>宏使用特殊的语法，例如<code>per_cpu(var, cpu)</code>，其中<code>var</code>是要访问的变量，<code>cpu</code>是指定的CPU编号。该宏会根据当前CPU的编号自动选择正确的实例，从而确保每个CPU都访问自己本地的变量。</p>
+</blockquote>
+<h3 id="1-1-4-VCPU生命周期"><a href="#1-1-4-VCPU生命周期" class="headerlink" title="1.1.4 VCPU生命周期"></a>1.1.4 VCPU生命周期</h3><p>对于每个虚拟处理器（VCPU），<strong>VMM使用一个线程来代表VCPU这个实体</strong></p>
+<p>在Guest运转过程中，每个VCPU基本都在下图所示的状态中不断地转换：（VCPU生命周期）</p>
+<p><img src="https://img.gls.show/img/Pasted%20image%2020230801221309.png" srcset="/img/loading.gif" lazyload></p>
+<ol>
+<li>VCPU准备：在用户空间准备好后，<strong>VCPU所在线程向内核中的KVM模块发起ioctl请求KVM_RUN</strong>，通知内核可以切入Guest模式运行Guest。</li>
+<li>切入Guest模式：进入内核态后，KVM模块<strong>使用虚拟化指令切入Guest模式</strong>。<strong>首次</strong>运行Guest使用<strong>VMLaunch</strong>指令，否则使用<strong>VMResume</strong>指令。<ol>
+<li>在切换过程中，CPU的状态（<strong>Host的状态</strong>）保存到VMCS中的Host状态区域，非CPU自动保存的状态由KVM负责保存</li>
+<li>然后，加载存储在VMCS中的Guest的状态到物理CPU，非CPU自动恢复的状态由KVM负责恢复。</li>
+</ol>
+</li>
+<li>运行Guest指令：物理CPU运行Guest指令。<strong>当执行Guest指令遇到敏感指令时，CPU将从Guest模式切回到Host模式的ring 0，进入Host内核的KVM模块</strong>。在切换过程中，CPU的状态（Guest的状态）保存到VMCS中的Guest状态区域，然后加载存储在VMCS中的Host的状态到物理CPU。非CPU自动保存的状态由KVM模块负责保存。</li>
+<li>处理虚拟机退出：KVM模块从VMCS中读取虚拟机退出原因，尝试在内核中处理。如果内核可以处理，就不必再切换到Host模式的用户态了，直接快速切回Guest。这种退出也称为轻量级虚拟机退出。</li>
+<li>处理虚拟机退出的复杂情况：如果KVM模块不能处理虚拟机退出，VCPU将再次进行上下文切换，从Host的内核态切换到Host的用户态，由VMM的用户空间部分进行处理。VMM用户空间处理完毕后，再次发起切入Guest模式的指令。</li>
+</ol>
+<p>在整个虚拟机运行过程中，步骤1～5循环往复。</p>
+<p>下面是KVM切入、切出Guest的代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// commit 6aa8b732ca01c3d7a54e93f4d701b8aabbe60fb7</span><br><span class="hljs-comment">// [PATCH] kvm: userspace interface</span><br><span class="hljs-comment">// linux.git/drivers/kvm/vmx.c</span><br><br><span class="hljs-comment">// 定义vmx_vcpu_run函数，用于虚拟CPU的运行和切换</span><br><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> <span class="hljs-title">vmx_vcpu_run</span><span class="hljs-params">(struct kvm_vcpu *vcpu, ...)</span></span><br><span class="hljs-function"></span>&#123;<br>    u8 fail;<br>    u16 fs_sel, gs_sel, ldt_sel;<br>    <span class="hljs-keyword">int</span> fs_gs_ldt_reload_needed;<br>again:<br>    <span class="hljs-comment">// ... 其他代码 ...</span><br>    <br>    <span class="hljs-comment">// 进入Guest模式</span><br>    <span class="hljs-string">&quot;jne launched \n\t&quot;</span> <span class="hljs-comment">// 检查前一个指令是否失败，如果失败则跳转到launched标签，执行VMLAUNCH指令</span><br>    ASM_VMX_VMLAUNCH <span class="hljs-string">&quot;\n\t&quot;</span> <span class="hljs-comment">// VMLAUNCH指令，用于切入Guest模式</span><br>    <span class="hljs-string">&quot;jmp kvm_vmx_return \n\t&quot;</span> <span class="hljs-comment">// 跳转到kvm_vmx_return标签，继续执行后续代码</span><br><span class="hljs-string">&quot;launched: &quot;</span> ASM_VMX_VMRESUME <span class="hljs-string">&quot;\n\t&quot;</span> <span class="hljs-comment">// VMRESUME指令，用于切出Guest模式</span><br><span class="hljs-string">&quot;.globl kvm_vmx_return \n\t&quot;</span> <span class="hljs-comment">// 声明kvm_vmx_return标签为全局标签</span><br><span class="hljs-string">&quot;kvm_vmx_return: &quot;</span> <span class="hljs-comment">// kvm_vmx_return标签，用于在需要时从其他代码段跳转到该标签处</span><br>    <span class="hljs-comment">// ... 其他代码 ...</span><br>    <br>    <span class="hljs-comment">// 处理虚拟机退出</span><br>    <span class="hljs-keyword">if</span> (kvm_handle_exit(kvm_run, vcpu)) &#123;<br>        <span class="hljs-comment">// 如果虚拟机退出原因在【内核中】得到处理，则跳转到again标签，再次进入Guest模式运行</span><br>        <span class="hljs-keyword">goto</span> again;<br>    &#125;<br>    <br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>; <span class="hljs-comment">// 函数结束，返回0表示虚拟机运行正常</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+<p>在从Guest模式退出时，KVM模块首先调用函数<code>kvm_handle_exit</code>尝试在内核空间处理虚拟机的退出原因。该函数有一个约定：如果<strong>在内核空间</strong>成功处理虚拟机退出，或者是因为其他干扰（比如外部中断）导致虚拟机退出等无需切换到Host的用户空间，则返回1；否则返回0，表示需要求助KVM的用户空间处理虚拟机退出，例如需要KVM用户空间的模拟设备来处理外设请求。</p>
+<ul>
+<li><p>如果内核空间成功处理了虚拟机的退出（<code>kvm_handle_exit</code>返回1），在上述代码中即直接跳转到标签<code>again</code>处，然后程序流程会再次切入Guest模式，继续执行Guest的指令。</p>
+</li>
+<li><p>如果函数<code>kvm_handle_exit</code>返回0，则函数<code>vmx_vcpu_run</code>结束执行，CPU从内核空间返回到用户空间。在用户空间，例如使用<code>kvmtool</code>作为例子，会处理Guest的请求，比如调用模拟设备来处理I/O请求。处理完Guest的请求后，程序重新进入下一轮for循环，<code>kvmtool</code>再次请求KVM模块切入Guest模式，继续执行Guest的指令。</p>
+</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs c">commit <span class="hljs-number">8</span>d20223edc81c6b199842b36fcd5b0aa1b8d3456<br>Dump KVM_EXIT_IO details<br>kvmtool.git/kvm.<span class="hljs-function">c</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-keyword">int</span> argc, <span class="hljs-keyword">char</span> *argv[])</span></span><br><span class="hljs-function"></span>&#123;<br>	…<br>	<span class="hljs-keyword">for</span> (;;) &#123;<br>		kvm__run(kvm);<br>		<span class="hljs-keyword">switch</span> (kvm-&gt;kvm_run-&gt;exit_reason) &#123;<br>		<span class="hljs-keyword">case</span> KVM_EXIT_IO:<br>		…<br>	&#125;<br>	…<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+<h2 id="1-2虚拟机切入和退出"><a href="#1-2虚拟机切入和退出" class="headerlink" title="1.2虚拟机切入和退出"></a>1.2虚拟机切入和退出</h2><h3 id="1-2-1GCC内联汇编"><a href="#1-2-1GCC内联汇编" class="headerlink" title="1.2.1GCC内联汇编"></a>1.2.1GCC内联汇编</h3><blockquote>
+<p>KVM模块中切入Guest模式的代码使用GCC的内联汇编编写</p>
+</blockquote>
+<p>内联汇编基本语法模板如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">asm</span> <span class="hljs-title">volatile</span> <span class="hljs-params">( assembler <span class="hljs-keyword">template</span></span></span><br><span class="hljs-params"><span class="hljs-function">    : output operands <span class="hljs-comment">/* optional */</span></span></span><br><span class="hljs-params"><span class="hljs-function">    : input operands <span class="hljs-comment">/* optional */</span></span></span><br><span class="hljs-params"><span class="hljs-function">    : <span class="hljs-built_in">list</span> of clobbered registers <span class="hljs-comment">/* optional */</span></span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>asm为GCC关键字，表示接下来要嵌入汇编代码</li>
+<li>volatile为可选关键字，表示不需要GCC对下面的汇编代码做任何优化</li>
+<li>assembler template是要嵌入的汇编指令，如果内嵌多行汇编指令，则每条指令占用1行，每行指令使用双引号括起来，以后缀<code>\n\t</code>结尾</li>
+</ul>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs perl">__asm_<span class="hljs-number">_</span> (<span class="hljs-string">&quot;movl %eax, %ebx \n\t&quot;</span><br>    <span class="hljs-string">&quot;movl $56, %esi \n\t&quot;</span><br>    <span class="hljs-string">&quot;movl %ecx, $label(%edx,%ebx,$4) \n\t&quot;</span><br>    <span class="hljs-string">&quot;movb %ah, (%ebx) \n\t&quot;</span>);<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>当使用扩展模式，即包含output、input和clobber list部分时，汇编指令中需要使用两个“%”来引用寄存器，比如%%rax；使用一个“%”来引用输入、输出操作数，比如%1，以便帮助GCC区分寄存器和由C语言提供的操作数</p>
+</blockquote>
+<ul>
+<li><p><strong>输出操作数（output operands）</strong>。输出操作数，用来指示内联汇编指令修改了C代码中的变量。如果有多个输出参数，则需要对每个输出参数进行分隔。</p>
+<ul>
+<li>输出操作数的格式可以为<code>[[asmSymbolicName]] constraint (cvariablename)</code>，可以为输出操作数指定一个名字asmSymbolicName，汇编指令中可以使用这个名字引用输出操作数。约束部分必须以“=”或者“+”作为前缀，“=”表示只写，“+”表示读写。在前缀之后，就可以是各种约束了，比如“=a”表示先将结果输出至rax/eax寄存器，然后再由rax/eax寄存器更新相应的输出变量。cvariablename为代码中的C变量名字，需要使用括号括起来</li>
+<li>也可以使用序号引用操作数比如输出操作数有两个，那么可以用**%0引用第1个输出操作数，%1引用第2个操作数**，以此类推。</li>
+</ul>
+</li>
+<li><p><strong>输入操作数（input operands）</strong>。与输出操作数相似。输入操作数来自C代码中的变量或者表达式。</p>
+<ul>
+<li>除了不必以“=”或者“+”前缀开头外，输入操作数的前缀与输出操作数基本相同。</li>
+<li>输出操作数的格式可以为<code>[[asmSymbolicName]] constraint (cvariablename)</code></li>
+<li>除了寄存器约束外，“i”这个约束，表示这个输入操作数是个立即数（immediateinteger）</li>
+<li>输出操作数的格式也可以从最后一个输出操作数的序号加1开始，比如输出操作数有两个，输入操作数有3个，那么需要使用%2引用第1个输入操作数，%3引用第2个输入操作数，以此类推。</li>
+</ul>
+</li>
+<li><p><strong>clobber list</strong></p>
+<ul>
+<li>汇编指令执行后<strong>可能会隐性地影响某些寄存器或者内存的值</strong>，如果被影响的寄存器或者内存并没有在输入、输出操作数中列出来，那么需要将这些寄存器或者内存列入clobber list。通过这种方式，内联汇编告知GCC，在执行内联汇编指令后恢复寄存器的值</li>
+</ul>
+</li>
+</ul>
+<p>一个具体的例子：一个加法运算，一个加数是val，值为100，另外一个加数是一个立即数400，计算结果保存到变量sum中</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-number">01</span> <span class="hljs-keyword">int</span> val = <span class="hljs-number">100</span>, sum = <span class="hljs-number">0</span>;<br><br><span class="hljs-number">03</span> <span class="hljs-comment">// 使用内联汇编将 val + 400 的结果存储到 sum 变量中</span><br><span class="hljs-number">04</span> <span class="hljs-keyword">asm</span> (<span class="hljs-string">&quot;movl %1, %%rax; \n\t&quot;</span>  <span class="hljs-comment">// 将 val 的值加载到寄存器 rax</span><br><span class="hljs-number">05</span>      <span class="hljs-string">&quot;movl %c[addend], %%rbx; \n\t&quot;</span>  <span class="hljs-comment">// 将常量 400 加载到寄存器 rbx</span><br><span class="hljs-number">06</span>      <span class="hljs-string">&quot;addl %%rbx, %%rax; \n\t&quot;</span>  <span class="hljs-comment">// 将 rax 和 rbx 寄存器的值相加，结果保存在 rax</span><br><span class="hljs-number">07</span>      <span class="hljs-string">&quot;movl %%rax, %0; \n\t&quot;</span>  <span class="hljs-comment">// 将 rax 寄存器的值存回 sum 变量</span><br><span class="hljs-number">08</span>     <br><span class="hljs-number">09</span>      : <span class="hljs-string">&quot;=r&quot;</span> (sum)  <span class="hljs-comment">// 输出约束：将 rax 寄存器的值存储到 sum 变量中</span><br><span class="hljs-number">10</span>      : <span class="hljs-string">&quot;r&quot;</span> (val), [addend] <span class="hljs-string">&quot;i&quot;</span> (<span class="hljs-number">400</span>)  <span class="hljs-comment">// 输入约束：val 是变量输入，[addend] 表示常量 400</span><br><span class="hljs-number">11</span>      : <span class="hljs-string">&quot;rbx&quot;</span>  <span class="hljs-comment">// clobber约束：表示寄存器 rbx 在内联汇编代码中被使用</span><br><span class="hljs-number">12</span> );<br><br></code></pre></td></tr></table></figure>
+
+<p>在汇编代码中使用了rbx寄存器，而rbx 寄存器没有出现在输出、输入操作数中，所以内联汇编需要把rbx寄存 器列入clobber list中，见第10行代码，告诉GCC汇编指令污染了rbx 寄存器</p>
+<h3 id="1-2-2虚拟机切入和退出及相关的上下文保存"><a href="#1-2-2虚拟机切入和退出及相关的上下文保存" class="headerlink" title="1.2.2虚拟机切入和退出及相关的上下文保存"></a>1.2.2虚拟机切入和退出及相关的上下文保存</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-number">01</span> <span class="hljs-comment">/* 提交哈希和代码文件路径 */</span><br><span class="hljs-number">02</span> <span class="hljs-comment">/* 提交 1c696d0e1b7c10e1e8b34cb6c797329e3c33f262 */</span><br><span class="hljs-number">03</span> <span class="hljs-comment">/* linux.git/arch/x86/kvm/vmx.c */</span><br><span class="hljs-number">04</span> <span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">vmx_vcpu_run</span><span class="hljs-params">(struct kvm_vcpu *vcpu)</span></span><br><span class="hljs-function">05 </span>&#123;<br><span class="hljs-number">06</span>     <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">vcpu_vmx</span> *<span class="hljs-title">vmx</span> =</span> to_vmx(vcpu);<br><span class="hljs-number">07</span>     <span class="hljs-keyword">asm</span>(<br><span class="hljs-number">08</span>         <span class="hljs-comment">/* 保存宿主机寄存器 */</span><br><span class="hljs-number">09</span>         <span class="hljs-string">&quot;push %%&quot;</span>R<span class="hljs-string">&quot;dx; push %%&quot;</span>R<span class="hljs-string">&quot;bp;&quot;</span><br><span class="hljs-number">10</span>         <span class="hljs-string">&quot;push %%&quot;</span>R<span class="hljs-string">&quot;cx \n\t&quot;</span><br><span class="hljs-number">11</span>         <span class="hljs-string">&quot;cmp %%&quot;</span>R<span class="hljs-string">&quot;sp, %c[host_rsp](%0) \n\t&quot;</span>; <span class="hljs-comment">/* 比较当前栈指针与host_rsp (vmx-&gt;host_rsp) */</span><br><span class="hljs-number">12</span>         <span class="hljs-string">&quot;je 1f \n\t&quot;</span>; <span class="hljs-comment">/* 如果相等 (未改变栈), 跳转到标签 1 */</span><br><span class="hljs-number">13</span>         <span class="hljs-string">&quot;mov %%&quot;</span>R<span class="hljs-string">&quot;sp, %c[host_rsp](%0) \n\t&quot;</span>; <span class="hljs-comment">/* 如果不相等 (栈改变), 更新host_rsp为当前栈指针 */</span><br><span class="hljs-number">14</span>         __ex(ASM_VMX_VMWRITE_RSP_RDX) <span class="hljs-string">&quot;\n\t&quot;</span>; <span class="hljs-comment">/* 将当前栈指针 (RDX) 保存到guest状态 */</span><br><br><span class="hljs-number">15</span>         <span class="hljs-string">&quot;1: \n\t&quot;</span>; <span class="hljs-comment">/* 标签 1: 如果cr2寄存器值有改变, 重新加载它 */</span><br><span class="hljs-number">16</span>         <span class="hljs-string">&quot;mov %c[cr2](%0), %%&quot;</span>R<span class="hljs-string">&quot;ax \n\t&quot;</span>; <span class="hljs-comment">/* 将保存在vmx-&gt;cr2中的cr2寄存器值加载到RAX */</span><br><span class="hljs-number">17</span>         <span class="hljs-string">&quot;mov %%cr2, %%&quot;</span>R<span class="hljs-string">&quot;dx \n\t&quot;</span>; <span class="hljs-comment">/* 将当前的cr2寄存器值加载到RDX */</span><br><span class="hljs-number">18</span>         <span class="hljs-string">&quot;cmp %%&quot;</span>R<span class="hljs-string">&quot;ax, %%&quot;</span>R<span class="hljs-string">&quot;dx \n\t&quot;</span>; <span class="hljs-comment">/* 比较保存的值与当前cr2寄存器值 */</span><br><span class="hljs-number">19</span>         <span class="hljs-string">&quot;je 2f \n\t&quot;</span>; <span class="hljs-comment">/* 如果相等 (未改变cr2), 跳转到标签 2 */</span><br><span class="hljs-number">20</span>         <span class="hljs-string">&quot;mov %%&quot;</span>R<span class="hljs-string">&quot;ax, %%cr2 \n\t&quot;</span>; <span class="hljs-comment">/* 如果不相等 (cr2有改变), 重新加载cr2为保存的值 */</span><br><span class="hljs-number">21</span>         <span class="hljs-string">&quot;2: \n\t&quot;</span>; <span class="hljs-comment">/* 标签 2 */</span><br><br><span class="hljs-number">22</span>         <span class="hljs-comment">/* 检查是否需要vmlaunch或vmresume */</span><br><span class="hljs-number">23</span>         <span class="hljs-string">&quot;cmpl $0, %c[launched](%0) \n\t&quot;</span>; <span class="hljs-comment">/* 检查vmx-&gt;launched的值 */</span><br><span class="hljs-number">24</span>         <span class="hljs-comment">/* 加载客户机寄存器，不破坏标志位 */</span><br><span class="hljs-number">25</span>         <span class="hljs-string">&quot;mov %c[rax](%0), %%&quot;</span>R<span class="hljs-string">&quot;ax \n\t&quot;</span>; <span class="hljs-comment">/* 将vcpu.arch.regs[VCPU_REGS_RAX]的值加载到RAX */</span><br><span class="hljs-number">26</span>         <span class="hljs-string">&quot;mov %c[rbx](%0), %%&quot;</span>R<span class="hljs-string">&quot;bx \n\t&quot;</span>; <span class="hljs-comment">/* 将vcpu.arch.regs[VCPU_REGS_RBX]的值加载到RBX */</span><br><span class="hljs-number">27</span>         <span class="hljs-comment">/* ... 其他客户机寄存器加载 ... */</span><br><span class="hljs-number">28</span>         <span class="hljs-string">&quot;mov %c[rcx](%0), %%&quot;</span>R<span class="hljs-string">&quot;cx \n\t&quot;</span>; <span class="hljs-comment">/* 将vcpu.arch.regs[VCPU_REGS_RCX]的值加载到RCX (破坏之前RCX的值) */</span><br><br><span class="hljs-number">29</span>         <span class="hljs-comment">/* 进入客户机模式 */</span><br><span class="hljs-number">30</span>         <span class="hljs-string">&quot;jne .Llaunched \n\t&quot;</span>; <span class="hljs-comment">/* 如果vmx-&gt;launched != 0，跳转到标签 .Llaunched */</span><br><span class="hljs-number">31</span>         __ex(ASM_VMX_VMLAUNCH) <span class="hljs-string">&quot;\n\t&quot;</span>; <span class="hljs-comment">/* 否则，使用VMLAUNCH执行VM entry */</span><br><span class="hljs-number">32</span>         <span class="hljs-string">&quot;jmp .Lkvm_vmx_return \n\t&quot;</span>; <span class="hljs-comment">/* 跳转到标签 .Lkvm_vmx_return 继续 */</span><br><br><span class="hljs-number">33</span>         <span class="hljs-string">&quot;.Llaunched: &quot;</span> __ex(ASM_VMX_VMRESUME) <span class="hljs-string">&quot;\n\t&quot;</span>; <span class="hljs-comment">/* 如果vmx-&gt;launched == 0，使用VMRESUME执行VM entry */</span><br><br><span class="hljs-number">34</span>         <span class="hljs-string">&quot;.Lkvm_vmx_return: &quot;</span> <span class="hljs-comment">/* 标签 .Lkvm_vmx_return */</span><br><br><span class="hljs-number">35</span>         <span class="hljs-comment">/* 保存客户机寄存器，加载宿主机寄存器，保持... */</span><br><span class="hljs-number">36</span>         <span class="hljs-string">&quot;xchg %0, (%%&quot;</span>R<span class="hljs-string">&quot;sp) \n\t&quot;</span>; <span class="hljs-comment">/* 交换vmx指针与栈顶的值 (vmx-&gt;host_rsp) */</span><br><span class="hljs-number">37</span>         <span class="hljs-string">&quot;mov %%&quot;</span>R<span class="hljs-string">&quot;ax, %c[rax](%0) \n\t&quot;</span>; <span class="hljs-comment">/* 将RAX的值存储到vcpu.arch.regs[VCPU_REGS_RAX] */</span><br><span class="hljs-number">38</span>         <span class="hljs-string">&quot;mov %%&quot;</span>R<span class="hljs-string">&quot;bx, %c[rbx](%0) \n\t&quot;</span>; <span class="hljs-comment">/* 将RBX的值存储到vcpu.arch.regs[VCPU_REGS_RBX] */</span><br><span class="hljs-number">39</span>         <span class="hljs-string">&quot;pop&quot;</span>Q<span class="hljs-string">&quot; %c[rcx](%0) \n\t&quot;</span>; <span class="hljs-comment">/* 将栈顶的值 (vmx-&gt;host_rsp) 弹出到RCX */</span><br><span class="hljs-number">40</span>         <span class="hljs-string">&quot;mov %%&quot;</span>R<span class="hljs-string">&quot;dx, %c[rdx](%0) \n\t&quot;</span>; <span class="hljs-comment">/* 将RDX的值存储到vcpu.arch.regs[VCPU_REGS_RDX] */</span><br><span class="hljs-number">41</span>         <span class="hljs-comment">/* ... 其他客户机寄存器存储 ... */</span><br><span class="hljs-number">42</span>         <span class="hljs-string">&quot;mov %%cr2, %%&quot;</span>R<span class="hljs-string">&quot;ax \n\t&quot;</span>; <span class="hljs-comment">/* 将当前的cr2值加载到RAX */</span><br><span class="hljs-number">43</span>         <span class="hljs-string">&quot;mov %%&quot;</span>R<span class="hljs-string">&quot;ax, %c[cr2](%0) \n\t&quot;</span>; <span class="hljs-comment">/* 将RAX的值存储到vmx-&gt;cr2 */</span><br><br><span class="hljs-number">44</span>         <span class="hljs-string">&quot;pop %%&quot;</span>R<span class="hljs-string">&quot;bp; pop %%&quot;</span>R<span class="hljs-string">&quot;dx \n\t&quot;</span>; <span class="hljs-comment">/* 弹出栈中的RBP和RDX的值 */</span><br><span class="hljs-number">45</span>         <span class="hljs-string">&quot;setbe %c[fail](%0) \n\t&quot;</span>; <span class="hljs-comment">/* 如果进位标志位设置 (发生任何错误), 设置vmx-&gt;fail标志 */</span><br><span class="hljs-number">46</span>         : : <span class="hljs-string">&quot;c&quot;</span>(vmx), <span class="hljs-string">&quot;d&quot;</span>((<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">long</span>)HOST_RSP),<br><span class="hljs-number">47</span>         [launched]<span class="hljs-string">&quot;i&quot;</span>(offsetof(struct vcpu_vmx, launched)),<br><span class="hljs-number">48</span>         [fail]<span class="hljs-string">&quot;i&quot;</span>(offsetof(struct vcpu_vmx, fail)),<br><span class="hljs-number">49</span>         [host_rsp]<span class="hljs-string">&quot;i&quot;</span>(offsetof(struct vcpu_vmx, host_rsp)),<br><span class="hljs-number">50</span>         [rax]<span class="hljs-string">&quot;i&quot;</span>(offsetof(struct vcpu_vmx, vcpu.arch.regs[VCPU_REGS_RAX])),<br><span class="hljs-number">51</span>         [rbx]<span class="hljs-string">&quot;i&quot;</span>(offsetof(struct vcpu_vmx, vcpu.arch.regs[VCPU_REGS_RBX])),<br><span class="hljs-number">52</span>         <span class="hljs-comment">/* ... 其他客户机寄存器的偏移量 ... */</span><br><span class="hljs-number">53</span>         [rcx]<span class="hljs-string">&quot;i&quot;</span>(offsetof(struct vcpu_vmx, vcpu.arch.regs[VCPU_REGS_RCX])),<br><span class="hljs-number">54</span>         [rdx]<span class="hljs-string">&quot;i&quot;</span>(offsetof(struct vcpu_vmx, vcpu.arch.regs[VCPU_REGS_RDX])),<br><span class="hljs-number">55</span>         <span class="hljs-comment">/* ... 其他客户机寄存器的偏移量 ... */</span><br><span class="hljs-number">56</span>         [cr2]<span class="hljs-string">&quot;i&quot;</span>(offsetof(struct vcpu_vmx, vcpu.arch.cr2))<br><span class="hljs-number">57</span>         : <span class="hljs-string">&quot;cc&quot;</span>, <span class="hljs-string">&quot;memory&quot;</span><br><span class="hljs-number">58</span>         , R<span class="hljs-string">&quot;ax&quot;</span>, R<span class="hljs-string">&quot;bx&quot;</span>, R<span class="hljs-string">&quot;di&quot;</span>, R<span class="hljs-string">&quot;si&quot;</span><br><span class="hljs-number">59</span>         <span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> CONFIG_X86_64</span><br><span class="hljs-number">60</span>         , <span class="hljs-string">&quot;r8&quot;</span>, <span class="hljs-string">&quot;r9&quot;</span>, <span class="hljs-string">&quot;r10&quot;</span>, <span class="hljs-string">&quot;r11&quot;</span>, <span class="hljs-string">&quot;r12&quot;</span>, <span class="hljs-string">&quot;r13&quot;</span>, <span class="hljs-string">&quot;r14&quot;</span>, <span class="hljs-string">&quot;r15&quot;</span> <span class="hljs-comment">/* 在x86_64架构上，还包含其他寄存器的约束 */</span><br><span class="hljs-number">61</span>         <span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span><br><span class="hljs-number">62</span>     );<br><span class="hljs-number">63</span>     <span class="hljs-comment">/* ... 其他代码 ... */</span><br><span class="hljs-number">64</span> &#125;<br><br><br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>line 7 . KVM将宿主机的通用寄存器保存到栈中。当发生VM退出时，KVM从栈中将这些保存的宿主机的通用寄存器恢复到CPU的物理寄存器中。这里，宏R在64位下值为r，32位下为e。</li>
+<li>rdx/edx寄存器是GCC保留的regparm特性，不能放在clobber list中，另外一个rbp/ebp寄存器也不生效，所以KVM手动保存了这两个寄存器</li>
+<li>从Guest退出到Host时，CPU不会自动保存guest的通用寄存器等寄存器，KVM手动将其保存到了结构体vcpu_vmx中的子结构体中。因此，在Guest退出的那一刻，首先必须要获取结构体vcpu_vmx的实例，也就是第3行代码中的变量vmx，<strong>将CPU寄存器中的状态保存到这个vmx中</strong>，也就是说，在保存完Guest的状态后，才能进行其他操作，避免破坏Guest的状态。于是，每次从Host切入Guest前的最后一刻，KVM将vmx的地址压入栈顶，然后在Guest退出时从栈顶第一时间取出vmx。</li>
+<li>如何将vmx压入栈顶呢？参见第47行代码，这里使用了GCC内联汇编的input约束，即在执行汇编代码前，告诉编译器将变量vmx加载到rcx/ecx寄存器，那么在执行第8行代码，即将rcx/ecx寄存器的内容压入栈时，实际上是将变量vmx压入栈顶了。</li>
+<li>在Guest<strong>退出</strong>时，CPU会自动<strong>将VMCS中Host的rsp/esp寄存器恢复到物理CPU的rsp/esp寄存器中</strong>，所以此时可以<strong>访问VCPU线程在Host态下的栈</strong>。</li>
+<li>在Guest退出后的第1行代码，即第36行代码，调用xchg指令将栈顶的值和序号%0指代的变量进行交换，根据第47行代码可见，%0指代变量vmx，对应的寄存器是rcx/ecx，也就是说，这行代码将切入Guest之前保存到栈顶的变量vmx的地址恢复到了rcx/ecx寄存器中，%0引用的也是这个地址，那么就可以使用%0引用这个地址保存Guest的寄存器了。</li>
+</ul>
+<p>这里上下文有点麻烦，详见书上吧</p>
+<h2 id="1-3陷入和模拟"><a href="#1-3陷入和模拟" class="headerlink" title="1.3陷入和模拟"></a>1.3陷入和模拟</h2><ol>
+<li>虚拟机并不会一直保持在Guest模式，而是需要在某些情况下切换到Host模式。在Host角度看，虚拟机就像是Host上的一个进程，与其他虚拟机一同共享系统资源。</li>
+<li>虚拟机访问系统资源时，可能需要退出到Host模式，让VMM（虚拟机监控器）代为完成资源访问。例如，虚拟机进行I/O访问时，VMM会处理实际的文件读写或网络传输。类似地，访问设备I/O内存映射的地址空间可能会触发页面异常，需要KVM介入模拟设备处理。</li>
+<li>虚拟机通常不会直接呈现Host的CPU信息，而是模拟特定的CPU型号。这意味着某些指令如cpuid在Guest模式下无法执行，需要KVM介入模拟这些指令。</li>
+<li>陷入（或中断）可以是虚拟机主动触发的，比如虚拟机主动请求Host来完成某些任务，也可以是被动触发的，比如外部时钟中断或外设中断。被动触发的陷入通常是需要将CPU资源让给Host或进行特定处理的情况。</li>
+</ol>
+<h3 id="1-3-2-特殊指令"><a href="#1-3-2-特殊指令" class="headerlink" title="1.3.2 特殊指令"></a>1.3.2 特殊指令</h3><p>在虚拟化环境中，存在一些指令在机制上可以直接在虚拟机的Guest模式下本地运行，但是它们在<strong>虚拟化上下文中的语义与非虚拟化环境下</strong>完全不同。两个主要的例子是cpuid指令和hlt指令：</p>
+<p><strong>cpuid</strong></p>
+<p>在虚拟化环境中，对于cpuid指令的模拟是必要的，<strong>因为直接在Guest模式下运行该指令会导致获取的是宿主机物理CPU的各种特性</strong></p>
+<p>为了保证虚拟机获得正确、一致的CPU特性信息，cpuid指令在虚拟化环境中需要被拦截并进行模拟，以确保虚拟机能够在各种环境下稳定运行，并且获得与实际情况相符的CPU特性信息。</p>
+<ul>
+<li>虚拟化监控器（VMM）需要在虚拟机执行cpuid指令时介入，模拟CPU的特性信息。由于VMM在虚拟化层面进行模拟，因此<strong>模拟的CPU可能支持更多的特性，与物理CPU不完全一致</strong>。VMM需要在执行cpuid指令时返回<strong>虚拟CPU的特性</strong>，以保证虚拟机获得正确的特性信息。</li>
+<li><strong>虚拟机可能</strong>会在不同的宿主机之间<strong>迁移</strong>，为了<strong>确保虚拟机</strong>能够<strong>在不同环境下一致地运行</strong>，cpuid指令需要陷入VMM进行特殊处理。这意味着无论虚拟机在哪个物理主机上运行，<strong>其获取的CPU特性信息都应该保持一致</strong>，以避免应用程序因特性差异而受到影响。</li>
+</ul>
+<p>KVM的<strong>用户空间</strong>通过cpuid指令<strong>获取Host的CPU特征</strong>，加上用户空间的<strong>配置</strong>，定义好VCPU支持的CPU<strong>特性</strong>，<strong>传递给KVM内核模块</strong>。</p>
+<p>KVM模块在内核中定义了接收来自用户空间定义的CPU特性的结构体：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs c">commit <span class="hljs-number">06465</span>c5a3aa9948a7b00af49cd22ed8f235cdb0f<br>KVM: Handle cpuid in the kernel instead of punting to<br>userspace<br>linux.git/include/linux/kvm.h<br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">kvm_cpuid_entry</span> &#123;</span><br>	__u32 function;<br>	__u32 eax;<br>	__u32 ebx;<br>	__u32 ecx;<br>	__u32 edx;<br>	__u32 padding;<br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<p>用户空间按照如下结构体kvm_cpuid的格式组织好CPU特性后，通过如下KVM模块提供的接口传递给KVM内核模块：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><code class="hljs c">commit <span class="hljs-number">06465</span>c5a3aa9948a7b00af49cd22ed8f235cdb0f<br>KVM: Handle cpuid in the kernel instead of punting to userspace<br>linux.git/include/linux/kvm.h<br><br><span class="hljs-comment">/* 定义传递CPU特性的结构体 */</span><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">kvm_cpuid</span> &#123;</span><br>    __u32 nent; <span class="hljs-comment">/* 特性条目数量 */</span><br>    __u32 padding;<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">kvm_cpuid_entry</span> <span class="hljs-title">entries</span>[0];</span> <span class="hljs-comment">/* 特性条目数组 可变长度数组，存储实际的 CPU 特性信息*/</span><br>&#125;;<br><br>linux.git/drivers/kvm/kvm_main.<span class="hljs-function">c</span><br><span class="hljs-function"></span><br><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">long</span> <span class="hljs-title">kvm_vcpu_ioctl</span><span class="hljs-params">(struct file *filp, <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> ioctl, <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">long</span> arg)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-comment">// ...</span><br>    <span class="hljs-keyword">case</span> KVM_SET_CPUID: &#123;<br>        <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">kvm_cpuid</span> __<span class="hljs-title">user</span> *<span class="hljs-title">cpuid_arg</span> =</span> argp;<br>        <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">kvm_cpuid</span> <span class="hljs-title">cpuid</span>;</span><br><br>        <span class="hljs-comment">// 从用户空间复制传入的CPU特性结构体</span><br>        <span class="hljs-keyword">if</span> (copy_from_user(&amp;cpuid, cpuid_arg, <span class="hljs-keyword">sizeof</span>(cpuid)))<br>            <span class="hljs-keyword">goto</span> out;<br><br>        <span class="hljs-comment">// 调用函数设置VCPU的CPU特性</span><br>        r = kvm_vcpu_ioctl_set_cpuid(vcpu, &amp;cpuid, cpuid_arg-&gt;entries);<br>        <span class="hljs-comment">// ...</span><br>    &#125;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> <span class="hljs-title">kvm_vcpu_ioctl_set_cpuid</span><span class="hljs-params">(struct kvm_vcpu *vcpu, struct kvm_cpuid *cpuid,</span></span><br><span class="hljs-params"><span class="hljs-function">                                   struct kvm_cpuid_entry __user *entries)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-comment">// ...</span><br>    <span class="hljs-comment">// 从用户空间复制特性条目数组到VCPU的特性条目数组</span><br>    <span class="hljs-keyword">if</span> (copy_from_user(&amp;vcpu-&gt;cpuid_entries, entries, cpuid-&gt;nent * <span class="hljs-keyword">sizeof</span>(struct kvm_cpuid_entry)))<br>        <span class="hljs-comment">// ...</span><br>    <span class="hljs-comment">// ...</span><br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>下面这段代码用于在虚拟化环境中模拟处理虚拟机执行 <code>cpuid</code> 指令的情况。通过<strong>遍历</strong>虚拟机提供的 <code>cpuid_entries</code> 数组，KVM 在其中<strong>查找与当前功能号匹配</strong>的特性信息，将匹配的特性信息的字段值加载到虚拟 CPU 寄存器中。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* 代码片段用于模拟虚拟机执行 cpuid 指令的情况 */</span><br><br><span class="hljs-comment">/* KVM 模拟处理虚拟机中的 cpuid 指令 */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">kvm_emulate_cpuid</span><span class="hljs-params">(struct kvm_vcpu *vcpu)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">int</span> i;<br>    u32 function;<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">kvm_cpuid_entry</span> *<span class="hljs-title">e</span>, *<span class="hljs-title">best</span>;</span><br><br>    <span class="hljs-comment">/* 从虚拟 CPU 寄存器中获取 cpuid 指令的功能号 */</span><br>    function = vcpu-&gt;regs[VCPU_REGS_RAX];<br><br>    <span class="hljs-comment">/* 遍历 cpuid_entries 数组查找匹配的特性信息 */</span><br>    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; vcpu-&gt;cpuid_nent; ++i) &#123;<br>        e = &amp;vcpu-&gt;cpuid_entries[i];<br>        <span class="hljs-keyword">if</span> (e-&gt;function == function) &#123;<br>            best = e; <span class="hljs-comment">/* 找到与功能号匹配的特性信息 */</span><br>            <span class="hljs-keyword">break</span>;<br>        &#125;<br>        <span class="hljs-comment">/* ... 其他特性信息的匹配判断 ... */</span><br>    &#125;<br><br>    <span class="hljs-keyword">if</span> (best) &#123;<br>        <span class="hljs-comment">/* 将特性信息中的字段值复制到虚拟 CPU 寄存器 */</span><br>        vcpu-&gt;regs[VCPU_REGS_RAX] = best-&gt;eax;<br>        vcpu-&gt;regs[VCPU_REGS_RBX] = best-&gt;ebx;<br>        vcpu-&gt;regs[VCPU_REGS_RCX] = best-&gt;ecx;<br>        vcpu-&gt;regs[VCPU_REGS_RDX] = best-&gt;edx;<br>    &#125;<br><br>    <span class="hljs-comment">/* 跳过当前模拟的指令，继续执行下一条指令 */</span><br>    kvm_arch_ops-&gt;skip_emulated_instruction(vcpu);<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<ol>
+<li>当虚拟机执行<code>cpuid</code>指令并产生 VM exit 时，KVM会调用 <code>kvm_emulate_cpuid</code> 函数进行模拟。</li>
+<li><code>vcpu-&gt;regs[VCPU_REGS_RAX]</code> 中存储了 <code>cpuid</code> 指令中的功能号，即 <code>eax</code> 寄存器的值。这个值用来确定要查询的 CPU 特性信息。</li>
+<li>在 <code>vcpu-&gt;cpuid_entries</code> 数组中，存储了一系列的 CPU 特性信息，每个元素都是一个 <code>kvm_cpuid_entry</code> 实例，其中包含了不同功能号对应的特性信息。</li>
+<li>通过遍历 <code>vcpu-&gt;cpuid_entries</code> 数组，KVM 在其中查找具有与当前功能号匹配的特性信息，即 <code>e-&gt;function == function</code>。</li>
+<li>如果找到匹配的特性信息（<code>best</code> 非空），则将该特性信息中的 <code>eax</code>、<code>ebx</code>、<code>ecx</code>、<code>edx</code> 字段的值分别复制到虚拟 CPU 寄存器 <code>vcpu-&gt;regs</code> 的相应位置，以便在进入虚拟机后，虚拟 CPU 可以从这些寄存器读取 CPU 相关信息和特性。</li>
+<li>最后，<code>skip_emulated_instruction</code> 函数用于通知 KVM 跳过当前模拟的指令，继续执行下一条指令。</li>
+</ol>
+<p>下面这段代码示例是在用户空间中处理虚拟机的 CPU 特性信息，以便在不同类型的宿主机之间迁移虚拟机。具体来说，它通过从 KVM 内核模块获取 CPU 特性信息，并清除不支持 AVX2 指令的特性。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs c"><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">kvm_cpuid2</span> *<span class="hljs-title">kvm_cpuid</span>;</span><br>kvm_cpuid = (struct kvm_cpuid2 *)<span class="hljs-built_in">malloc</span>(<span class="hljs-keyword">sizeof</span>(*kvm_cpuid) + CPUID_ENTRIES * <span class="hljs-keyword">sizeof</span>(*kvm_cpuid-&gt;entries));<br>kvm_cpuid-&gt;nent = CPUID_ENTRIES;<br><br><span class="hljs-comment">// 获取支持的 CPU 特性信息</span><br>ioctl(vcpu_fd, KVM_GET_SUPPORTED_CPUID, kvm_cpuid);<br><br><span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; kvm_cpuid-&gt;nent; i++) &#123;<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">kvm_cpuid_entry2</span> *<span class="hljs-title">entry</span> =</span> &amp;kvm_cpuid-&gt;entries[i];<br>    <br>    <span class="hljs-keyword">if</span> (entry-&gt;function == <span class="hljs-number">7</span>) &#123;<br>        <span class="hljs-comment">/* 清除 AVX2 指令支持 */</span><br>        entry-&gt;ebx &amp;= ~(<span class="hljs-number">1</span> &lt;&lt; <span class="hljs-number">6</span>);<br>        <span class="hljs-keyword">break</span>;<br>    &#125;<br>&#125;<br><br><span class="hljs-comment">// 将修改后的 CPU 特性信息设置回虚拟机</span><br>ioctl(vcpu_fd, KVM_SET_CPUID2, kvm_cpuid);<br><br></code></pre></td></tr></table></figure>
+
+<p><strong>hlt</strong></p>
+<blockquote>
+<p><code>hlt</code> 指令是一条汇编指令，用于让处理器进入空闲状态。它的作用是暂停当前处理器的执行，等待外部中断或其他事件的发生。当处理器执行到 <code>hlt</code> 指令时，它会停止执行指令，并将自己置于低功耗状态，直到有新的中断或事件触发处理器唤醒。</p>
+</blockquote>
+<p><code>hlt</code> 指令用于让处理器进入停机状态。在开启超线程的处理器中，<code>hlt</code> 指令会停止逻辑核的运行。对于虚拟化环境中的虚拟机，如果允许虚拟机的某个核本地执行 <code>hlt</code> 指令，将导致物理CPU停止运行，但实际上我们只需要停止用于模拟CPU的线程。因此，在虚拟化环境中，虚拟机执行 <code>hlt</code> 指令时需要陷入KVM，<strong>由KVM挂起对应的VCPU线程，而不是停止物理CPU的运行</strong>。下面代码片段展示了如何在KVM中处理虚拟机执行 <code>hlt</code> 指令，通过设置线程状态和调用内核调度函数，实现了在虚拟机中正确处理 <code>hlt</code> 指令的逻辑。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// 当处理器执行hlt指令后，将处于停机状态（Halt）。</span><br><span class="hljs-comment">// 对于开启了超线程的处理器，hlt指令是停止的逻辑核。</span><br><span class="hljs-comment">// 之后如果收到NMI、SMI中断，或者reset信号等，则恢复运行。</span><br><span class="hljs-comment">// 但是，对于虚拟机而言，如果任凭Guest的某个核本地执行hlt，</span><br><span class="hljs-comment">// 将导致物理CPU停止运行，然而我们需要停止的只是Host中用于模拟CPU的线程。</span><br><span class="hljs-comment">// 因此，Guest执行hlt指令时需要陷入KVM中，由KVM挂起VCPU对应的线程，而不是停止物理CPU。</span><br><br><span class="hljs-comment">// 文件：linux.git/drivers/kvm/vmx.c</span><br><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> <span class="hljs-title">handle_halt</span><span class="hljs-params">(struct kvm_vcpu *vcpu, ...)</span></span><br><span class="hljs-function"></span>&#123;<br>    skip_emulated_instruction(vcpu);<br>    <span class="hljs-keyword">return</span> kvm_emulate_halt(vcpu);<br>&#125;<br><br><span class="hljs-comment">// 文件：linux.git/drivers/kvm/kvm_main.c</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">kvm_emulate_halt</span><span class="hljs-params">(struct kvm_vcpu *vcpu)</span></span><br><span class="hljs-function"></span>&#123;<br>    ...<br>    kvm_vcpu_kernel_halt(vcpu);<br>    ...<br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">kvm_vcpu_kernel_halt</span><span class="hljs-params">(struct kvm_vcpu *vcpu)</span></span><br><span class="hljs-function"></span>&#123;<br>    ...<br>    <span class="hljs-keyword">while</span> (!(irqchip_in_kernel(vcpu-&gt;kvm) &amp;&amp; kvm_cpu_has_interrupt(vcpu))<br>            &amp;&amp; !vcpu-&gt;irq_summary &amp;&amp; !signal_pending(current)) &#123;<br>        set_current_state(TASK_INTERRUPTIBLE);<br>        ...<br>        schedule();<br>        ...<br>    &#125;<br>    ...<br>    set_current_state(TASK_RUNNING);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="1-3-3-访问具有副作用的寄存器"><a href="#1-3-3-访问具有副作用的寄存器" class="headerlink" title="1.3.3 访问具有副作用的寄存器"></a>1.3.3 访问具有副作用的寄存器</h3><p>在虚拟化环境中，Guest访问CPU的某些寄存器时，除了读写寄存器的内容外，还可能产生一些副作用。对于这些具有副作用的访问，CPU需要从Guest模式陷入VMM，由VMM进行模拟，以完成副作用操作。以下是一些典型示例：</p>
+<ol>
+<li><strong>核间中断（Inter-processor Interrupts）：</strong> 当Guest访问LAPIC的中断控制寄存器时，例如写入中断控制寄存器，可能<strong>触发LAPIC向其他处理器</strong>发送核间中断。这种操作的副作用需要由VMM模拟，从而保证在虚拟化环境中的正确处理。</li>
+</ol>
+<blockquote>
+<p>LAPIC，全称为“Local Advanced Programmable Interrupt Controller”，是一种<strong>高级可编程中断控制器</strong>，常用于<strong>多处理器系统中的各个处理器核心之间进行中断的管理和协调</strong>。LAPIC负责处理本地（即同一物理处理器上的）中断，以及处理器之间的通信。</p>
+</blockquote>
+<p> 2.<strong>地址翻译和页表切换：</strong> 当Guest切换进程，其内核会设置CR3寄存器指向即将运行的进程的页表。在使用影子页表（Shadow Page Table）机制实现虚拟机地址（GVA）到宿主机物理地址（HPA）的映射时，<strong>虚拟机期望物理CPU的CR3寄存器指向KVM为Guest中即将投入运行的进程准备的影子页表。</strong> 因此，每当Guest切换进程时，CPU会陷入KVM，<strong>KVM将CR3寄存器设置为指向影子页表</strong>，以确保正确的地址映射。</p>
+<p>在影子页表机制中，KVM需要对处理Guest对控制寄存器CR3的访问进行特殊处理，以便让KVM能够正确地进行虚拟地址到宿主机物理地址的转换。为了实现这个目标，KVM需要在<strong>VMCS</strong>（Virtual Machine Control Structure，虚拟机控制结构）中的Processor-Based VM-Execution Controls字段中设置特定的标志位，即第15位CR3-load exiting。<strong>这个标志位的设置会导致每当Guest访问物理CPU的CR3寄存器时，物理CPU会触发VM exit，即从Guest模式切换到Host模式，然后陷入KVM</strong>，由KVM负责处理这个VM exit。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// 处理处理器控制寄存器（CR）的操作</span><br><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> <span class="hljs-title">handle_cr</span><span class="hljs-params">(struct kvm_vcpu *vcpu, …)</span></span><br><span class="hljs-function"></span>&#123;<br>    u64 exit_qualification; <span class="hljs-comment">// 退出限定信息</span><br>    <span class="hljs-keyword">int</span> cr; <span class="hljs-comment">// 控制寄存器编号</span><br>    <span class="hljs-keyword">int</span> reg; <span class="hljs-comment">// 目标寄存器编号</span><br>    <br>    <span class="hljs-comment">// 从VMCS中读取退出限定信息</span><br>    exit_qualification = vmcs_read64(EXIT_QUALIFICATION);<br>    <span class="hljs-comment">// 解析退出限定信息，提取控制寄存器编号和目标寄存器编号</span><br>    cr = exit_qualification &amp; <span class="hljs-number">15</span>;<br>    reg = (exit_qualification &gt;&gt; <span class="hljs-number">8</span>) &amp; <span class="hljs-number">15</span>;<br>    <br>    <span class="hljs-comment">// 根据退出限定信息的操作类型选择处理方式</span><br>    <span class="hljs-keyword">switch</span> ((exit_qualification &gt;&gt; <span class="hljs-number">4</span>) &amp; <span class="hljs-number">3</span>) &#123;<br>        <span class="hljs-keyword">case</span> <span class="hljs-number">0</span>: <span class="hljs-comment">/* mov to cr */</span><br>            <span class="hljs-comment">// 根据不同的控制寄存器执行不同的操作</span><br>            <span class="hljs-keyword">switch</span> (cr) &#123;<br>                <span class="hljs-comment">// ...</span><br>                <span class="hljs-keyword">case</span> <span class="hljs-number">3</span>: <span class="hljs-comment">// 控制寄存器CR3</span><br>                    <span class="hljs-comment">// 调用函数，加载目标寄存器的值到当前虚拟CPU的rsp和rip寄存器</span><br>                    vcpu_load_rsp_rip(vcpu);<br>                    <span class="hljs-comment">// 调用函数，设置当前虚拟CPU的CR3寄存器值为目标寄存器的值</span><br>                    set_cr3(vcpu, vcpu-&gt;regs[reg]);<br>                    <span class="hljs-comment">// 跳过已模拟的指令</span><br>                    skip_emulated_instruction(vcpu);<br>                    <span class="hljs-comment">// 返回处理结果</span><br>                    <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br>                <span class="hljs-comment">// ...</span><br>            &#125;<br>        <span class="hljs-comment">// ...</span><br>    &#125;<br>    <span class="hljs-comment">// ...</span><br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+
+<h2 id="1-5-一个简单KVM用户空间实例"><a href="#1-5-一个简单KVM用户空间实例" class="headerlink" title="1.5  一个简单KVM用户空间实例"></a>1.5  一个简单KVM用户空间实例</h2><p>先做一下概念辨析：</p>
+<ul>
+<li><strong>创建虚拟机（Create VM）</strong>：这指的是在虚拟化平台（如 KVM、VMware、Hyper-V 等）中，建立一个<strong>虚拟机的实例</strong>。在这一步骤中，你<strong>为虚拟机分配资源，配置硬件特性，如内存、处理器等</strong>。创建虚拟机是虚拟化平台提供的功能，它是设置虚拟机的基本环境。</li>
+<li><strong>创建 Guest</strong>：这指的是在<strong>虚拟机内部安装一个操作系统</strong>（Guest OS），使虚拟机能够在其内部运行一个独立的操作系统实例。这个操作系统可以是 Windows、Linux 或其他支持的操作系统。在创建 Guest 时，你需要安装操作系统的镜像文件，进行操作系统的配置和设置，就像在物理硬件上安装操作系统一样。</li>
+</ul>
+<p>通过一个<strong>具体的KVM用户空间的实例</strong>，我们可以总结CPU虚拟化的关键概念和步骤。在这个实例中，我们将代码放在一个名为kvm.c的文件中，主要涵盖以下几个要点：</p>
+<ol>
+<li><strong>虚拟机（VM）结构体</strong>（vm）：表示一台虚拟机，包含基本的计算机组件，如处理器和内存。每个<strong>虚拟机可以包含多个处理器，每个处理器有自己的状态（寄存器</strong>）。</li>
+<li><strong>处理器（VCPU）结构体</strong>（vcpu）：表示一个虚拟的处理器。在这个实例中，我们<strong>只虚拟了一个vcpu。每个vcpu具有自己的寄存器状态</strong>，如通用寄存器和特殊寄存器。</li>
+<li><strong>用户空间与内核通信</strong>：用户空间通过文件描述符/dev/kvm 与内核中的KVM模块进行通信。在实例中，我们<strong>使用全局变量g_dev_fd 来记录打开的/dev/kvm 文件描述符</strong>。</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;linux/kvm.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdlib.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;fcntl.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;sys/mman.h&gt;</span></span><br><br><span class="hljs-comment">// 定义虚拟机结构体</span><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">vm</span> &#123;</span><br>    <span class="hljs-keyword">int</span> vm_fd;                           <span class="hljs-comment">// 虚拟机文件描述符，用于与内核通信</span><br>    __u64 ram_size;                      <span class="hljs-comment">// 虚拟机内存大小</span><br>    __u64 ram_start;                     <span class="hljs-comment">// 虚拟机内存起始地址</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">kvm_userspace_memory_region</span> <span class="hljs-title">mem</span>;</span> <span class="hljs-comment">// 虚拟机内存区域描述，用于告知内核虚拟机内存的位置和大小</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">vcpu</span> *<span class="hljs-title">vcpu</span>[1];</span>                 <span class="hljs-comment">// 虚拟机处理器（VCPU）数组指针，这里只包含一个元素</span><br>&#125;;<br><br><span class="hljs-comment">// 定义虚拟处理器结构体</span><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">vcpu</span> &#123;</span><br>    <span class="hljs-keyword">int</span> id;                               <span class="hljs-comment">// 虚拟处理器的唯一标识符 </span><br>    <span class="hljs-keyword">int</span> fd;                               <span class="hljs-comment">// 虚拟处理器文件描述符，用于与内核通信</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">kvm_run</span> *<span class="hljs-title">run</span>;</span>                  <span class="hljs-comment">// 指向虚拟CPU运行状态的指针，用于在用户空间和内核空间传递状态信息</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">kvm_sregs</span> <span class="hljs-title">sregs</span>;</span>               <span class="hljs-comment">// 虚拟CPU特殊寄存器的状态</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">kvm_regs</span> <span class="hljs-title">regs</span>;</span>                 <span class="hljs-comment">// 虚拟CPU通用寄存器的状态</span><br>&#125;;<br><br><span class="hljs-comment">// 全局变量，记录打开的/dev/kvm文件描述符，用于与内核通信</span><br><span class="hljs-keyword">int</span> g_dev_fd;<br><br></code></pre></td></tr></table></figure>
+
+<p>main函数首先对这些变量进行了初始化，然后调用setup_vm开始组装机器了。组装好机器后，调用load_image加载Guest的镜像到内存中，最后调用run_rm开始执行Guest：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-keyword">int</span> argc, <span class="hljs-keyword">char</span> **argv)</span> </span>&#123;<br>    <span class="hljs-comment">// 打开KVM设备文件，获取文件描述符用于与内核通信</span><br>    <span class="hljs-keyword">if</span> ((g_dev_fd = open(<span class="hljs-string">&quot;/dev/kvm&quot;</span>, O_RDWR)) &lt; <span class="hljs-number">0</span>) &#123;<br>        <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;failed to open KVM device.\n&quot;</span>);<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;<br>    &#125;<br><br>    <span class="hljs-comment">// 分配内存并初始化虚拟机结构体</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">vm</span> *<span class="hljs-title">vm</span> =</span> <span class="hljs-built_in">malloc</span>(<span class="hljs-keyword">sizeof</span>(struct vm));<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">vcpu</span> *<span class="hljs-title">vcpu</span> =</span> <span class="hljs-built_in">malloc</span>(<span class="hljs-keyword">sizeof</span>(struct vcpu));<br>    vcpu-&gt;id = <span class="hljs-number">0</span>;<br>    vm-&gt;vcpu[<span class="hljs-number">0</span>] = vcpu;<br><br>    <span class="hljs-comment">// 设置虚拟机的内存大小和初始化</span><br>    setup_vm(vm, <span class="hljs-number">64000000</span>);<br><br>    <span class="hljs-comment">// 载入虚拟机的镜像</span><br>    load_image(vm);<br><br>    <span class="hljs-comment">// 运行虚拟机</span><br>    run_vm(vm);<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<h3 id="1-5-1-创建虚拟机实例"><a href="#1-5-1-创建虚拟机实例" class="headerlink" title="1.5.1 创建虚拟机实例"></a>1.5.1 创建虚拟机实例</h3><p>这段代码用于创建一个虚拟机实例，首先调用 <code>ioctl</code> 函数发送 <code>KVM_CREATE_VM</code> 命令给内核的 KVM 子系统，从而在内核中创建了一个虚拟机实例，并<strong>返回了虚拟机实例的文件描述符</strong>。在后续的代码中，可以通过这个文件描述符来操作该虚拟机实例</p>
+<p>最初创建的虚拟机只是一个空机箱，既没有内存，也没有处理器</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs c"><br><span class="hljs-comment">// 设置虚拟机，包括分配内存、初始化虚拟机结构等</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">setup_vm</span><span class="hljs-params">(struct vm *vm, <span class="hljs-keyword">int</span> ram_size)</span> </span>&#123;<br>    <span class="hljs-keyword">int</span> ret = <span class="hljs-number">0</span>;<br><br>    <span class="hljs-comment">// 通过ioctl调用KVM_CREATE_VM命令创建虚拟机实例</span><br>    <span class="hljs-keyword">if</span> ((vm-&gt;vm_fd = ioctl(g_dev_fd, KVM_CREATE_VM, <span class="hljs-number">0</span>)) &lt; <span class="hljs-number">0</span>) &#123;<br>        <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;failed to create vm.\n&quot;</span>);<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;<br>    &#125;<br>    <span class="hljs-comment">// ... 其他设置虚拟机的代码 ...</span><br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<h3 id="1-5-2-创建内存"><a href="#1-5-2-创建内存" class="headerlink" title="1.5.2 创建内存"></a>1.5.2 创建内存</h3><p>组装机器，首先是内存，就像需要在内存槽上插上内存条一样，我们也需要为我们的虚拟机安装内存。KVM为用户空间工具配置虚拟机内存定义的数据结构如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs c">commit <span class="hljs-number">6f</span>c138d2278078990f597cb1f62fde9e5b458f96<br>KVM: Support assigning userspace memory to the guest<br>linux.git/include/linux/kvm.h<br><br><span class="hljs-comment">// 结构体定义，用于配置虚拟机内存</span><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">kvm_userspace_memory_region</span> &#123;</span><br>    __u32 slot;                  <span class="hljs-comment">// 内存槽编号</span><br>    __u32 flags;                 <span class="hljs-comment">// 内存的标志和属性</span><br>    __u64 guest_phys_addr;       <span class="hljs-comment">// 内存在虚拟机物理地址空间的起始地址</span><br>    __u64 memory_size;           <span class="hljs-comment">// 内存大小（以字节为单位）</span><br>    __u64 userspace_addr;        <span class="hljs-comment">// 内存在宿主机中的起始地址</span><br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<p>这段代码定义了一个结构体，用于配置虚拟机中的内存区域。其中，<code>slot</code> 字段表示内存槽编号，用于标识内存的插槽。<code>flags</code> 字段表示内存的类型和属性，如 <code>KVM_MEM_READONLY</code> 表示只读内存。<code>guest_phys_addr</code> 字段指定插入的内存在虚拟机的物理地址空间中的起始地址。<code>memory_size</code> 字段表示内存的大小，以字节为单位。<code>userspace_addr</code> 字段表示宿主机中分配的内存的起始地址，用于在宿主机和虚拟机之间进行内存映射。</p>
+<p>下面这段代码的主要功能是为虚拟机配置物理内存。它首先使用 <code>mmap</code> 分配一段按照页面尺寸对齐的内存作为虚拟机的物理内存。然后，通过 <code>KVM_SET_USER_MEMORY_REGION</code> API，将这块内存插入虚拟机的内存槽中。在 <code>setup_vm</code> 函数中，填充了虚拟机内存配置结构体 <code>vm-&gt;mem</code> 的各个字段，包括内存槽编号、内存大小、内存在虚拟机物理地址空间的起始地址以及在宿主机中的起始地址。最后，通过 <code>ioctl</code> 调用将内存配置信息传递给 KVM 子系统，将这块内存插入虚拟机的0号槽（使用mmap分配了一段按照页面尺寸对齐的64MB的内存作为虚拟机的物理内存。然后通过KVM子系统为用户空间配置虚拟机内存提供的API KVM_SET_USER_MEMORY_REGION，为虚拟机在0号槽上插入一条内存）。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs c"><br><br><span class="hljs-comment">// 准备虚拟机的物理内存</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">setup_vm</span><span class="hljs-params">(struct vm *vm, <span class="hljs-keyword">int</span> ram_size)</span> </span>&#123;<br>    <span class="hljs-comment">// ... other setup ...</span><br><br>    vm-&gt;ram_size = ram_size;<br><br>    <span class="hljs-comment">// 通过 mmap 分配页面对齐的内存作为虚拟机的物理内存</span><br>    vm-&gt;ram_start = (__u64)mmap(<span class="hljs-literal">NULL</span>, vm-&gt;ram_size,<br>                                 PROT_READ | PROT_WRITE, MAP_PRIVATE |<br>                                 MAP_ANONYMOUS | MAP_NORESERVE, <span class="hljs-number">-1</span>, <span class="hljs-number">0</span>);<br>    <span class="hljs-keyword">if</span> ((<span class="hljs-keyword">void</span> *)vm-&gt;ram_start == MAP_FAILED) &#123;<br>        <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;failed to map memory for vm.\n&quot;</span>);<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;<br>    &#125;<br><br>    <span class="hljs-comment">// 配置虚拟机内存</span><br>    vm-&gt;mem.slot = <span class="hljs-number">0</span>;                       <span class="hljs-comment">// 内存槽编号</span><br>    vm-&gt;mem.guest_phys_addr = <span class="hljs-number">0</span>;            <span class="hljs-comment">// 内存在虚拟机物理地址空间的起始地址</span><br>    vm-&gt;mem.memory_size = vm-&gt;ram_size;     <span class="hljs-comment">// 内存大小</span><br>    vm-&gt;mem.userspace_addr = vm-&gt;ram_start; <span class="hljs-comment">// 内存在宿主机中的起始地址</span><br><br>    <span class="hljs-comment">// 使用 KVM_SET_USER_MEMORY_REGION API 将内存插入虚拟机的0号槽</span><br>    <span class="hljs-keyword">if</span> ((ioctl(vm-&gt;vm_fd, KVM_SET_USER_MEMORY_REGION, &amp;(vm-&gt;mem))) &lt; <span class="hljs-number">0</span>) &#123;<br>        <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;failed to set memory for vm.\n&quot;</span>);<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;<br>    &#125;<br><br>    <span class="hljs-comment">// ... other setup ...</span><br><br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br><br><br></code></pre></td></tr></table></figure>
+
+<h3 id="1-5-3-创建处理器"><a href="#1-5-3-创建处理器" class="headerlink" title="1.5.3 创建处理器"></a>1.5.3 创建处理器</h3><p>KVM模块为用户空间提供的API为KVM_CREATE_VCPU，这个API接收一个参数vcpu id，本质上是lapci id：</p>
+<p>在 <code>setup_vm</code> 函数中，首先获取虚拟机中的第一个处理器实例，然后通过 <code>KVM_CREATE_VCPU</code> 命令，为虚拟机创建一个处理器。创建后，处理器的文件描述符 <code>fd</code> 将用于与该处理器实例进行交互。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// 为虚拟机配置处理器</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">setup_vm</span><span class="hljs-params">(struct vm *vm, <span class="hljs-keyword">int</span> ram_size)</span> </span>&#123;<br>    <span class="hljs-comment">// ... other setup ...</span><br><br>    <span class="hljs-comment">// 获取虚拟机中的第一个处理器</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">vcpu</span> *<span class="hljs-title">vcpu</span> =</span> vm-&gt;vcpu[<span class="hljs-number">0</span>];<br><br>    <span class="hljs-comment">// 通过 KVM_CREATE_VCPU 命令，为虚拟机创建一个处理器实例</span><br>    vcpu-&gt;fd = ioctl(vm-&gt;vm_fd, KVM_CREATE_VCPU, vcpu-&gt;id);<br>    <span class="hljs-keyword">if</span> (vcpu-&gt;fd &lt; <span class="hljs-number">0</span>) &#123;<br>        <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;failed to create cpu for vm.\n&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-comment">// ... other setup ...</span><br><br>    <span class="hljs-keyword">return</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在虚拟处理器创建完成后，我们需要告知处理器从虚拟机内存的哪个位置开始执行指令。这可以通过直接设置代码段（cs）和指令指针（RIP）来实现，而不需要按照传统的方式执行，如处理器重置后从地址0xFFFFFFF0开始执行。在x86架构中，KVM为虚拟处理器的寄存器定义了两个结构体，其中一个是<code>struct kvm_sregs</code>，该结构体被称为特殊寄存器（special registers），它包括了各种段寄存器、控制寄存器等。代码段寄存器<code>cs</code> 就在这个结构体中。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs c">linux.git/include/linux/kvm.h<br><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">kvm_sregs</span> &#123;</span><br>	 <span class="hljs-comment">/* in */</span><br>	__u32 vcpu;<br>	__u32 padding;<br>	<br>	<span class="hljs-comment">/* out (KVM_GET_SREGS) / in (KVM_SET_SREGS) */</span><br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">kvm_segment</span> <span class="hljs-title">cs</span>, <span class="hljs-title">ds</span>, <span class="hljs-title">es</span>, <span class="hljs-title">fs</span>, <span class="hljs-title">gs</span>, <span class="hljs-title">ss</span>;</span><br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">kvm_segment</span> <span class="hljs-title">tr</span>, <span class="hljs-title">ldt</span>;</span><br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">kvm_dtable</span> <span class="hljs-title">gdt</span>, <span class="hljs-title">idt</span>;</span><br>	<br>	__u64 cr0, cr2, cr3, cr4, cr8;<br>	__u64 efer;<br>	__u64 apic_base;<br>	__u64 interrupt_bitmap[KVM_IRQ_BITMAP_SIZE(__u64)];<br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<p>通用寄存器、标志寄存器，以及前面刚刚提到的指令指针寄存器<br>eip定义在另一个结构体kvm_regs中：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs c"><br>linux.git/include/linux/kvm.h<br><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">kvm_regs</span> &#123;</span><br>	<span class="hljs-comment">/* in */</span><br>	__u32 vcpu;<br>	__u32 padding;<br>	<span class="hljs-comment">/* out (KVM_GET_REGS) / in (KVM_SET_REGS) */</span><br>	__u64 rax, rbx, rcx, rdx;<br>	__u64 rsi, rdi, rsp, rbp;<br>	__u64 r8, r9, r10, r11;<br>	__u64 r12, r13, r14, r15;<br>	__u64 rip, rflags;<br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<p>在系统启动时，首先进入16位实模式，并在后续将Guest加载到段地址为0x1000、偏移地址为0的内存位置。为了实现这个目标，代码中使用了KVM API来设置虚拟处理器的寄存器值，包括代码段寄存器（cs）和指令指针寄存器（RIP），以及一些附加操作。下面是对文字和代码的解释和注释：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">setup_vm</span><span class="hljs-params">(struct vm *vm, <span class="hljs-keyword">int</span> ram_size)</span> </span>&#123;<br>…<br><span class="hljs-comment">// 通过 ioctl 获取虚拟处理器的特殊寄存器（special registers）</span><br><span class="hljs-keyword">if</span> (ioctl(vcpu-&gt;fd, KVM_GET_SREGS, &amp;(vcpu-&gt;sregs)) &lt; <span class="hljs-number">0</span>) &#123;<br>    <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;failed to get sregs.\n&quot;</span>);<br>    <span class="hljs-built_in">exit</span>(<span class="hljs-number">-1</span>);<br>&#125;<br><br><span class="hljs-comment">// 设置代码段寄存器 cs</span><br>vcpu-&gt;sregs.cs.selector = <span class="hljs-number">0x1000</span>;         <span class="hljs-comment">// 设置代码段选择子为0x1000</span><br>vcpu-&gt;sregs.cs.base = <span class="hljs-number">0x1000</span> &lt;&lt; <span class="hljs-number">4</span>;       <span class="hljs-comment">// 设置代码段基地址为0x1000 &lt;&lt; 4 = 0x10000</span><br><br><span class="hljs-comment">// 将更新后的 sregs 重新设置给虚拟处理器</span><br><span class="hljs-keyword">if</span> (ioctl(vcpu-&gt;fd, KVM_SET_SREGS, &amp;(vcpu-&gt;sregs)) &lt; <span class="hljs-number">0</span>) &#123;<br>    <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;failed to set sregs.\n&quot;</span>);<br>    <span class="hljs-built_in">exit</span>(<span class="hljs-number">-1</span>);<br>&#125;<br><br><span class="hljs-comment">// 通过 ioctl 获取虚拟处理器的通用寄存器（general-purpose registers）</span><br><span class="hljs-keyword">if</span> (ioctl(vcpu-&gt;fd, KVM_GET_REGS, &amp;(vcpu-&gt;regs)) &lt; <span class="hljs-number">0</span>) &#123;<br>    <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;failed to get regs.\n&quot;</span>);<br>    <span class="hljs-built_in">exit</span>(<span class="hljs-number">-1</span>);<br>&#125;<br><br>vcpu-&gt;regs.rip = <span class="hljs-number">0x0</span>;               <span class="hljs-comment">// 设置指令指针初始值为0</span><br>vcpu-&gt;regs.rflags = <span class="hljs-number">0x2</span>;            <span class="hljs-comment">// 设置 rflags 寄存器，保留第2位，其余位初始化为0</span><br><br><span class="hljs-comment">// 将更新后的 regs 重新设置给虚拟处理器</span><br><span class="hljs-keyword">if</span> (ioctl(vcpu-&gt;fd, KVM_SET_REGS, &amp;(vcpu-&gt;regs)) &lt; <span class="hljs-number">0</span>) &#123;<br>    <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;failed to set regs.\n&quot;</span>);<br>    <span class="hljs-built_in">exit</span>(<span class="hljs-number">-1</span>);<br>&#125;<br><br><span class="hljs-comment">// ... 其他设置 ...</span><br><br><br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<h3 id="1-5-4-Guest"><a href="#1-5-4-Guest" class="headerlink" title="1.5.4 Guest"></a>1.5.4 Guest</h3><p>实现一个非常小的Guest：这个Guest就是一个简单的无限循环</p>
+<p>这个Guest的内核中没有任何文件格式解码器，需要将Guest编译为无格式的，因此我们需要使用objcopy从ELF格式转换为binary格式，代码从地址0开始。这个Guest没有任何依赖，所以不连接任何其他的第三方库</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// guest/kernel.S</span><br>.code16gcc<br>.text<br>.globl _start<br>.type _start, @function<br>_start:<br><span class="hljs-number">1</span>:<br>jmp <span class="hljs-number">1b</span>       <span class="hljs-comment">// 无限循环，不断跳转到标号1处，创建一个简单的无限循环。</span><br><br><span class="hljs-comment">// Makefile 文件用于编译和生成 Guest 内核的可执行文件。</span><br><span class="hljs-comment">// guest/Makefile</span><br>BIN := kernel.bin<br>ELF := kernel.elf<br>OBJ := kernel.o<br><br>all: $(BIN)   <span class="hljs-comment">// 定义默认目标 all，生成 kernel.bin 可执行文件。</span><br><br>$(BIN): $(ELF) <span class="hljs-comment">// 生成 kernel.bin 依赖于 kernel.elf 文件。</span><br>    objcopy -O binary $&lt; $@ <span class="hljs-comment">// 使用 objcopy 将 ELF 文件转换为 binary 格式。</span><br><br>$(ELF): $(OBJ) <span class="hljs-comment">// 生成 kernel.elf 依赖于 kernel.o 目标文件。</span><br>    $(LD) -Ttext=<span class="hljs-number">0x00</span> -nostdlib -<span class="hljs-keyword">static</span> $&lt; -o $@ <span class="hljs-comment">// 链接目标文件</span><br><br>%.o: %.S <span class="hljs-comment">// 定义一般规则，用于将汇编文件编译为目标文件。</span><br>    $(CC) -nostdinc -c $&lt; -o $@<br><br>clean: <span class="hljs-comment">// 定义 clean 目标，用于清除生成的文件。</span><br>    rm -rf $(OBJ) $(BIN) $(ELF)<br><br></code></pre></td></tr></table></figure>
+
+<h3 id="1-5-5-加载Guest镜像到内存"><a href="#1-5-5-加载Guest镜像到内存" class="headerlink" title="1.5.5 加载Guest镜像到内存"></a>1.5.5 加载Guest镜像到内存</h3><p>初始化VCPU时我们将代码段cs设置为0xf000，将rip设置为0，所以这里需要将Guest镜像加载到Guest的内存地址(0x1000＜＜4)+0x0处。Guest的物理内存的起始地址为ram_start，所以加载Guest镜像到内存的代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">load_image</span><span class="hljs-params">(struct vm *vm)</span> </span>&#123;<br>    <span class="hljs-keyword">int</span> ret = <span class="hljs-number">0</span>;<br>    <span class="hljs-keyword">int</span> fd = open(<span class="hljs-string">&quot;./guest/kernel.bin&quot;</span>, O_RDONLY); <span class="hljs-comment">// 打开Guest镜像文件</span><br>    <span class="hljs-keyword">if</span> (fd &lt; <span class="hljs-number">0</span>) &#123;<br>        <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;can not open guest image\n&quot;</span>);<br>        <span class="hljs-built_in">exit</span>(<span class="hljs-number">-1</span>);<br>    &#125;<br>    <br>    <span class="hljs-comment">// 计算Guest加载到内存的物理地址</span><br>    <span class="hljs-keyword">char</span> *p = (<span class="hljs-keyword">char</span> *)vm-&gt;ram_start + ((<span class="hljs-number">0x1000</span> &lt;&lt; <span class="hljs-number">4</span>) + <span class="hljs-number">0x0</span>);<br><br>    <span class="hljs-keyword">while</span> (<span class="hljs-number">1</span>) &#123;<br>        <span class="hljs-comment">// 从文件中读取数据并写入内存</span><br>        <span class="hljs-keyword">if</span> ((ret = read(fd, p, <span class="hljs-number">4096</span>)) &lt;= <span class="hljs-number">0</span>)<br>            <span class="hljs-keyword">break</span>;<br>        p += ret; <span class="hljs-comment">// 更新内存指针</span><br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>这段代码的目的是将Guest镜像文件加载到虚拟机的内存中。它首先<strong>打开名为 “./guest/kernel.bin” 的Guest镜像文件</strong>，然后通过计算得到Guest镜像应该加载到内存中的物理地址。接下来，通过循环从文件中读取数据，每次最多读取 4096 字节（一个页面的大小），然后将读取的数据写入到内存中。这个过程会一直进行，直到文件的内容被完全读取并写入内存，或者发生了读取错误。在每次循环中，内存指针会被更新，以便在下次循环中写入数据的时候不会覆盖之前的数据。</p>
+<h3 id="1-5-6-运行虚拟机"><a href="#1-5-6-运行虚拟机" class="headerlink" title="1.5.6 运行虚拟机"></a>1.5.6 运行虚拟机</h3><p>下面是对代码和文本的详细解释：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// 启动虚拟机的函数</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">run_vm</span><span class="hljs-params">(struct vm *vm)</span> </span>&#123;<br>    <span class="hljs-keyword">int</span> ret = <span class="hljs-number">0</span>;<br>    <span class="hljs-keyword">while</span> (<span class="hljs-number">1</span>) &#123;<br>        <span class="hljs-comment">// 使用 ioctl 调用 KVM_RUN 命令来启动虚拟机运行</span><br>        <span class="hljs-keyword">if</span> ((ioctl(vm-&gt;vcpu[<span class="hljs-number">0</span>]-&gt;fd, KVM_RUN, <span class="hljs-number">0</span>)) &lt; <span class="hljs-number">0</span>) &#123;<br>            <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;failed to run kvm.\n&quot;</span>);<br>            <span class="hljs-built_in">exit</span>(<span class="hljs-number">1</span>);<br>        &#125;<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+
+<p>这段代码中的函数 <code>run_vm</code> 是用来启动虚拟机的。它进入了一个无限的循环，每次循环都通过 ioctl 调用发送 KVM_RUN 命令，从而启动虚拟机的运行。在这个循环中，虚拟机会被不断地执行，直到某个条件使得虚拟机退出到用户空间。</p>
+<p>在解释完代码后，接下来是对操作步骤的解释：</p>
+<ol>
+<li>编译 kmm.c 文件：通过执行命令 <code>gcc kvm.c -o kvm</code>，将 <code>kvm.c</code> 编译成名为 <code>kvm</code> 的可执行文件。</li>
+<li>运行虚拟机：通过执行命令 <code>sudo ./kvm</code>，以超级用户权限运行生成的可执行文件。</li>
+<li>在另一个终端中运行 <code>pidstat</code> 命令：执行命令 <code>pidstat -p</code> pidof kvm <code>1</code>，监视虚拟机进程的资源使用情况。其中 <code>-p</code> pidof kvm`` 参数指定要监视的进程号，<code>1</code> 表示每秒输出一次监视结果。</li>
+<li>观察监视结果：如果一切正常，<code>pidstat</code> 命令的输出会显示每个采样时刻的虚拟机进程的资源利用率。在正常情况下，由于虚拟机中只有一个简单的无限循环，它不会主动触发陷入，因此虚拟机的 CPU 利用率会接近 100%。同时，由于虚拟机并没有进行复杂的操作，因此在 Host 系统态（%system）方面的资源使用率会非常低，接近 0。</li>
+</ol>
+<p>这个过程展示了如何使用 KVM 在用户空间创建一个简单的虚拟机，并让虚拟机在无限循环中运行，从而实现虚拟化。</p>
+<h1 id="二、内存虚拟化"><a href="#二、内存虚拟化" class="headerlink" title="二、内存虚拟化"></a>二、内存虚拟化</h1>
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>《深度探索Linux系统虚拟化》学习笔记</div>
+      <div>http://gls.show/p/c275a99e/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年10月30日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/6b8fde0c/" title="source insight ——源码的最佳阅读器">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">source insight ——源码的最佳阅读器</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/3645f6a9/" title="Git的使用">
+                        <span class="hidden-mobile">Git的使用</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

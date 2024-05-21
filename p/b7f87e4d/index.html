@@ -1,0 +1,880 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="为什么使用MakefileMakefile可以使构建更方便、减少不必要的构建 想象以下情景，目标文件main的依赖关系如下：那么可以使用如下命令行进行编译： 1gcc main.c stack.c maze.c -o main  那么会出现以下状况：  即使是仅仅改变了某一个文件的一行代码，那么所有的.o文件都需要重新生成，然后通过链接得到目标文件，这个开销是巨大的 一个极端情景：一个大型的软件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Makefile：一个简单的入门">
+<meta property="og:url" content="http://gls.show/p/b7f87e4d/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="为什么使用MakefileMakefile可以使构建更方便、减少不必要的构建 想象以下情景，目标文件main的依赖关系如下：那么可以使用如下命令行进行编译： 1gcc main.c stack.c maze.c -o main  那么会出现以下状况：  即使是仅仅改变了某一个文件的一行代码，那么所有的.o文件都需要重新生成，然后通过链接得到目标文件，这个开销是巨大的 一个极端情景：一个大型的软件">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/CMake-Logo.png">
+<meta property="article:published_time" content="2022-09-12T14:00:12.954Z">
+<meta property="article:modified_time" content="2022-10-13T04:40:20.732Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/CMake-Logo.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>Makefile：一个简单的入门 - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Makefile：一个简单的入门"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-09-12 22:00" pubdate>
+          2022年9月12日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          3.4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          11 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Makefile：一个简单的入门</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2022年10月13日 下午
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <p><img src="/image/CMake-Logo.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="为什么使用Makefile"><a href="#为什么使用Makefile" class="headerlink" title="为什么使用Makefile"></a>为什么使用Makefile</h1><p>Makefile可以使构建更方便、减少不必要的构建</p>
+<p>想象以下情景，目标文件main的依赖关系如下：<br><img src="/image/Pastedimage20220912172957.png" srcset="/img/loading.gif" lazyload><br>那么可以使用如下命令行进行编译：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus">gcc <span class="hljs-selector-tag">main</span><span class="hljs-selector-class">.c</span> stack<span class="hljs-selector-class">.c</span> maze<span class="hljs-selector-class">.c</span> -o main<br></code></pre></td></tr></table></figure>
+
+<p>那么会出现以下状况：</p>
+<ul>
+<li>即使是仅仅改变了某一个文件的一行代码，那么所有的.o文件都需要重新生成，然后通过链接得到目标文件，这个开销是巨大的<ul>
+<li>一个极端情景：一个大型的软件项目往往由上千个源文件组成，全部编译一遍需要几个小时</li>
+</ul>
+</li>
+<li>如果有多个.o文件，我们修改了某一个文件（比如.h或者.c文件），那么会影响多个.o文件，因此我们需要重新编译这些.o文件，那么管理他们的依赖是十分麻烦的</li>
+</ul>
+<p>Makefile应运而生</p>
+<h1 id="Makefile格式"><a href="#Makefile格式" class="headerlink" title="Makefile格式"></a>Makefile格式</h1><p>在目录下必须有一个Makefile文件，该文件名大小写敏感，里面内容类似下面：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;target&gt; : &lt;prerequisites&gt; <br>[tab]  &lt;commands&gt; <span class="hljs-comment">#hello，thank you</span><br></code></pre></td></tr></table></figure>
+<p>其中：</p>
+<ul>
+<li>target是目标文件</li>
+<li>prerequisites是前置条件</li>
+<li>如果要更新目标，那么需要更新所有前置条件</li>
+<li>target和prerequisites可以有多个，用空格分开</li>
+<li>command前面必须是tab，这些command将会被shell执行</li>
+<li>#是注释</li>
+</ul>
+<p>一个简单的Makefile程序：</p>
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs mipsasm"><span class="hljs-keyword">blah: </span><span class="hljs-keyword">blah.o</span><br><span class="hljs-keyword"></span><br>cc <span class="hljs-keyword">blah.o </span>-o <span class="hljs-keyword">blah </span><span class="hljs-comment"># Runs third</span><br><span class="hljs-symbol"></span><br><span class="hljs-symbol">blah.o:</span> <span class="hljs-keyword">blah.c</span><br><span class="hljs-keyword"></span><br>cc -c <span class="hljs-keyword">blah.c </span>-o <span class="hljs-keyword">blah.o </span><span class="hljs-comment"># Runs second</span><br><span class="hljs-symbol"></span><br><span class="hljs-symbol">blah.c:</span><br><br>echo <span class="hljs-string">&quot;int main() &#123; return 0; &#125;&quot;</span> &gt; <span class="hljs-keyword">blah.c </span><span class="hljs-comment"># Runs first</span><br></code></pre></td></tr></table></figure>
+<p>在下面的情况下，执行make会更新目标文件：</p>
+<ul>
+<li>当前目录没有目标文件</li>
+<li>前置条件需要更新</li>
+<li>前置条件修改时间晚于目标文件（目标文件依赖于前置条件，而前置条件被修改了，那么目标文件需要更新）</li>
+</ul>
+<p>在编译过程中，经常有一些过程文件，比如二进制文件，那么我们可以清除这些二进制文件，保留源文件，以便于下次make</p>
+<p>make规则的一个示例：</p>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs jboss-cli">clean:<br>	@<span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;cleanning project&quot;</span><br>	-rm main *<span class="hljs-string">.o</span><br>	@<span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;clean completed&quot;</span><br></code></pre></td></tr></table></figure>
+<ul>
+<li>@表示这行语句不被输出，如果不加@那么会输出这行语句本身</li>
+<li>-表示这行语句的执行错误也要忽略。一般rm命令会加-，因为要删除的文件或许不存在</li>
+</ul>
+<p>至此我们发现Makefile中已经有了很多目标文件了，比如main和clean，那么如果我们要指定构建target，那么只需要在命令行中输入make target即可；假设没有指定，那么会默认执行Makefile文件的第一个目标</p>
+<p>如果文件夹中存在clean这个文件名，那么再次执行make clean并不会执行，因为它认为该文件已存在。为了防止这种情况发生，可以通过.PHONY声明clean是”伪目标”</p>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs jboss-cli"><span class="hljs-string">.PHONY</span>: clean<br><br>clean:<br>	@<span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;cleanning project&quot;</span><br>	-rm main *<span class="hljs-string">.o</span><br>	@<span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;clean completed&quot;</span><br></code></pre></td></tr></table></figure>
+
+
+<p>Makefile中约定俗成的名字：</p>
+<blockquote>
+<p>all，执行主要的编译工作，通常用作缺省目标。<br>install，执行编译后的安装工作，把可执行文件、配置文件、文档等分别拷到不同的安装目录。<br>clean，删除编译生成的二进制文件。<br>distclean，不仅删除编译生成的二进制文件，也删除其它生成的文件，例如配置文件和格式转换后的文档，执行make distclean之后应该清除所有这些文件，只留下源文件。</p>
+</blockquote>
+<h1 id="变量与规则"><a href="#变量与规则" class="headerlink" title="变量与规则"></a>变量与规则</h1><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs makefile">foo = <span class="hljs-variable">$(bar)</span><br>	bar = Huh?<br><span class="hljs-section">all:</span><br>	@echo <span class="hljs-variable">$(foo)</span><br></code></pre></td></tr></table></figure>
+<ul>
+<li>最终会打印出Huh？</li>
+<li>这种赋值方式，在make遇到变量定义时不会立即展开</li>
+<li>如果想要立即展开，可以使用<code>a:=b</code>的形式</li>
+<li>+=可以追加</li>
+</ul>
+<p>Makefile中有一些特殊变量，比如：</p>
+<ul>
+<li>$@表示规则中的目标文件（target）</li>
+<li>$&lt;表示规则中第一个prerequisites</li>
+<li>$?表示规则中所有比目标文件新的prerequisites</li>
+<li>$^规则中的所有prerequisites</li>
+</ul>
+<p>使用这些变量，可以对Makefile进行改写</p>
+<p>版本1：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs stylus"><span class="hljs-selector-tag">main</span>: <span class="hljs-selector-tag">main</span><span class="hljs-selector-class">.o</span> stack<span class="hljs-selector-class">.o</span> maze<span class="hljs-selector-class">.o</span><br>	gcc <span class="hljs-selector-tag">main</span><span class="hljs-selector-class">.o</span> stack<span class="hljs-selector-class">.o</span> maze<span class="hljs-selector-class">.o</span> -o main<br></code></pre></td></tr></table></figure>
+<p>版本2：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs stylus"><span class="hljs-selector-tag">main</span>: <span class="hljs-selector-tag">main</span><span class="hljs-selector-class">.o</span> stack<span class="hljs-selector-class">.o</span> maze<span class="hljs-selector-class">.o</span><br>	gcc $^ -o $@<br></code></pre></td></tr></table></figure>
+
+<p>常见变量：</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">AR<br>静态库打包命令的名字，缺省值是ar。<br>ARFLAGS<br>静态库打包命令的选项，缺省值是rv。<br>AS<br>汇编器的名字，缺省值是<span class="hljs-keyword">as</span>。<br>ASFLAGS<br>汇编器的选项，没有定义。<br>CC<br>C编译器的名字，缺省值是cc。<br>CFLAGS<br>C编译器的选项，没有定义。<br>CXX<br>C++编译器的名字，缺省值是g++。<br>CXXFLAGS<br>C++编译器的选项，没有定义。<br>CPP<br>C预处理器的名字，缺省值是<span class="hljs-constructor">$(CC)</span> -E。<br>CPPFLAGS<br>C预处理器的选项，没有定义。<br>LD<br>链接器的名字，缺省值是ld。<br>LDFLAGS<br>链接器的选项，没有定义。<br>TARGET_ARCH<br>和目标平台相关的命令行选项，没有定义。<br>OUTPUT_OPTION<br>输出的命令行选项，缺省值是-o $@。<br><span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">LINK</span>.</span></span>o<br>把.o文件链接在一起的命令行，缺省值是<span class="hljs-constructor">$(CC)</span> <span class="hljs-constructor">$(LDFLAGS)</span> <span class="hljs-constructor">$(TARGET_ARCH)</span>。<br><span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">LINK</span>.</span></span>c<br>把.c文件链接在一起的命令行，缺省值是<span class="hljs-constructor">$(CC)</span> <span class="hljs-constructor">$(CFLAGS)</span> <span class="hljs-constructor">$(CPPFLAGS)</span> <span class="hljs-constructor">$(LDFLAGS)</span><br><span class="hljs-constructor">$(TARGET_ARCH)</span>。<br><span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">LINK</span>.</span></span>cc<br>把.cc文件（C++源文件）链接在一起的命令行，缺省值是<span class="hljs-constructor">$(CXX)</span> <span class="hljs-constructor">$(CXXFLAGS)</span><br><span class="hljs-constructor">$(CPPFLAGS)</span> <span class="hljs-constructor">$(LDFLAGS)</span> <span class="hljs-constructor">$(TARGET_ARCH)</span>。<br><span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">COMPILE</span>.</span></span>c<br>编译.c文件的命令行，缺省值是<span class="hljs-constructor">$(CC)</span> <span class="hljs-constructor">$(CFLAGS)</span> <span class="hljs-constructor">$(CPPFLAGS)</span> <span class="hljs-constructor">$(TARGET_ARCH)</span> -c。<br><span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">COMPILE</span>.</span></span>cc<br>编译.cc文件的命令行，缺省值是<span class="hljs-constructor">$(CXX)</span> <span class="hljs-constructor">$(CXXFLAGS)</span> <span class="hljs-constructor">$(CPPFLAGS)</span> <span class="hljs-constructor">$(TARGET_ARCH)</span> -c。<br>RM<br>删除命令的名字，缺省值是rm -f。<br></code></pre></td></tr></table></figure>
+
+<p>make -p查看Makefile的隐藏规则</p>
+<h1 id="依赖关系"><a href="#依赖关系" class="headerlink" title="依赖关系"></a>依赖关系</h1><ul>
+<li><code>gcc -M main.c</code>可以列出目标文件和源文件的依赖关系，包括系统头文件</li>
+<li><code>gcc -MM *.c</code>在上面的基础上不列出系统头文件</li>
+</ul>
+<h1 id="一个内核驱动的Makefile实例"><a href="#一个内核驱动的Makefile实例" class="headerlink" title="一个内核驱动的Makefile实例"></a>一个内核驱动的Makefile实例</h1><ul>
+<li>-j $(nrpoc) ：指定处理器数量</li>
+<li>-C $(LINUX_KERNAL_PATH) ：在内核源码路径执行Makefile</li>
+<li>M=$(CURRENT_PATH) modules ：以内核为基础编译模块的时候，指定目录查找模块源码</li>
+<li>all：make的缺省目标</li>
+<li>@表示这行语句不被输出，如果不加@那么会输出这行语句本身<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs makefile">TARGET=rootkit<br>OBJ=<span class="hljs-variable">$(TARGET)</span>.o<br>MODULE=<span class="hljs-variable">$(TARGET)</span>.ko <br>obj-m+=<span class="hljs-variable">$(OBJ)</span> <br><br>EXTRA_CFLAGS+=-g -O0 <span class="hljs-comment"># 编译参数</span><br>CURRENT_PATH:=<span class="hljs-variable">$(<span class="hljs-built_in">shell</span> pwd)</span> <span class="hljs-comment">#当前路径</span><br>LINUX_KERNAL:=<span class="hljs-variable">$(<span class="hljs-built_in">shell</span> uname -r)</span> <span class="hljs-comment">#内核版本号</span><br>LINUX_KERNAL_PATH:=/lib/modules/<span class="hljs-variable">$(LINUX_KERNAL)</span>/build<br><br><br><span class="hljs-section">all:rootkit </span><br><br><span class="hljs-section">rootkit:</span><br>	make -j <span class="hljs-variable">$(nrpoc)</span>-C <span class="hljs-variable">$(LINUX_KERNAL_PATH)</span> M=<span class="hljs-variable">$(CURRENT_PATH)</span> modules <br><span class="hljs-section">install:</span><br><span class="hljs-comment"># 安装模块</span><br>	@sudo insmod <span class="hljs-variable">$(CURRENT_PATH)</span>/<span class="hljs-variable">$(MODULE)</span><br><span class="hljs-comment"># 卸载模块</span><br>	@sudo rmmod <span class="hljs-variable">$(CURRENT_PATH)</span>/<span class="hljs-variable">$(MODULE)</span><br><br><span class="hljs-section">clean:</span><br>	make -C <span class="hljs-variable">$(LINUX_KERNAL_PATH)</span> M=<span class="hljs-variable">$(CURRENT_PATH)</span> clean<br><br><span class="hljs-meta"><span class="hljs-meta-keyword">.PHONY</span>:all install clean rootkit</span><br></code></pre></td></tr></table></figure></li>
+</ul>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Makefile/" class="category-chain-item">Makefile</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Makefile：一个简单的入门</div>
+      <div>http://gls.show/p/b7f87e4d/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年9月12日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/8b271bd/" title="计算机加电后发生了什么？代码 &amp; 理论分析">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">计算机加电后发生了什么？代码 &amp; 理论分析</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/44962f68/" title="CSAPP-lab2：Bomb-lab">
+                        <span class="hidden-mobile">CSAPP-lab2：Bomb-lab</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

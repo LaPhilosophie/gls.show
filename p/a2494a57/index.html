@@ -1,0 +1,910 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="GDB 非常强大！">
+<meta property="og:type" content="article">
+<meta property="og:title" content="pwn college 刷题记录：debugging refresher">
+<meta property="og:url" content="http://gls.show/p/a2494a57/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="GDB 非常强大！">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/pwn-college.png">
+<meta property="article:published_time" content="2024-03-27T03:43:20.000Z">
+<meta property="article:modified_time" content="2024-05-20T07:57:30.270Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/pwn-college.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>pwn college 刷题记录：debugging refresher - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="pwn college 刷题记录：debugging refresher"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-03-27 11:43" pubdate>
+          2024年3月27日 中午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          15k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          46 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">pwn college 刷题记录：debugging refresher</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2024年5月20日 下午
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <p>GDB 非常强大！</p>
+<span id="more"></span>
+
+<p><img src="/image/pwn-college.png" srcset="/img/loading.gif" lazyload></p>
+<p><a target="_blank" rel="noopener" href="https://pwn.college/fundamentals/debugging-refresher">https://pwn.college/fundamentals/debugging-refresher</a></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><ul>
+<li>熟悉一些gdb命令 <ul>
+<li>一些常用的指令<ul>
+<li>layout asm</li>
+<li>layout regs</li>
+<li>display /10i <ul>
+<li>undisplay num 取消</li>
+</ul>
+</li>
+<li> <code>start</code> 启动程序，断点设置在 <code>main</code> </li>
+<li> <code>run</code> 启动程序，不设置断点</li>
+<li>p/x $rax 以十六进制打印出rax的值</li>
+<li>x 查看内存的值<ul>
+<li><code>x/20g  $rbp-0x18</code></li>
+</ul>
+</li>
+<li>set 修改内存的值<ul>
+<li><code>set *(int*)($rbp-0x1c) = 100</code></li>
+</ul>
+</li>
+<li><code>call (void)win()</code>  调用函数</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>熟悉如何写gdb脚本与程序进行交互<ul>
+<li>gdb启动时候的脚本：.gdbinit</li>
+<li>与程序交互的脚本：xxx.gdb。将命令写入某个文件，例如<code>x.gdb</code>，然后使用标志<code>-x &lt;PATH_TO_SCRIPT&gt;</code>启动gdb</li>
+<li>调整汇编风格：<code>set disassembly-flavor intel</code></li>
+</ul>
+</li>
+</ul>
+<h1 id="Lectures-and-Reading"><a href="#Lectures-and-Reading" class="headerlink" title="Lectures and Reading"></a>Lectures and Reading</h1><h1 id="1"><a href="#1" class="headerlink" title="1"></a>1</h1><figure class="highlight autohotkey"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs autohotkey">GDB是一个非常强大的动态分析工具，您可以使用它来了解程序在执行过程中的状态。在本模块中，您将熟悉一些GDB的功能。<br><br>您正在运行GDB！程序当前处于暂停状态。这是因为它在这里设置了断点。<br><br>您可以使用命令 `start` 启动程序，断点设置在 `main` 上。您可以使用命令 `starti` 启动程序，断点设置在 `_start` 上。您可以使用命令 `run` 启动程序，不设置断点。您可以使用命令 `attach &lt;PID&gt;` 连接到其他已经运行的程序。您可以使用命令 `core &lt;PATH&gt;` 分析已经运行的程序的核心转储。<br><br>在启动或运行程序时，您可以几乎以与在shell中相同的方式指定参数。例如，您可以使用 `start &lt;ARGV1&gt; &lt;ARGV2&gt; &lt;ARGVN&gt; &lt; &lt;STDIN_PATH&gt;`。<br><br>使用命令 `continue` 或 `c` 继续执行程序。<br></code></pre></td></tr></table></figure>
+
+
+<p>直接run，程序执行完毕时吐出flag</p>
+<h1 id="2"><a href="#2" class="headerlink" title="2"></a>2</h1><p>打印出寄存器的值</p>
+<ul>
+<li>info registers</li>
+<li>p/x $rax <ul>
+<li>以十六进制打印出rax的值</li>
+</ul>
+</li>
+</ul>
+<p>flag存在r12寄存器中</p>
+<h1 id="3"><a href="#3" class="headerlink" title="3"></a>3</h1><figure class="highlight autohotkey"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs autohotkey"><br>GDB是一个非常强大的动态分析工具，您可以使用它来了解程序在执行过程中的状态。在本模块中，您将熟悉一些GDB的功能。<br><br>您可以使用 `x/&lt;n&gt;&lt;u&gt;&lt;f&gt; &lt;address&gt;` 命令来检查内存的内容。在这个格式中，`&lt;u&gt;` 是要显示的单元大小，`&lt;f&gt;` 是要显示的格式，`&lt;n&gt;` 是要显示的元素数量。有效的单元大小有 `b`（<span class="hljs-number">1</span>字节）、`h`（<span class="hljs-number">2</span>字节）、`w`（<span class="hljs-number">4</span>字节）和 `g`（<span class="hljs-number">8</span>字节）。有效的格式有 `d`（十进制）、`x`（十六进制）、`s`（字符串）和 `i`（指令）。地址可以使用寄存器名、符号名或绝对地址来指定。此外，在指定地址时，您还可以使用数学表达式。<br><br>例如，`x/<span class="hljs-number">8</span>i $rip` 将打印当前指令指针后面的<span class="hljs-number">8</span>条指令。`x/<span class="hljs-number">16</span>i main` 将打印 main 函数的前<span class="hljs-number">16</span>条指令。您还可以使用 `disassemble main` 或 `disas main`（简写）来打印 main 函数的所有指令。另外，`x/<span class="hljs-number">16</span>gx $rsp` 将打印堆栈上的前<span class="hljs-number">16</span>个值。`x/gx $rbp-<span class="hljs-number">0</span>x32` 将打印存储在堆栈上的该位置的局部变量。<br><br>您可能希望使用正确的汇编语法查看指令。您可以使用命令 `set disassembly-flavor intel` 来实现。<br><br>为了解决这个关卡，您必须找出堆栈上的随机值（从 `/dev/urandom` 读取的值）。思考一下 read 系统调用的参数是什么。<br><br>程序接收到信号 SIGTRAP，跟踪/断点陷阱。<br></code></pre></td></tr></table></figure>
+
+
+<ul>
+<li>layout asm</li>
+<li>layout regs</li>
+</ul>
+<figure class="highlight autohotkey"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs autohotkey"><span class="hljs-number">1</span>. `open`函数：<br>    <br>    `#include &lt;fcntl.h&gt; int open(const char *pathname, int flags, mode_t mode)<span class="hljs-comment">;`</span><br>    <br>    `open`函数用于打开一个文件，并返回文件描述符（file descriptor）。它接受三个参数：<br>    <br>    - `pathname`：要打开的文件的路径名。<br>    - `flags`：打开文件的标志，例如`O_RDONLY`（只读）、`O_WRONLY`（只写）、`O_RDWR`（读写）等。<br>    - `mode`：指定新创建文件的权限，通常使用八进制表示，例如`0644`。<br>    <br>    `open`函数返回一个非负整数的文件描述符，如果出现错误，则返回-<span class="hljs-number">1</span>。<br>    <br><span class="hljs-number">2</span>. `read`函数：<br>    <br>    `#include &lt;unistd.h&gt; ssize_t read(int fd, void *buf, size_t count)<span class="hljs-comment">;`</span><br>    <br>    `read`函数用于从文件中读取数据。它接受三个参数：<br>    <br>    - `fd`：要读取的文件的文件描述符。<br>    - `buf`：用于存储读取数据的缓冲区的指针。<br>    - `count`：要读取的最大字节数。<br>    <br>    `read`函数返回实际读取的字节数，如果返回值为<span class="hljs-number">0</span>表示已到达文件末尾，如果返回-<span class="hljs-number">1</span>表示出现错误。<br></code></pre></td></tr></table></figure>
+
+<p>看一下对应的逻辑</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs x86asm"><span class="hljs-symbol">.text:</span>0000000000001C2C loc_1C2C:                               <span class="hljs-comment">; CODE XREF: .text:0000000000001CDD↓j</span><br><span class="hljs-symbol">.text:</span>0000000000001C2C                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">esi</span>, <span class="hljs-number">0</span><br><span class="hljs-symbol">.text:</span>0000000000001C31                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aDevUrandom <span class="hljs-comment">; &quot;/dev/urandom&quot;</span><br><span class="hljs-symbol">.text:</span>0000000000001C38                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">eax</span>, <span class="hljs-number">0</span><br><span class="hljs-symbol">.text:</span>0000000000001C3D                 <span class="hljs-keyword">call</span>    _open<br><span class="hljs-symbol">.text:</span>0000000000001C42                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">ecx</span>, <span class="hljs-built_in">eax</span><br><span class="hljs-symbol">.text:</span>0000000000001C44                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rax</span>, [<span class="hljs-built_in">rbp</span>-<span class="hljs-number">18h</span>]<br><span class="hljs-symbol">.text:</span>0000000000001C48                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">edx</span>, <span class="hljs-number">8</span><br><span class="hljs-symbol">.text:</span>0000000000001C4D                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rsi</span>, <span class="hljs-built_in">rax</span><br><span class="hljs-symbol">.text:</span>0000000000001C50                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">edi</span>, <span class="hljs-built_in">ecx</span><br><span class="hljs-symbol">.text:</span>0000000000001C52                 <span class="hljs-keyword">call</span>    _read<br><span class="hljs-symbol">.text:</span>0000000000001C57                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aTheRandomValue <span class="hljs-comment">; &quot;The random value has been set!\n&quot;</span><br><span class="hljs-symbol">.text:</span>0000000000001C5E                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001C63                 <span class="hljs-keyword">int</span>     <span class="hljs-number">3</span>               <span class="hljs-comment">; Trap to Debugger</span><br></code></pre></td></tr></table></figure>
+
+<p>这里打开random文件，然后read到缓冲区中，获取缓冲区的内容，作为下一个scanf函数的输入，即可获得flag</p>
+<p>x/20g  $rbp-0x18即可读取</p>
+<h1 id="4"><a href="#4" class="headerlink" title="4"></a>4</h1><figure class="highlight autohotkey"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs autohotkey">动态分析的一个关键部分是将程序运行到您感兴趣的状态。到目前为止，这些挑战已经为您自动设置了断点，以便在您可能感兴趣的状态下暂停执行。自己能够做到这一点非常重要。<br><br>在程序的执行过程中，有多种方式可以向前移动。您可以使用`stepi &lt;n&gt;`命令或`si &lt;n&gt;`命令（简写）向前单步执行一条指令。您可以使用`nexti &lt;n&gt;`命令或`ni &lt;n&gt;`命令（简写）向前单步执行一条指令，同时跳过任何函数调用。`&lt;n&gt;`参数是可选的，但可以让您一次执行多个步骤。您可以使用`finish`命令来完成当前正在执行的函数。您可以使用`break *&lt;address&gt;`参数化命令在指定的地址设置断点。您已经使用了`continue`命令，它将继续执行，直到程序遇到断点。<br><br>在逐步执行程序时，您可能会发现始终显示一些值对您很有用。有多种方法可以做到这一点。最简单的方法是使用`display/&lt;n&gt;&lt;u&gt;&lt;f&gt;`参数化命令，其格式与`x/&lt;n&gt;&lt;u&gt;&lt;f&gt;`参数化命令完全相同。例如，`display/<span class="hljs-number">8</span>i $rip`将始终显示接下来的<span class="hljs-number">8</span>条指令。另一方面，`display/<span class="hljs-number">4</span>gx $rsp`将始终显示堆栈上的前<span class="hljs-number">4</span>个值。另一个选项是使用`layout regs`命令。这将将GDB切换到TUI模式，并显示所有寄存器的内容，以及附近的指令。<br><br>为了解决这个级别的问题，您必须找出一系列将放置在堆栈上的随机值。强烈建议您尝试使用`stepi`、`nexti`、`break`、`continue`和`finish`的组合，以确保您对这些命令有良好的内部理解。这些命令在导航程序的执行过程中是绝对关键的。<br></code></pre></td></tr></table></figure>
+
+<p>看一下汇编源码</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br></pre></td><td class="code"><pre><code class="hljs x86asm"><span class="hljs-symbol">.text:</span>0000000000001AA6 <span class="hljs-comment">; int __cdecl main(int argc, const char **argv, const char **envp)</span><br><span class="hljs-symbol">.text:</span>0000000000001AA6                 <span class="hljs-meta">public</span> main<br><span class="hljs-symbol">.text:</span>0000000000001AA6 main            proc <span class="hljs-built_in">near</span>               <span class="hljs-comment">; DATA XREF: _start+21↑o</span><br><span class="hljs-symbol">.text:</span>0000000000001AA6<br><span class="hljs-symbol">.text:</span>0000000000001AA6 var_38          = <span class="hljs-built_in">qword</span> <span class="hljs-built_in">ptr</span> -<span class="hljs-number">38h</span><br><span class="hljs-symbol">.text:</span>0000000000001AA6 var_30          = <span class="hljs-built_in">qword</span> <span class="hljs-built_in">ptr</span> -<span class="hljs-number">30h</span><br><span class="hljs-symbol">.text:</span>0000000000001AA6 var_24          = <span class="hljs-built_in">dword</span> <span class="hljs-built_in">ptr</span> -<span class="hljs-number">24h</span><br><span class="hljs-symbol">.text:</span>0000000000001AA6 var_8           = <span class="hljs-built_in">qword</span> <span class="hljs-built_in">ptr</span> -<span class="hljs-number">8</span><br><span class="hljs-symbol">.text:</span>0000000000001AA6<br><span class="hljs-symbol">.text:</span>0000000000001AA6 <span class="hljs-comment">; __unwind &#123;</span><br><span class="hljs-symbol">.text:</span>0000000000001AA6                 endbr64<br><span class="hljs-symbol">.text:</span>0000000000001<span class="hljs-keyword">AAA</span>                 <span class="hljs-keyword">push</span>    <span class="hljs-built_in">rbp</span><br><span class="hljs-symbol">.text:</span>0000000000001AAB                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rbp</span>, <span class="hljs-built_in">rsp</span><br><span class="hljs-symbol">.text:</span>0000000000001AAE                 <span class="hljs-keyword">sub</span>     <span class="hljs-built_in">rsp</span>, <span class="hljs-number">40h</span><br><span class="hljs-symbol">.text:</span>0000000000001AB2                 <span class="hljs-keyword">mov</span>     [<span class="hljs-built_in">rbp</span>+var_24], <span class="hljs-built_in">edi</span><br><span class="hljs-symbol">.text:</span>0000000000001AB5                 <span class="hljs-keyword">mov</span>     [<span class="hljs-built_in">rbp</span>+var_30], <span class="hljs-built_in">rsi</span><br><span class="hljs-symbol">.text:</span>0000000000001AB9                 <span class="hljs-keyword">mov</span>     [<span class="hljs-built_in">rbp</span>+var_38], <span class="hljs-built_in">rdx</span><br><span class="hljs-symbol">.text:</span>0000000000001ABD                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rax</span>, <span class="hljs-built_in">fs</span>:<span class="hljs-number">28h</span><br><span class="hljs-symbol">.text:</span>0000000000001AC6                 <span class="hljs-keyword">mov</span>     [<span class="hljs-built_in">rbp</span>+var_8], <span class="hljs-built_in">rax</span><br><span class="hljs-symbol">.text:</span>0000000000001ACA                 <span class="hljs-keyword">xor</span>     <span class="hljs-built_in">eax</span>, <span class="hljs-built_in">eax</span><br><span class="hljs-symbol">.text:</span>0000000000001ACC                 <span class="hljs-keyword">cmp</span>     [<span class="hljs-built_in">rbp</span>+var_24], <span class="hljs-number">0</span><br><span class="hljs-symbol">.text:</span>0000000000001AD0                 <span class="hljs-keyword">jg</span>      short loc_1AF1<br><span class="hljs-symbol">.text:</span>0000000000001AD2                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rcx</span>, __PRETTY_FUNCTION___5345 <span class="hljs-comment">; &quot;main&quot;</span><br><span class="hljs-symbol">.text:</span>0000000000001AD9                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">edx</span>, <span class="hljs-number">51h</span> <span class="hljs-comment">; &#x27;Q&#x27;  ; line</span><br><span class="hljs-symbol">.text:</span>0000000000001ADE                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rsi</span>, file       <span class="hljs-comment">; &quot;&lt;stdin&gt;&quot;</span><br><span class="hljs-symbol">.text:</span>0000000000001AE5                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aArgc0     <span class="hljs-comment">; &quot;argc &gt; 0&quot;</span><br><span class="hljs-symbol">.text:</span>0000000000001AEC                 <span class="hljs-keyword">call</span>    ___assert_fail<br><span class="hljs-symbol">.text:</span>0000000000001AF1 <span class="hljs-comment">; ---------------------------------------------------------------------------</span><br><span class="hljs-symbol">.text:</span>0000000000001AF1<br><span class="hljs-symbol">.text:</span>0000000000001AF1 loc_1AF1:                               <span class="hljs-comment">; CODE XREF: main+2A↑j</span><br><span class="hljs-symbol">.text:</span>0000000000001AF1                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, asc_21C5   <span class="hljs-comment">; &quot;###&quot;</span><br><span class="hljs-symbol">.text:</span>0000000000001AF8                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001AFD                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rax</span>, [<span class="hljs-built_in">rbp</span>+var_30]<br><span class="hljs-symbol">.text:</span>0000000000001B01                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rax</span>, [<span class="hljs-built_in">rax</span>]<br><span class="hljs-symbol">.text:</span>0000000000001B04                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rsi</span>, <span class="hljs-built_in">rax</span><br><span class="hljs-symbol">.text:</span>0000000000001B07                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aWelcomeToS <span class="hljs-comment">; &quot;### Welcome to %s!\n&quot;</span><br><span class="hljs-symbol">.text:</span>0000000000001B0E                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">eax</span>, <span class="hljs-number">0</span><br><span class="hljs-symbol">.text:</span>0000000000001B13                 <span class="hljs-keyword">call</span>    _printf<br><span class="hljs-symbol">.text:</span>0000000000001B18                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, asc_21C5   <span class="hljs-comment">; &quot;###&quot;</span><br><span class="hljs-symbol">.text:</span>0000000000001B1F                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001B24                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">edi</span>, <span class="hljs-number">0Ah</span>        <span class="hljs-comment">; c</span><br><span class="hljs-symbol">.text:</span>0000000000001B29                 <span class="hljs-keyword">call</span>    _putchar<br><span class="hljs-symbol">.text:</span>0000000000001B2E                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rax</span>, <span class="hljs-built_in">cs</span>:stdin@@GLIBC_2_2_5<br><span class="hljs-symbol">.text:</span>0000000000001B35                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">ecx</span>, <span class="hljs-number">0</span>          <span class="hljs-comment">; n</span><br><span class="hljs-symbol">.text:</span>0000000000001B3A                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">edx</span>, <span class="hljs-number">2</span>          <span class="hljs-comment">; modes</span><br><span class="hljs-symbol">.text:</span>0000000000001B3F                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">esi</span>, <span class="hljs-number">0</span>          <span class="hljs-comment">; buf</span><br><span class="hljs-symbol">.text:</span>0000000000001B44                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rdi</span>, <span class="hljs-built_in">rax</span>        <span class="hljs-comment">; stream</span><br><span class="hljs-symbol">.text:</span>0000000000001B47                 <span class="hljs-keyword">call</span>    _setvbuf<br><span class="hljs-symbol">.text:</span>0000000000001B4C                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rax</span>, <span class="hljs-built_in">cs</span>:__bss_start<br><span class="hljs-symbol">.text:</span>0000000000001B53                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">ecx</span>, <span class="hljs-number">1</span>          <span class="hljs-comment">; n</span><br><span class="hljs-symbol">.text:</span>0000000000001B58                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">edx</span>, <span class="hljs-number">2</span>          <span class="hljs-comment">; modes</span><br><span class="hljs-symbol">.text:</span>0000000000001B5D                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">esi</span>, <span class="hljs-number">0</span>          <span class="hljs-comment">; buf</span><br><span class="hljs-symbol">.text:</span>0000000000001B62                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rdi</span>, <span class="hljs-built_in">rax</span>        <span class="hljs-comment">; stream</span><br><span class="hljs-symbol">.text:</span>0000000000001B65                 <span class="hljs-keyword">call</span>    _setvbuf<br><span class="hljs-symbol">.text:</span>0000000000001B6A                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aGdbIsAVeryPowe <span class="hljs-comment">; &quot;GDB is a very powerful dynamic analysis&quot;...</span><br><span class="hljs-symbol">.text:</span>0000000000001B71                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001B76                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aItsExecutionYo <span class="hljs-comment">; &quot;its execution. You will become familiar&quot;...</span><br><span class="hljs-symbol">.text:</span>0000000000001B7D                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001B82                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aACriticalPartO <span class="hljs-comment">; &quot;A critical part of dynamic analysis is &quot;...</span><br><span class="hljs-symbol">.text:</span>0000000000001B89                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001B8E                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aChallengesHave <span class="hljs-comment">; &quot;challenges have automatically set break&quot;...</span><br><span class="hljs-symbol">.text:</span>0000000000001B95                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001B9A                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aItIsImportantT <span class="hljs-comment">; &quot;It is important to be able to do this y&quot;...</span><br><span class="hljs-symbol">.text:</span>0000000000001BA1                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001BA6                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aThereAreANumbe <span class="hljs-comment">; &quot;There are a number of ways to move forw&quot;...</span><br><span class="hljs-symbol">.text:</span>0000000000001BAD                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001BB2                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aForShortInOrde <span class="hljs-comment">; &quot;for short, in order to step forward one&quot;...</span><br><span class="hljs-symbol">.text:</span>0000000000001BB9                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001BBE                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aOrderToStepFor <span class="hljs-comment">; &quot;order to step forward one instruction, &quot;...</span><br><span class="hljs-symbol">.text:</span>0000000000001BC5                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001BCA                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aAllowsYouToPer <span class="hljs-comment">; &quot;allows you to perform multiple steps at&quot;...</span><br><span class="hljs-symbol">.text:</span>0000000000001BD1                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001BD6                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aExecutingFunct <span class="hljs-comment">; &quot;executing function. You can use the `br&quot;...</span><br><span class="hljs-symbol">.text:</span>0000000000001BDD                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001BE2                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aSpecifiedAddre <span class="hljs-comment">; &quot;specified-address. You have already use&quot;...</span><br><span class="hljs-symbol">.text:</span>0000000000001BE9                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001BEE                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aBreakpoint <span class="hljs-comment">; &quot;breakpoint.\n&quot;</span><br><span class="hljs-symbol">.text:</span>0000000000001BF5                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001BFA                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aWhileSteppingT <span class="hljs-comment">; &quot;While stepping through a program, you m&quot;...</span><br><span class="hljs-symbol">.text:</span>0000000000001C01                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001C06                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aMultipleWaysTo <span class="hljs-comment">; &quot;multiple ways to do this. The simplest &quot;...</span><br><span class="hljs-symbol">.text:</span>0000000000001C0D                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001C12                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aExactlyTheSame <span class="hljs-comment">; &quot;exactly the same format as the `x/&lt;n&gt;&lt;u&quot;...</span><br><span class="hljs-symbol">.text:</span>0000000000001C19                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001C1E                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aTheNext8Instru <span class="hljs-comment">; &quot;the next 8 instructions. On the other h&quot;...</span><br><span class="hljs-symbol">.text:</span>0000000000001C25                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001C2A                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aAnotherOptionI <span class="hljs-comment">; &quot;Another option is to use the `layout re&quot;...</span><br><span class="hljs-symbol">.text:</span>0000000000001C31                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001C36                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aOfTheRegisters <span class="hljs-comment">; &quot;of the registers, as well as nearby ins&quot;...</span><br><span class="hljs-symbol">.text:</span>0000000000001C3D                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001C42                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aInOrderToSolve <span class="hljs-comment">; &quot;In order to solve this level, you must &quot;...</span><br><span class="hljs-symbol">.text:</span>0000000000001C49                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001C4E                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aHighlyEncourag <span class="hljs-comment">; &quot;highly encouraged to try using combinat&quot;...</span><br><span class="hljs-symbol">.text:</span>0000000000001C55                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001C5A                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aAGoodInternalU <span class="hljs-comment">; &quot;a good internal understanding of these &quot;...</span><br><span class="hljs-symbol">.text:</span>0000000000001C61                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001C66                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aExecution <span class="hljs-comment">; &quot;execution.\n&quot;</span><br><span class="hljs-symbol">.text:</span>0000000000001C6D                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001C72                 <span class="hljs-keyword">int</span>     <span class="hljs-number">3</span>               <span class="hljs-comment">; Trap to Debugger</span><br><span class="hljs-symbol">.text:</span>0000000000001C72 main            endp<br><span class="hljs-symbol">.text:</span>0000000000001C72<br><span class="hljs-symbol">.text:</span>0000000000001C72 <span class="hljs-comment">; ---------------------------------------------------------------------------</span><br><span class="hljs-symbol">.text:</span>0000000000001C73                 <span class="hljs-meta">align</span> <span class="hljs-number">4</span><br><span class="hljs-symbol">.text:</span>0000000000001C74                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">dword</span> <span class="hljs-built_in">ptr</span> [<span class="hljs-built_in">rbp</span>-<span class="hljs-number">1Ch</span>], <span class="hljs-number">0</span><br><span class="hljs-symbol">.text:</span>0000000000001C7B                 <span class="hljs-keyword">jmp</span>     loc_1D2B<br><span class="hljs-symbol">.text:</span>0000000000001C80 <span class="hljs-comment">; ---------------------------------------------------------------------------</span><br><span class="hljs-symbol">.text:</span>0000000000001C80<br><span class="hljs-symbol">.text:</span>0000000000001C80 loc_1C80:                               <span class="hljs-comment">; CODE XREF: .text:0000000000001D2F↓j</span><br><span class="hljs-symbol">.text:</span>0000000000001C80                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">esi</span>, <span class="hljs-number">0</span><br><span class="hljs-symbol">.text:</span>0000000000001C85                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aDevUrandom <span class="hljs-comment">; &quot;/dev/urandom&quot;</span><br><span class="hljs-symbol">.text:</span>0000000000001C8C                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">eax</span>, <span class="hljs-number">0</span><br><span class="hljs-symbol">.text:</span>0000000000001C91                 <span class="hljs-keyword">call</span>    _open<br><span class="hljs-symbol">.text:</span>0000000000001C96                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">ecx</span>, <span class="hljs-built_in">eax</span><br><span class="hljs-symbol">.text:</span>0000000000001C98                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rax</span>, [<span class="hljs-built_in">rbp</span>-<span class="hljs-number">18h</span>]<br><span class="hljs-symbol">.text:</span>0000000000001C9C                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">edx</span>, <span class="hljs-number">8</span><br><span class="hljs-symbol">.text:</span>0000000000001CA1                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rsi</span>, <span class="hljs-built_in">rax</span><br><span class="hljs-symbol">.text:</span>0000000000001CA4                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">edi</span>, <span class="hljs-built_in">ecx</span><br><span class="hljs-symbol">.text:</span>0000000000001CA6                 <span class="hljs-keyword">call</span>    _read<br><span class="hljs-symbol">.text:</span>0000000000001CAB                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aTheRandomValue <span class="hljs-comment">; &quot;The random value has been set!\n&quot;</span><br><span class="hljs-symbol">.text:</span>0000000000001CB2                 <span class="hljs-keyword">call</span>    _puts<br><span class="hljs-symbol">.text:</span>0000000000001CB7                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aRandomValue <span class="hljs-comment">; &quot;Random value: &quot;</span><br><span class="hljs-symbol">.text:</span>0000000000001CBE                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">eax</span>, <span class="hljs-number">0</span><br><span class="hljs-symbol">.text:</span>0000000000001CC3                 <span class="hljs-keyword">call</span>    _printf<br><span class="hljs-symbol">.text:</span>0000000000001CC8                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rax</span>, [<span class="hljs-built_in">rbp</span>-<span class="hljs-number">10h</span>]<br><span class="hljs-symbol">.text:</span>0000000000001CCC                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rsi</span>, <span class="hljs-built_in">rax</span><br><span class="hljs-symbol">.text:</span>0000000000001CCF                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aLlx       <span class="hljs-comment">; &quot;%llx&quot;</span><br><span class="hljs-symbol">.text:</span>0000000000001CD6                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">eax</span>, <span class="hljs-number">0</span><br><span class="hljs-symbol">.text:</span>0000000000001CDB                 <span class="hljs-keyword">call</span>    ___isoc99_scanf<br><span class="hljs-symbol">.text:</span>0000000000001CE0                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rax</span>, [<span class="hljs-built_in">rbp</span>-<span class="hljs-number">10h</span>]<br><span class="hljs-symbol">.text:</span>0000000000001CE4                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rsi</span>, <span class="hljs-built_in">rax</span><br><span class="hljs-symbol">.text:</span>0000000000001CE7                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aYouInputLlx <span class="hljs-comment">; &quot;You input: %llx\n&quot;</span><br><span class="hljs-symbol">.text:</span>0000000000001CEE                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">eax</span>, <span class="hljs-number">0</span><br><span class="hljs-symbol">.text:</span>0000000000001CF3                 <span class="hljs-keyword">call</span>    _printf<br><span class="hljs-symbol">.text:</span>0000000000001CF8                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rax</span>, [<span class="hljs-built_in">rbp</span>-<span class="hljs-number">18h</span>]<br><span class="hljs-symbol">.text:</span>0000000000001CFC                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rsi</span>, <span class="hljs-built_in">rax</span><br><span class="hljs-symbol">.text:</span>0000000000001CFF                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aTheCorrectAnsw <span class="hljs-comment">; &quot;The correct answer is: %llx\n&quot;</span><br><span class="hljs-symbol">.text:</span>0000000000001D06                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">eax</span>, <span class="hljs-number">0</span><br><span class="hljs-symbol">.text:</span>0000000000001D0B                 <span class="hljs-keyword">call</span>    _printf<br><span class="hljs-symbol">.text:</span>0000000000001D10                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rdx</span>, [<span class="hljs-built_in">rbp</span>-<span class="hljs-number">10h</span>]<br><span class="hljs-symbol">.text:</span>0000000000001D14                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rax</span>, [<span class="hljs-built_in">rbp</span>-<span class="hljs-number">18h</span>]<br><span class="hljs-symbol">.text:</span>0000000000001D18                 <span class="hljs-keyword">cmp</span>     <span class="hljs-built_in">rdx</span>, <span class="hljs-built_in">rax</span><br><span class="hljs-symbol">.text:</span>0000000000001D1B                 <span class="hljs-keyword">jz</span>      short loc_1D27<br><span class="hljs-symbol">.text:</span>0000000000001D1D                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">edi</span>, <span class="hljs-number">1</span><br><span class="hljs-symbol">.text:</span>0000000000001D22                 <span class="hljs-keyword">call</span>    _exit<br><span class="hljs-symbol">.text:</span>0000000000001D27 <span class="hljs-comment">; ---------------------------------------------------------------------------</span><br><span class="hljs-symbol">.text:</span>0000000000001D27<br><span class="hljs-symbol">.text:</span>0000000000001D27 loc_1D27:                               <span class="hljs-comment">; CODE XREF: .text:0000000000001D1B↑j</span><br><span class="hljs-symbol">.text:</span>0000000000001D27                 <span class="hljs-keyword">add</span>     <span class="hljs-built_in">dword</span> <span class="hljs-built_in">ptr</span> [<span class="hljs-built_in">rbp</span>-<span class="hljs-number">1Ch</span>], <span class="hljs-number">1</span><br><span class="hljs-symbol">.text:</span>0000000000001D2B<br><span class="hljs-symbol">.text:</span>0000000000001D2B loc_1D2B:                               <span class="hljs-comment">; CODE XREF: .text:0000000000001C7B↑j</span><br><span class="hljs-symbol">.text:</span>0000000000001D2B                 <span class="hljs-keyword">cmp</span>     <span class="hljs-built_in">dword</span> <span class="hljs-built_in">ptr</span> [<span class="hljs-built_in">rbp</span>-<span class="hljs-number">1Ch</span>], <span class="hljs-number">3</span><br><span class="hljs-symbol">.text:</span>0000000000001D2F                 <span class="hljs-keyword">jle</span>     loc_1C80<br><span class="hljs-symbol">.text:</span>0000000000001D35                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">eax</span>, <span class="hljs-number">0</span><br><span class="hljs-symbol">.text:</span>0000000000001D3A                 <span class="hljs-keyword">call</span>    win<br></code></pre></td></tr></table></figure>
+
+<p>有一个跳转，会和3比较，小于等于3则跳回去，重复验证输入是不是正确</p>
+<p>也就是for(i=0;i&lt;=3;i++)</p>
+<p>三次都对即可（相当于三次level 3 ）</p>
+<h1 id="5"><a href="#5" class="headerlink" title="5"></a>5</h1><figure class="highlight autohotkey"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs autohotkey">虽然像我们在过去的级别中所做的那样交互地使用gdb非常强大，但另一个强大的工具是gdb脚本。通过编写gdb脚本，您可以快速创建一个定制的程序分析工具。如果您知道如何与gdb进行交互，那么您已经知道如何编写gdb脚本——语法完全相同。您可以将命令写入某个文件，例如`x.gdb`，然后使用标志`-x &lt;PATH_TO_SCRIPT&gt;`启动gdb。这个文件将在gdb启动后执行所有的gdb命令。或者，您可以使用`-ex &#x27;&lt;COMMAND&gt;&#x27;`执行单个命令。您可以使用多个`-ex`参数传递多个命令。最后，您可以将一些命令放在`~/.gdbinit`中，以便在任何gdb会话中始终执行。您可能希望在其中放入`set disassembly-flavor intel`。<br><br>在gdb脚本中，一个非常强大的结构是断点命令。考虑以下gdb脚本：<br><br>start  <br><span class="hljs-keyword">break</span> *main+<span class="hljs-number">42</span>  <br>commands  <br>	x/gx $rbp-<span class="hljs-number">0</span>x32  <br>	<span class="hljs-keyword">continue</span>  <br>end  <br><span class="hljs-keyword">continue</span><br><br>在这种情况下，每当我们到达`main+<span class="hljs-number">42</span>`处的指令时，我们将输出一个特定的局部变量，然后继续执行。<br><br>现在考虑一个类似但稍微更高级的脚本，其中使用了一些您尚未见过的命令：<br><br>start  <br><span class="hljs-keyword">break</span> *main+<span class="hljs-number">42</span>  <br>commands  <br>silent  <br>	set �������������=∗(����������������∗)(localv​ariable=∗(unsignedlonglong∗)(rbp-<span class="hljs-number">0</span>x32)  <br>	printf <span class="hljs-string">&quot;当前值：%llx\n&quot;</span>, $local_variable  <br>	<span class="hljs-keyword">continue</span>  <br>end  <br><span class="hljs-keyword">continue</span><br><br>在这种情况下，`silent`表示我们不希望gdb报告我们已经触发了一个断点，以使输出更清晰。然后我们使用`set`命令在gdb会话中定义一个变量，其值为我们的局部变量。最后，我们使用格式化字符串输出当前值。<br><br>使用gdb脚本来帮助您收集随机值。<br></code></pre></td></tr></table></figure>
+
+<p>open 打开/dev/urandom的文件描述符，返回描述符</p>
+<p>read读取描述符所在位置的值写到缓冲区中，缓冲区位置在<code>$rbp-0x18</code></p>
+<p>scanf两个参数，第一个是 “llx”，第二个是<code>$rbp-0x10</code></p>
+<p>在main+752处打断点</p>
+<p>display用法：</p>
+<ul>
+<li>display/10i $rip<ul>
+<li>每次gdb停止都会打印出接下来的十条指令</li>
+</ul>
+</li>
+<li>info display<ul>
+<li>查看目前有多少个display</li>
+</ul>
+</li>
+<li>undisplay</li>
+</ul>
+<p>layout asm和layout regs的窗口绘制有问题，所以不如用display指令</p>
+<p>题干给的gdb脚本，一直没搞懂怎么在二进制中自动调用的gdb窗口中使用和交互，这类还是用最基本的方法，让程序使用display自动输出值，复制粘贴作为scanf的输入</p>
+<ul>
+<li><code>b *main+752</code></li>
+<li>run</li>
+<li><code>(gdb) display /10i $rip</code></li>
+<li><code>(gdb) display/xg $rbp-0x18</code><ul>
+<li><code>x/gx $rbp-0x18</code></li>
+</ul>
+</li>
+<li>输入值</li>
+<li>c</li>
+</ul>
+<p>这一次和上一次相比，循环次数变成了7，因此如果每一次都是手动打命令，非常容易出错。display可以帮助我们</p>
+<h1 id="6"><a href="#6" class="headerlink" title="6"></a>6</h1><figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs arduino">GDB是一个非常强大的动态分析工具，可以帮助你了解程序在执行过程中的状态。在本模块中，你将熟悉一些gdb的功能。<br><br>事实证明，gdb对目标进程具有完全的控制权。你不仅可以分析程序的状态，还可以修改它。尽管gdb可能不是长期维护程序的最佳工具，但有时候为了更容易分析目标进程，快速修改其行为可能会很有用。<br><br>你可以使用`set`命令来修改目标程序的状态。例如，你可以使用`set $rdi = <span class="hljs-number">0</span>`将 `$rdi` 寄存器置为<span class="hljs-number">0</span>。你可以使用 `set *((<span class="hljs-keyword">uint64_t</span> *) $rsp) = <span class="hljs-number">0x1234</span>` 将栈上的第一个值设置为<span class="hljs-number">0x1234</span>。你可以使用 `set *((<span class="hljs-keyword">uint16_t</span> *) <span class="hljs-number">0x31337000</span>) = <span class="hljs-number">0x1337</span>` 将地址为<span class="hljs-number">0x31337000</span>的两个字节设置为<span class="hljs-number">0x1337</span>。<br><br>假设你的目标是一个网络应用程序，它从文件描述符<span class="hljs-number">42</span>上读取数据。也许为了分析方便，你希望目标改为从标准输入(stdin)读取。你可以使用以下gdb脚本实现这样的功能：<br><br>start<br><span class="hljs-keyword">catch</span> syscall read<br>commands<br>  silent<br>  <span class="hljs-keyword">if</span> ($rdi == <span class="hljs-number">42</span>)<br>    set $rdi = <span class="hljs-number">0</span><br>  end<br>  <span class="hljs-keyword">continue</span><br>end<br><span class="hljs-keyword">continue</span><br><br>这个示例gdb脚本演示了如何自动在系统调用上设置断点，并如何在命令中使用条件来有条件地执行gdb命令。<br><br>在上一级中，你的gdb脚本解决方案可能仍然需要你复制和粘贴解决方案。这一次，尝试编写一个脚本，不需要与程序进行交互，而是通过正确修改寄存器和内存来自动解决每个挑战。<br></code></pre></td></tr></table></figure>
+
+<p>一直在如何和gdb交互，跳过scanf函数、达到和scanf相同的效果上搞事情了，结果越想越复杂</p>
+<p>但是其实如果只是想要flag，可以直接修改内存的值，也即是说，将和0x3F对比的那个循环条件的内存的值修改为一个较大的值</p>
+<p><code>set *(int*)($rbp-0x1c) = 100</code></p>
+<h1 id="7"><a href="#7" class="headerlink" title="7"></a>7</h1><figure class="highlight autohotkey"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs autohotkey">GDB是一个非常强大的动态分析工具，您可以使用它来了解程序在执行过程中的状态。在本模块中，您将熟悉一些GDB的功能。<br><br>正如我们在前一个级别中演示的那样，GDB对目标进程具有完全控制权。在正常情况下，作为普通用户运行的GDB无法附加到特权进程。这就是为什么GDB不是一个巨大的安全问题，不会让您立即解决所有级别的原因。尽管如此，GDB仍然是一个非常强大的工具。<br><br>在这个提升的GDB实例中运行，您将对整个系统拥有更高的控制权。为了清楚地证明这一点，试试运行命令`call (void)win()`会发生什么。事实证明，这个模块中的所有级别都可以用这种方式解决。<br><br>GDB非常强大！<br></code></pre></td></tr></table></figure>
+
+<p>直接调用win</p>
+<p>call (void)win()</p>
+<h1 id="8"><a href="#8" class="headerlink" title="8"></a>8</h1><figure class="highlight autohotkey"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs autohotkey">GDB是一个非常强大的动态分析工具，可以帮助你了解程序在执行过程中的状态。在本模块中，你将熟悉一些gdb的功能。<br><br>正如我们在前一个级别中演示的那样，gdb对目标进程具有完全控制权。在正常情况下，以你常规用户身份运行的gdb无法附加到特权进程。这就是为什么gdb不是一个允许你立即解决所有级别的严重安全问题。尽管如此，gdb仍然是一个非常强大的工具。<br><br>在这个提升的gdb实例中运行，你可以对整个系统拥有更高的控制权。为了清楚地证明这一点，看看当你运行命令 `call (void)win()` 时会发生什么。<br><br>请注意，这不会给你带来标志（似乎我们破坏了win函数！），所以你需要更加努力才能获得这个标志！<br><br>事实证明，本模块的所有其他级别都可以用这种方式解决。<br><br>GDB非常强大！<br></code></pre></td></tr></table></figure>
+
+
+<p>看一下win函数，把0赋值给rax，然后取0地址指向的值，这造成指针引用错误</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs x86asm"><span class="hljs-symbol">.text:</span><span class="hljs-number">0000000000001951</span> win             proc <span class="hljs-built_in">near</span><br><span class="hljs-symbol">.text:</span><span class="hljs-number">0000000000001951</span><br><span class="hljs-symbol">.text:</span><span class="hljs-number">0000000000001951</span> var_8           = <span class="hljs-built_in">qword</span> <span class="hljs-built_in">ptr</span> -<span class="hljs-number">8</span><br><span class="hljs-symbol">.text:</span><span class="hljs-number">0000000000001951</span><br><span class="hljs-symbol">.text:</span><span class="hljs-number">0000000000001951</span> <span class="hljs-comment">; __unwind &#123;</span><br><span class="hljs-symbol">.text:</span><span class="hljs-number">0000000000001951</span>                 endbr64<br><span class="hljs-symbol">.text:</span><span class="hljs-number">0000000000001955</span>                 <span class="hljs-keyword">push</span>    <span class="hljs-built_in">rbp</span><br><span class="hljs-symbol">.text:</span><span class="hljs-number">0000000000001956</span>                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rbp</span>, <span class="hljs-built_in">rsp</span><br><span class="hljs-symbol">.text:</span><span class="hljs-number">0000000000001959</span>                 <span class="hljs-keyword">sub</span>     <span class="hljs-built_in">rsp</span>, <span class="hljs-number">10h</span><br><span class="hljs-symbol">.text:</span><span class="hljs-number">000000000000195D</span>                 <span class="hljs-keyword">mov</span>     [<span class="hljs-built_in">rbp</span>+var_8], <span class="hljs-number">0</span><br><span class="hljs-symbol">.text:</span><span class="hljs-number">0000000000001965</span>                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rax</span>, [<span class="hljs-built_in">rbp</span>+var_8]<br><span class="hljs-symbol">.text:</span><span class="hljs-number">0000000000001969</span>                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">eax</span>, [<span class="hljs-built_in">rax</span>]<br><span class="hljs-symbol">.text:</span>000000000000196B                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">edx</span>, [<span class="hljs-built_in">rax</span>+<span class="hljs-number">1</span>]<br><span class="hljs-symbol">.text:</span>000000000000196E                 <span class="hljs-keyword">mov</span>     <span class="hljs-built_in">rax</span>, [<span class="hljs-built_in">rbp</span>+var_8]<br><span class="hljs-symbol">.text:</span><span class="hljs-number">0000000000001972</span>                 <span class="hljs-keyword">mov</span>     [<span class="hljs-built_in">rax</span>], <span class="hljs-built_in">edx</span><br><span class="hljs-symbol">.text:</span><span class="hljs-number">0000000000001974</span>                 <span class="hljs-keyword">lea</span>     <span class="hljs-built_in">rdi</span>, aYouWinHereIsYo <span class="hljs-comment">; &quot;You win! Here is your flag:&quot;</span><br><span class="hljs-symbol">.text:</span>000000000000197B                 <span class="hljs-keyword">call</span>    _puts<br></code></pre></td></tr></table></figure>
+
+<p>解决方法：直接调用win函数，然后单步执行，如果遇到对0解引用就修改使其不为0</p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/CTF/" class="category-chain-item">CTF</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>pwn college 刷题记录：debugging refresher</div>
+      <div>http://gls.show/p/a2494a57/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年3月27日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/78594644/" title="pwn college 刷题记录： Shellcode Injection">
+                        <span class="hidden-mobile">pwn college 刷题记录： Shellcode Injection</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

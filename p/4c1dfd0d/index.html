@@ -1,0 +1,1092 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Using the shell访问带有空格的文件夹，比如my photos  使用双引号括起来：”my photos” 使用转义：- my\ photos  shell 执行 echo hello的过程：   shell 基于空格分割命令并进行解析，然后执行第一个单词代表的程序，并将后续的单词作为程序可以访问的参数 shell首先判断命令是不是编程关键字，如果不是就从环境变量$PATH中寻找，可">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MIT-missing-semester计算机教育中缺失的一课">
+<meta property="og:url" content="http://gls.show/p/4c1dfd0d/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="Using the shell访问带有空格的文件夹，比如my photos  使用双引号括起来：”my photos” 使用转义：- my\ photos  shell 执行 echo hello的过程：   shell 基于空格分割命令并进行解析，然后执行第一个单词代表的程序，并将后续的单词作为程序可以访问的参数 shell首先判断命令是不是编程关键字，如果不是就从环境变量$PATH中寻找，可">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://gls.show/image/missing-semester.png">
+<meta property="article:published_time" content="2023-07-26T02:09:09.999Z">
+<meta property="article:modified_time" content="2023-09-13T13:05:12.424Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://gls.show/image/missing-semester.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>MIT-missing-semester计算机教育中缺失的一课 - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="MIT-missing-semester计算机教育中缺失的一课"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-07-26 10:09" pubdate>
+          2023年7月26日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          6.5k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          21 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">MIT-missing-semester计算机教育中缺失的一课</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2023年9月13日 晚上
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <p><img src="/image/missing-semester.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="Using-the-shell"><a href="#Using-the-shell" class="headerlink" title="Using the shell"></a>Using the shell</h1><p>访问带有空格的文件夹，比如my photos</p>
+<ul>
+<li>使用双引号括起来：”my photos”</li>
+<li>使用转义：- my\ photos</li>
+</ul>
+<p>shell 执行 echo hello的过程：</p>
+<ul>
+<li> shell 基于空格分割命令并进行解析，然后执行第一个单词代表的程序，并将后续的单词作为程序可以访问的参数</li>
+<li>shell首先判断命令是不是编程关键字，如果不是就从环境变量<code>$PATH</code>中寻找，可以通过<code>echo $PATH</code>命令查找路径<ul>
+<li> 可以通过which命令查找可执行文件/链接所在的路径</li>
+</ul>
+</li>
+</ul>
+<p>路径：</p>
+<ul>
+<li>shell 中的路径是一组被分割的目录，在 Linux 和 macOS 上使用 / 分割，而在Windows上是 \</li>
+<li>绝对路径与相对路径</li>
+<li>ls可以列出路径<ul>
+<li>ls -al命令的输出结果第一列有10个字母，第一个字母若是d表示是一个文件夹</li>
+<li>若要进入某一个文件夹，需要可执行权限</li>
+<li>若要列出它所包含的内容，需要可读权限</li>
+</ul>
+</li>
+</ul>
+<h1 id="重定向"><a href="#重定向" class="headerlink" title="重定向"></a>重定向</h1><ul>
+<li><code>cat &lt; hello.txt &gt; hello2.txt</code>将hello.txt文件的内容重定向到cat命令，cat将输出重定向到hello2.txt文件</li>
+<li>使用管道可以重定向，比如<code>ls -l / | tail -n1</code>将会列出<code>ls -l / </code>命令最后一行的输出</li>
+<li>一个报错分析<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs stata">sudo echo 3 &gt; brightness<br><span class="hljs-keyword">An</span> <span class="hljs-keyword">error</span> occurred <span class="hljs-keyword">while</span> redirecting <span class="hljs-keyword">file</span> &#x27;brightness&#x27;<br><span class="hljs-keyword">open</span>: Permission denied<br></code></pre></td></tr></table></figure>
+<ul>
+<li>shell (权限为您的当前用户) 在设置 sudo echo 前尝试打开 brightness 文件并写入，但是系统拒绝了 shell 的操作因为此时 shell 不是根用户</li>
+<li>一个正确的做法：<code>echo 3 | sudo tee brightness</code></li>
+</ul>
+</li>
+</ul>
+<h1 id="Shell-Scripting"><a href="#Shell-Scripting" class="headerlink" title="Shell Scripting"></a>Shell Scripting</h1><p>shell脚本与其他脚本语言不同之处在于，针对 shell 所从事的相关工作进行来优化:</p>
+<ul>
+<li>创建命令流程（pipelines）</li>
+<li>将结果保存到文件</li>
+<li>从标准输入中读取输入</li>
+</ul>
+<p>以上这些都是 shell 脚本中的原生操作，这让它比通用的脚本语言更易用</p>
+<ul>
+<li><code>#</code> 后的内容会被注释</li>
+<li>shell脚本的第一行如果出现了<code>#!/bin/bash</code>，说明这个脚本将会被bash执行，而不是zsh之类的别的shell</li>
+<li><code>chmod +x xxx.sh</code>赋予可执行权限</li>
+<li><code>./xxx.sh</code>会执行xxx.sh这个脚本，不可以直接写上xxx.sh，否则会在PATH里面找有没有交xxx.sh的</li>
+<li>bash赋值语法为<code>foo=bar</code>，表示将bar赋值给foo，假设写为<code>foo = bar</code>，表示将=和bar当做foo的两个参数（在shell脚本中使用空格会起到分割参数的作用，有时候可能会造成混淆）</li>
+<li>Bash中的字符串通过’ 和 “分隔符来定义，前者定义的字符串为原意字符串，其中的变量不会被转义，而后者将会对变量值进行替换<ul>
+<li>单引号里的任何字符都会原样输出，单引号字符串中的变量是无效的</li>
+<li>双引号里可以有变量与转义字符</li>
+</ul>
+</li>
+<li>和其他大多数的编程语言一样，bash也支持if, case, while 和 for 这些控制流关键字、函数，一个函数的例子：<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">mcd</span> () &#123;<br>  <span class="hljs-attribute">mkdir</span> -p <span class="hljs-string">&quot;<span class="hljs-variable">$1</span>&quot;</span> <span class="hljs-comment"># $1表示脚本的第一个参数</span><br>  cd <span class="hljs-string">&quot;<span class="hljs-variable">$1</span>&quot;</span><br>&#125;<br></code></pre></td></tr></table></figure></li>
+<li>bash使用许多特殊的变量来表示参数、错误代码和相关变量：<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs powershell"><span class="hljs-variable">$0</span> - 脚本名<br><span class="hljs-variable">$1</span> 到 <span class="hljs-variable">$9</span> - 脚本的参数。 <span class="hljs-variable">$1</span> 是第一个参数，依此类推。** 注意，<span class="hljs-variable">$10</span> 不能获取第十个参数，获取第十个参数需要<span class="hljs-variable">$</span>&#123;<span class="hljs-number">10</span>&#125;。当n&gt;=<span class="hljs-number">10</span>时，需要使用<span class="hljs-variable">$</span>&#123;n&#125;来获取参数。 **<br><span class="hljs-variable">$</span><span class="hljs-selector-tag">@</span> - 所有参数<br><span class="hljs-variable">$</span><span class="hljs-comment"># - 参数个数</span><br><span class="hljs-variable">$</span>? - 前一个命令的返回值<br><span class="hljs-variable">$</span><span class="hljs-variable">$</span> - 当前脚本的进程识别码<br>!! - 完整的上一条命令，包括参数。常见应用：当你因为权限不足执行命令失败时，可以使用 sudo !!再尝试一次。<br><span class="hljs-variable">$_</span> - 上一条命令的最后一个参数。如果你正在使用的是交互式 shell，你可以通过按下 Esc 之后键入 . 来获取这个值。<br></code></pre></td></tr></table></figure></li>
+<li><code>&lt;(...)</code>被称为程序替换（progress substitution），它可以将命令输出转化为diff命令可以读取的类文件对象，因此<code>diff &lt;(ls foo) &lt;(ls bar)</code> 会显示文件夹 foo 和 bar 中文件的区别</li>
+<li>通配符*和？,分别表示匹配单个和匹配所有。对于文件foo, foo1, foo2, foo10 和 bar, rm foo?这条命令会删除foo1 和 foo2 ，而rm foo* 则会删除除了bar之外的所有文件。</li>
+<li>可以使用 <a target="_blank" rel="noopener" href="https://www.shellcheck.net/">https://www.shellcheck.net/</a> 来检测shell脚本的错误</li>
+<li>可以使用 <a target="_blank" rel="noopener" href="https://explainshell.com/">https://explainshell.com/</a>  来分析shell脚本的功能</li>
+<li>花括号{} - 当你有一系列的指令，其中包含一段公共子串时，可以用花括号来自动展开这些命令<ul>
+<li><code>cp /path/to/project/&#123;foo,bar,baz&#125;.sh /newpath </code>会展开为<code>cp /path/to/project/foo.sh /path/to/project/bar.sh /path/to/project/baz.sh /newpath</code></li>
+<li><code>mv *&#123;.py,.sh&#125; folder</code>会移动所有 *.py 和 *.sh 文件</li>
+<li>下面命令会创建<code>foo/a, foo/b, ... foo/h, bar/a, bar/b, ... bar/h</code>这些文件：<code>touch &#123;foo,bar&#125;/&#123;a..h&#125;</code></li>
+</ul>
+</li>
+<li>查找文件：<code>find</code>命令、<code>fd</code>（github上对于find命令的替代的开源项目）、locate命令</li>
+</ul>
+<h1 id="Vim"><a href="#Vim" class="headerlink" title="Vim"></a>Vim</h1><p>Vim的哲学：</p>
+<ul>
+<li>Vim可编程（可以使用 Vimscript 或者像 Python 一样的其他程序语言））</li>
+<li>Vim 的接口本身也是一个程序语言</li>
+<li>Vim 避免了使用鼠标，减少了手指移动</li>
+<li> Vim 是一个能跟上你思维速度的编辑器</li>
+</ul>
+<p>Vim的几个模式：</p>
+<ul>
+<li>正常（normal）模式：在文件中四处移动光标进行修改（启动后的默认模式）</li>
+<li>插入（insert）模式：插入文本</li>
+<li>替换（replace）模式：替换文本</li>
+<li>可视化（visual）（一般，行，块）模式：选中文本块</li>
+<li>命令（command）模式：用于执行命令</li>
+<li>Vim会在左下角显示当前的模式</li>
+</ul>
+<blockquote>
+<p>在不同的操作模式下，键盘敲击的含义也不同。比如，x 在插入模式会插入字母x，但是在正常模式 会删除当前光标所在的字母，在可视模式下则会删除选中文块。</p>
+</blockquote>
+<p><strong>一些需要记忆的命令：</strong></p>
+<p><strong>移动：</strong></p>
+<ul>
+<li>基本移动: hjkl （左， 下， 上， 右）</li>
+<li>词： w （下一个词）， b （词初）， e （词尾）</li>
+<li>行： 0 （行初）， ^ （第一个非空格字符）， $ （行尾）</li>
+<li>屏幕： H （屏幕首行）， M （屏幕中间）， L （屏幕底部）</li>
+<li>翻页： Ctrl-u （上翻）， Ctrl-d （下翻）</li>
+<li>文件： gg （文件头）， G （文件尾）</li>
+<li>行数： :{行数}<CR> 或者 {行数}G ({行数}为行数)</li>
+<li>杂项： % （找到配对，比如括号或者 /* */ 之类的注释对）</li>
+<li>查找： f{字符}， t{字符}， F{字符}， T{字符}</li>
+<li>查找/到 向前/向后 在本行的{字符}</li>
+<li>, / ; 用于导航匹配</li>
+<li>搜索: /{正则表达式}, n / N 用于导航匹配</li>
+</ul>
+<p><strong>编辑：</strong></p>
+<ul>
+<li>O / o 在之上/之下插入行</li>
+<li>d{移动命令} 删除 {移动命令}</li>
+<li>例如， dw 删除词, d$ 删除到行尾, d0 删除到行头。</li>
+<li>c{移动命令} 改变 {移动命令}</li>
+<li>例如， cw 改变词</li>
+<li>比如 d{移动命令} 再 i</li>
+<li>x 删除字符（等同于 dl）</li>
+<li>s 替换字符（等同于 xi）</li>
+<li>可视化模式 + 操作</li>
+<li>选中文字, d 删除 或者 c 改变</li>
+<li>u 撤销, <C-r> 重做</li>
+<li>y 复制 / “yank” （其他一些命令比如 d 也会复制）</li>
+<li>p 粘贴</li>
+<li>更多值得学习的: 比如 ~ 改变字符的大小写</li>
+</ul>
+<p><a href="https://gls.show/p/4f2baa62/">https://gls.show/p/4f2baa62/</a></p>
+<h1 id="Data-Wrangling"><a href="#Data-Wrangling" class="headerlink" title="Data Wrangling"></a>Data Wrangling</h1><ul>
+<li>正则表达式</li>
+<li>sed</li>
+<li>awk</li>
+</ul>
+<h1 id="Command-line-Environment"><a href="#Command-line-Environment" class="headerlink" title="Command-line Environment"></a>Command-line Environment</h1><p><strong>进程与信号</strong></p>
+<ul>
+<li>信号机制可以进行进程间通信，比如当我们输入 Ctrl-C 时，shell 会发送一个SIGINT 信号到进程<ul>
+<li>当一个进程接收到信号时，它会停止执行、处理该信号并基于信号传递的信息来改变其执行。就这一点而言，信号是一种软件中断</li>
+</ul>
+</li>
+<li>SIGSTOP可以让进程暂停（ctrl+z），可以配合fg（前台继续）、bg（后台继续）恢复被暂停的工作<ul>
+<li>后台进程仍然是终端进程的子进程，关闭终端后该进程也会被终止</li>
+<li>为了防止上述事情，可以使用nohup运行程序，也可以使用disown（对于已运行的程序）</li>
+</ul>
+</li>
+<li>jobs列出当前终端会话的尚未完成的全部任务，echo $!打印出最近的任务的pid</li>
+<li>&amp;可以让程序在后台运行</li>
+</ul>
+<p><strong>终端多路复用</strong></p>
+<p><strong>可见 <a href="https://gls.show/p/34c553/">计算机教育中缺失的一课——Tmux</a></strong></p>
+<p>会话 - 每个会话都是一个独立的工作区，其中包含一个或多个窗口</p>
+<ul>
+<li>tmux 开始一个新的会话</li>
+<li>tmux new -s NAME 以指定名称开始一个新的会话</li>
+<li>tmux ls 列出当前所有会话</li>
+<li>在 tmux 中输入 <C-b> d ，将当前会话分离</li>
+<li>tmux a 重新连接最后一个会话。您也可以通过 -t 来指定具体的会话</li>
+</ul>
+<p>窗口 - 相当于编辑器或是浏览器中的标签页，从视觉上将一个会话分割为多个部分</p>
+<ul>
+<li><C-b> c 创建一个新的窗口，使用 <C-d>关闭</li>
+<li><C-b> N 跳转到第 N 个窗口，注意每个窗口都是有编号的</li>
+<li><C-b> p 切换到前一个窗口</li>
+<li><C-b> n 切换到下一个窗口</li>
+<li><C-b> , 重命名当前窗口</li>
+<li><C-b> w 列出当前所有窗口<br>面板 - 像 vim 中的分屏一样，面板使我们可以在一个屏幕里显示多个 shell</li>
+<li><C-b> “ 水平分割</li>
+<li><C-b> % 垂直分割</li>
+<li><C-b> &lt;方向&gt; 切换到指定方向的面板，&lt;方向&gt; 指的是键盘上的方向键</li>
+<li><C-b> z 切换当前面板的缩放</li>
+<li><C-b> [ 开始往回卷动屏幕。您可以按下空格键来开始选择，回车键复制选中的部分</li>
+<li><C-b> &lt;空格&gt; 在不同的面板排布间切换</li>
+</ul>
+<p>别名</p>
+<ul>
+<li>alias可以给长命令取别名，比如alias ls=“ls -al;pwd”，注意到等号两遍没有空格</li>
+<li>unalias禁用别名</li>
+<li>为了让别名持续生效，需要把别名放到.bashrc等shell的启动文件中</li>
+</ul>
+<p>配置文件（Dotfile，点文件）</p>
+<p>很多程序的配置都是有对应的配置文件的，以点开头，比如：</p>
+<ul>
+<li>bash - ~/.bashrc, ~/.bash_profile</li>
+<li>git - ~/.gitconfig</li>
+<li>vim - ~/.vimrc 和 ~/.vim 目录</li>
+<li>ssh - ~/.ssh/config</li>
+<li>tmux - ~/.tmux.conf</li>
+</ul>
+<p>配置文件可以方便移植，定制化等</p>
+<p><strong>远程登录</strong></p>
+<ul>
+<li>ssh user@ip command可以以user的身份执行command</li>
+<li>ssh可以配置免密登录</li>
+<li>ssh-keygen命令可以生成一对rsa秘钥</li>
+<li>ssh 会查询 .ssh/authorized_keys 来确认那些用户可以被允许登录，需要将公钥拷贝到此处</li>
+<li>scp命令可以拷贝文件</li>
+<li>rsync是scp的改进版，可以实现断点续传、防止重复拷贝等功能</li>
+<li>编辑.ssh/config文件可以给给需要连接的远程服务器、用户取别名，简化命令</li>
+</ul>
+<p>拷贝公钥的两个命令：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql">cat .ssh<span class="hljs-operator">/</span>id_ed25519 <span class="hljs-operator">|</span> ssh foobar<span class="hljs-variable">@remote</span> <span class="hljs-string">&#x27;cat &gt;&gt; ~/.ssh/authorized_keys&#x27;</span><br><br>ssh<span class="hljs-operator">-</span><span class="hljs-keyword">copy</span><span class="hljs-operator">-</span>id <span class="hljs-operator">-</span>i .ssh<span class="hljs-operator">/</span>id_ed25519.pub foobar<span class="hljs-variable">@remote</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="Version-Control-Git"><a href="#Version-Control-Git" class="headerlink" title="Version Control (Git)"></a>Version Control (Git)</h1><p>版本控制系统的作用：</p>
+<ul>
+<li>追踪项目的修改历史</li>
+<li>查看某行代码编辑的时间和人</li>
+<li>创建项目快照、多人合作、分支开发等</li>
+</ul>
+<p>Git的特点：</p>
+<ul>
+<li>Git 在储存数据时，所有的对象都会基于它们的 SHA-1 哈希 进行寻址</li>
+<li>给这些哈希值赋予人类可读的名字，也就是引用（references），比如master 引用通常会指向主分支的最新一次提交</li>
+<li>当前位置的索引：HEAD</li>
+</ul>
+<p>详细内容可以参考<a href="https://gls.show/p/3645f6a9/">https://gls.show/p/3645f6a9/</a></p>
+<h1 id="Debugging-and-Profiling"><a href="#Debugging-and-Profiling" class="headerlink" title="Debugging and Profiling"></a>Debugging and Profiling</h1><blockquote>
+<p>最有效的 debug 工具就是细致的分析，配合恰当位置的打印语句</p>
+</blockquote>
+<p>调试代码的方式：</p>
+<ul>
+<li><p>print大法好</p>
+</li>
+<li><p>日志，比如journalctl可以查询系统日志，可以配合正则进行匹配</p>
+</li>
+<li><p>可以通过彩色的终端输出更好的分析调试（需要终端的彩色配置）</p>
+</li>
+<li><p>lnav提供了易于查看的日志<br><img src="/image/lnav-front-page.png" srcset="/img/loading.gif" lazyload></p>
+</li>
+<li><p>一些调试器：gdb、pwngdb、pdb</p>
+</li>
+<li><p>分析系统调用：strace</p>
+</li>
+<li><p>web开发：使用Chrome的开发者工具</p>
+</li>
+<li><p>python的 pycallgraph可以生成如下的调用图和流程图：<br><img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/A_Call_Graph_generated_by_pycallgraph.png" srcset="/img/loading.gif" lazyload></p>
+</li>
+</ul>
+<p>资源监控：</p>
+<ul>
+<li>htop，注意到一些快捷键的使用，比如<F6> 进程排序、 t 显示树状结构和 h 打开或折叠线程</li>
+<li>glance</li>
+<li>iotop可以显示实时 I/O 占用信息而且可以非常方便地检查某个进程是否正在执行大量的磁盘读写操作</li>
+<li>df 可以显示每个分区的信息，而 du 则可以显示当前目录下每个文件的磁盘使用情况（ disk usage）。-h 选项可以使命令以对人类（human）更加友好的格式显示数据；ncdu是一个交互性更好的 du ，它可以让您在不同目录下导航、删除文件和文件夹</li>
+<li>lsof 可以列出被进程打开的文件信息、查看文件是被哪个进程打开的</li>
+</ul>
+<h1 id="Metaprogramming"><a href="#Metaprogramming" class="headerlink" title="Metaprogramming"></a>Metaprogramming</h1><p>构建系统，以makefile为例</p>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs jboss-cli">paper.pdf: paper.tex plot-data.png<br>	pdflatex paper.tex<br><br>plot-%<span class="hljs-string">.png</span>: %<span class="hljs-string">.dat</span> plot.py<br>	<span class="hljs-string">./plot.py</span> -i $*<span class="hljs-string">.dat</span> -o $@<br></code></pre></td></tr></table></figure>
+<ul>
+<li>左侧是构建目标，右侧是构建目标所需要的依赖</li>
+<li>缩进的部分是上述过程所需要的程序</li>
+<li><code>%</code>会匹配左右两端相同的字符串<ul>
+<li>如果目标是 plot-foo.png， make 会去寻找 foo.dat 和 plot.py 作为依赖</li>
+</ul>
+</li>
+</ul>
+<p>依赖管理</p>
+<ul>
+<li>语义版本号：主版本号.次版本号.补丁号，比如8.1.3</li>
+<li>假设项目依赖A,A有版本B，那么只要B的主版本号和A相同，次版本号不低于A一般来说即可使用<ul>
+<li> 如果我依赖的版本是1.3.7，那么使用1.3.8、1.6.1，甚至是1.3.0都是可以的。如果版本号是 2.2.4 就不一定能用</li>
+</ul>
+</li>
+<li>锁文件（lock files）：锁文件列出了您当前每个依赖所对应的具体版本号，需要执行升级程序才能更新依赖的版本</li>
+</ul>
+<p>持续集成</p>
+<ul>
+<li>CI（continuous integration 持续集成）<ul>
+<li><blockquote>
+<p>本课程的网站基于 GitHub Pages 构建，这就是一个很好的例子。Pages 在每次master有代码更新时，会执行 Jekyll 博客软件，然后使您的站点可以通过某个 GitHub 域名来访问。对于我们来说这些事情太琐碎了，我现在我们只需要在本地进行修改，然后使用 git 提交代码，发布到远端。CI 会自动帮我们处理后续的事情。</p>
+</blockquote>
+</li>
+<li>Git 可以作为一个简单的 CI 系统来使用，在任何 git 仓库中的 .git/hooks 目录中，您可以找到一些文件（当前处于未激活状态），它们的作用和脚本一样，当某些事件发生时便可以自动执行</li>
+</ul>
+</li>
+</ul>
+<h1 id="Security-and-Cryptography"><a href="#Security-and-Cryptography" class="headerlink" title="Security and Cryptography"></a>Security and Cryptography</h1><ul>
+<li>散列函数<ul>
+<li>密钥生成函数 (Key Derivation Functions) </li>
+<li>文件的信息摘要(Message digest)</li>
+<li>Git中的内容寻址存储(Content addressed storage)</li>
+</ul>
+</li>
+<li>对称加密</li>
+<li>非对称加密<ul>
+<li>PGP电子邮件加密，公布公钥，实现电子邮件加密</li>
+<li>软件签名，验证下载的软件</li>
+</ul>
+</li>
+<li>密码管理器，比如keepass</li>
+<li>两步验证</li>
+<li>ssh（非对称签名来验证用户身份）<h1 id="Potpourri"><a href="#Potpourri" class="headerlink" title="Potpourri"></a>Potpourri</h1></li>
+<li>修改键位映射<ul>
+<li>Vim经常用到escape键但是太远了，因此可以将escape与caps键替换。通常这个功能由在计算机上运行的软件实现。当某一个按键被按下，软件截获键盘发出的按键事件（keypress event）并使用另外一个事件取代</li>
+</ul>
+</li>
+<li>守护进程<ul>
+<li>指后台持续运行的程序，一般以 d 结尾，比如 SSH 服务端 sshd，用来监听传入的 SSH 连接请求并对用户进行鉴权</li>
+<li>systemd（（the system daemon）） 配置文件的详细指南可参见 freedesktop.org</li>
+<li>定期运行程序可以使用cron</li>
+</ul>
+</li>
+<li>计算机启动时，BIOS 或者 UEFI 会在加载操作系统之前对硬件系统进行初始化，这被称为引导（booting）。你可以通过按下计算机提示的键位组合来配置引导，比如 Press F9 to configure BIOS. Press F12 to enter boot menu</li>
+<li>交互式记事本。比如Jupyter，它的名字来源于所支持的三种核心语言：Julia、Python、R（JuPyteR）</li>
+<li>GitHub</li>
+</ul>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Linux/" class="category-chain-item">Linux</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>MIT-missing-semester计算机教育中缺失的一课</div>
+      <div>http://gls.show/p/4c1dfd0d/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年7月26日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/a735da4/" title="pwnable-tw刷题记录">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">pwnable-tw刷题记录</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/c98013d5/" title="MIT-6.S081：Lab3 page table">
+                        <span class="hidden-mobile">MIT-6.S081：Lab3 page table</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

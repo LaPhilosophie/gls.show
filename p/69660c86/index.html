@@ -1,0 +1,927 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/image/atom1.png">
+  <link rel="icon" href="/image/atom1.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#153b6e">
+  <meta name="author" content="郭佳明">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="前置准备 看完p4、p5  搞清楚lab要求  对riscv指令集、函数调用约定、trap机制有一定理解   RISC-V assembly (easy)通过make fs.img 命令可以将user&#x2F;call.c文件转化为user&#x2F;call.asm文件 123456789101112131415161718#include &quot;kernel&#x2F;param.h&quot;#include">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MIT-6.S081：Lab4 trap">
+<meta property="og:url" content="http://gls.show/p/69660c86/index.html">
+<meta property="og:site_name" content="郭佳明的博客">
+<meta property="og:description" content="前置准备 看完p4、p5  搞清楚lab要求  对riscv指令集、函数调用约定、trap机制有一定理解   RISC-V assembly (easy)通过make fs.img 命令可以将user&#x2F;call.c文件转化为user&#x2F;call.asm文件 123456789101112131415161718#include &quot;kernel&#x2F;param.h&quot;#include">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.gls.show/img/20230830215347.png">
+<meta property="article:published_time" content="2023-08-02T13:26:53.462Z">
+<meta property="article:modified_time" content="2023-08-30T13:54:17.984Z">
+<meta property="article:author" content="郭佳明">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://img.gls.show/img/20230830215347.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>MIT-6.S081：Lab4 trap - 郭佳明的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"gls.show","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>郭佳明的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/mountain1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="MIT-6.S081：Lab4 trap"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-08-02 21:26" pubdate>
+          2023年8月2日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          <!-- compatible with older versions-->
+          14k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          <!-- compatible with older versions-->
+          44 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">MIT-6.S081：Lab4 trap</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    <!-- compatible with older versions-->
+                    本文最后更新于：2023年8月30日 晚上
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <p><img src="https://img.gls.show/img/20230830215347.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="前置准备"><a href="#前置准备" class="headerlink" title="前置准备"></a>前置准备</h1><ul>
+<li><p>看完<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV19k4y1C7kA">p4、p5</a></p>
+</li>
+<li><p>搞清楚<a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.S081/2020/labs/traps.html">lab要求</a></p>
+</li>
+<li><p>对riscv指令集、函数调用约定、trap机制有一定理解</p>
+</li>
+</ul>
+<h1 id="RISC-V-assembly-easy"><a href="#RISC-V-assembly-easy" class="headerlink" title="RISC-V assembly (easy)"></a>RISC-V assembly (<a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.S081/2020/labs/guidance.html">easy</a>)</h1><p>通过make fs.img 命令可以将user/call.c文件转化为user/call.asm文件</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;kernel/param.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;kernel/types.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;kernel/stat.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;user/user.h&quot;</span></span><br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">g</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x)</span> </span>&#123;<br>  <span class="hljs-keyword">return</span> x+<span class="hljs-number">3</span>;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">f</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x)</span> </span>&#123;<br>  <span class="hljs-keyword">return</span> g(x);<br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span> </span>&#123;<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%d %d\n&quot;</span>, f(<span class="hljs-number">8</span>)+<span class="hljs-number">1</span>, <span class="hljs-number">13</span>);<br>  <span class="hljs-built_in">exit</span>(<span class="hljs-number">0</span>);<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>不难观察出：</p>
+<ol>
+<li><code>s0</code>寄存器（也称为<code>fp</code>或帧指针）：它用于保存当前函数的帧指针，即指向当前函数栈帧的基址。在函数调用过程中，<code>s0</code>寄存器通常被用于存储上一个函数的栈帧基址，以便在函数返回时恢复调用者的栈帧。</li>
+<li><code>sp</code>寄存器（也称为堆栈指针）：它用于指示当前的栈顶位置，即栈指针。栈是一种后进先出（LIFO）的数据结构，用于存储局部变量、函数调用信息和其他临时数据。在函数调用期间，栈会动态增长和收缩，而<code>sp</code>寄存器会随着栈的变化而移动。</li>
+<li>a0保存第一个参数，同时具有存储返回值的用途（也即是x，返回x+3）。a1存储第二个参数，以此类推</li>
+<li>f函数被内联优化，没有新开辟栈帧，它的内容和g函数相同</li>
+<li>ra寄存器存储函数的返回地址</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><code class="hljs asm"><br>user/_call:     file format elf64-littleriscv<br><br><br>Disassembly of section .text:<br><br>0000000000000000 &lt;g&gt;:<br>#include &quot;kernel/param.h&quot;<br>#include &quot;kernel/types.h&quot;<br>#include &quot;kernel/stat.h&quot;<br>#include &quot;user/user.h&quot;<br><br>int g(int x) &#123;<br>   0:	1141                	addi	sp,sp,-16 #给栈指针分配内存<br>   2:	e422                	sd	s0,8(sp) #保存s0寄存器的值<br>   4:	0800                	addi	s0,sp,16 <br>  return x+3;<br>&#125;<br>   6:	250d                	addiw	a0,a0,3 # a0是第一个参数，也即是x，返回x+3<br>   8:	6422                	ld	s0,8(sp)<br>   a:	0141                	addi	sp,sp,16<br>   c:	8082                	ret<br><br>000000000000000e &lt;f&gt;:<br>#f函数被内联优化，没有新开辟栈帧，它的内容和g函数相同<br>int f(int x) &#123;<br>   e:	1141                	addi	sp,sp,-16<br>  10:	e422                	sd	s0,8(sp)<br>  12:	0800                	addi	s0,sp,16<br>  return g(x);<br>&#125;<br>  14:	250d                	addiw	a0,a0,3<br>  16:	6422                	ld	s0,8(sp)<br>  18:	0141                	addi	sp,sp,16<br>  1a:	8082                	ret<br><br>000000000000001c &lt;main&gt;:<br><br>void main(void) &#123;<br>  1c:	1141                	addi	sp,sp,-16 # 初始化工作<br>  1e:	e406                	sd	ra,8(sp)<br>  20:	e022                	sd	s0,0(sp)<br>  22:	0800                	addi	s0,sp,16<br>  printf(&quot;%d %d\n&quot;, f(8)+1, 13);<br>  24:	4635                	li	a2,13<br>  26:	45b1                	li	a1,12 # f(8)+1<br>  28:	00000517          	auipc	a0,0x0<br>  2c:	79050513          	addi	a0,a0,1936 # 7b8 &lt;malloc+0xea&gt;<br>  30:	00000097          	auipc	ra,0x0<br>  34:	5e6080e7          	jalr	1510(ra) # 616 &lt;printf&gt;<br>  exit(0);<br>  38:	4501                	li	a0,0<br>  3a:	00000097          	auipc	ra,0x0<br>  3e:	274080e7          	jalr	628(ra) # 2ae &lt;exit&gt;<br><br></code></pre></td></tr></table></figure>
+
+
+
+<h2 id="Q1"><a href="#Q1" class="headerlink" title="Q1"></a>Q1</h2><p>Which registers contain arguments to functions? For example, which register holds 13 in main’s call to <code>printf</code>?</p>
+<figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs gherkin">reg    |<span class="hljs-string"> name  </span>|<span class="hljs-string"> saver  </span>|<span class="hljs-string"> description</span><br><span class="hljs-string">-------+-------+--------+------------</span><br><span class="hljs-string">x0     </span>|<span class="hljs-string"> zero  </span>|<span class="hljs-string">        </span>|<span class="hljs-string"> hardwired zero</span><br><span class="hljs-string">x1     </span>|<span class="hljs-string"> ra    </span>|<span class="hljs-string"> caller </span>|<span class="hljs-string"> return address</span><br><span class="hljs-string">x2     </span>|<span class="hljs-string"> sp    </span>|<span class="hljs-string"> callee </span>|<span class="hljs-string"> stack pointer</span><br><span class="hljs-string">x3     </span>|<span class="hljs-string"> gp    </span>|<span class="hljs-string">        </span>|<span class="hljs-string"> global pointer</span><br><span class="hljs-string">x4     </span>|<span class="hljs-string"> tp    </span>|<span class="hljs-string">        </span>|<span class="hljs-string"> thread pointer</span><br><span class="hljs-string">x5-7   </span>|<span class="hljs-string"> t0-2  </span>|<span class="hljs-string"> caller </span>|<span class="hljs-string"> temporary registers</span><br><span class="hljs-string">x8     </span>|<span class="hljs-string"> s0/fp </span>|<span class="hljs-string"> callee </span>|<span class="hljs-string"> saved register / frame pointer</span><br><span class="hljs-string">x9     </span>|<span class="hljs-string"> s1    </span>|<span class="hljs-string"> callee </span>|<span class="hljs-string"> saved register</span><br><span class="hljs-string">x10-11 </span>|<span class="hljs-string"> a0-1  </span>|<span class="hljs-string"> caller </span>|<span class="hljs-string"> function arguments / return values</span><br><span class="hljs-string">x12-17 </span>|<span class="hljs-string"> a2-7  </span>|<span class="hljs-string"> caller </span>|<span class="hljs-string"> function arguments</span><br><span class="hljs-string">x18-27 </span>|<span class="hljs-string"> s2-11 </span>|<span class="hljs-string"> callee </span>|<span class="hljs-string"> saved registers</span><br><span class="hljs-string">x28-31 </span>|<span class="hljs-string"> t3-6  </span>|<span class="hljs-string"> caller </span>|<span class="hljs-string"> temporary registers</span><br><span class="hljs-string">pc     </span>|<span class="hljs-string">       </span>|<span class="hljs-string">        </span>|<span class="hljs-string"> program counter</span><br></code></pre></td></tr></table></figure>
+
+<p>a0保存第一个参数，同时具有存储返回值的用途（也即是x，返回x+3）。a1存储第二个参数，以此类推</p>
+<h2 id="Q2"><a href="#Q2" class="headerlink" title="Q2"></a>Q2</h2><p>Where is the call to function <code>f</code> in the assembly code for main? Where is the call to <code>g</code>? (Hint: the compiler may inline functions.)</p>
+<p>代码<code>li    a1,12 </code>直接将f(8)+1的结果存入a1中，并没有调用函数的过程，这里存在编译器的优化</p>
+<h2 id="Q3"><a href="#Q3" class="headerlink" title="Q3"></a>Q3</h2><p>At what address is the function <code>printf</code> located?</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-number">0000000000000616</span> &lt;printf&gt;:<br><br><span class="hljs-function"><span class="hljs-keyword">void</span></span><br><span class="hljs-function"><span class="hljs-title">printf</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *fmt, ...)</span></span><br><span class="hljs-function"></span>&#123;<br> <span class="hljs-number">616</span>:	<span class="hljs-number">711</span>d                	addi	sp,sp,<span class="hljs-number">-96</span><br></code></pre></td></tr></table></figure>
+
+<p>616</p>
+<blockquote>
+<p><code>jalr 1510(ra)</code>指令用于调用<code>printf</code>函数，其中偏移量1510是相对于全局地址0x0<strong>的偏移</strong>。（全局地址不确定）</p>
+</blockquote>
+<h2 id="Q4"><a href="#Q4" class="headerlink" title="Q4"></a>Q4</h2><p>Run the following code.</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">unsigned</span> int i = <span class="hljs-number">0</span>x<span class="hljs-number">00646</span>c<span class="hljs-number">72</span>;<br><span class="hljs-attribute">printf</span>(<span class="hljs-string">&quot;H%x Wo%s&quot;</span>, <span class="hljs-number">57616</span>, &amp;i);<br>    <br></code></pre></td></tr></table></figure>
+
+<p>What is the output? <a target="_blank" rel="noopener" href="http://web.cs.mun.ca/~michael/c/ascii-table.html">Here’s an ASCII table</a> that maps bytes to characters.</p>
+<p>The output depends on that fact that the RISC-V is little-endian. If the RISC-V were instead big-endian what would you set <code>i</code> to in order to yield the same output? Would you need to change <code>57616</code> to a different value?</p>
+<p><a target="_blank" rel="noopener" href="http://www.webopedia.com/TERM/b/big_endian.html">Here’s a description of little- and big-endian</a> and <a target="_blank" rel="noopener" href="http://www.networksorcery.com/enp/ien/ien137.txt">a more whimsical description</a>.</p>
+<p>57616是0xE110</p>
+<p>%s打印出&amp;i指向十六进制数对应的ASCII码，遇0停止打印。变量<code>i</code>存储了字符串”rld\0”</p>
+<p>最终打印出HE110 World</p>
+<h2 id="Q5"><a href="#Q5" class="headerlink" title="Q5"></a>Q5</h2><p>In the following code, what is going to be printed after <code>&#39;y=&#39;</code>? (note: the answer is not a specific value.) Why does this happen?</p>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs perl"><span class="hljs-keyword">printf</span>(<span class="hljs-string">&quot;x=%d y=%d&quot;</span>, <span class="hljs-number">3</span>);<br></code></pre></td></tr></table></figure>
+
+<p>y=a2寄存器的值</p>
+<p>这里printf函数相当于有三个参数，第一个是字符串（a0保存），第二个是3（a1保存），第三个（（a2保存））</p>
+<h1 id="Backtrace-moderate"><a href="#Backtrace-moderate" class="headerlink" title="Backtrace (moderate)"></a>Backtrace (<a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.S081/2020/labs/guidance.html">moderate</a>)</h1><p>要求：<strong>在 kernel/printf.c 中实现一个 backtrace ()函数。在 sys _ sleep 中插入对此函数的调用，然后运行 bttest，它调用 sys _ sleep。你的输出应该如下:</strong></p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs x86asm"><span class="hljs-symbol">backtrace:</span><br><span class="hljs-number">0x000000080002cda</span><br><span class="hljs-number">0x000000080002bb6</span><br><span class="hljs-number">0x0000000080002898</span><br></code></pre></td></tr></table></figure>
+
+<p>编译器在每个堆栈帧中放入一个包含调用者帧指针地址的帧指针。您的回溯应该使用这些帧指针来遍历堆栈，并在每个堆栈帧中打印保存的返回地址。</p>
+<blockquote>
+<p>补充一下基础知识：</p>
+<p>栈指针：sp（stack pointer），指向栈的低地址</p>
+<p>帧指针：fp（frame pointer），指向栈的高地址</p>
+<p>fp-8：返回地址</p>
+<p>fp-16：preview fp</p>
+<p>内核会为栈分配一页的内存，因此可以使用 PGROUNDUP（fp）和 PGROUNDDOWN（fp）定位栈的上下边界，以终止循环</p>
+</blockquote>
+<p>具体的栈的内存布局参考lecture中教授手画图</p>
+<ul>
+<li><p>将backtrace的原型添加到 kernel/defs.h，这样就可以在 sys _ sleep 中调用backtrace</p>
+<ul>
+<li>在defs.h中添加<code>void backtrace(void);</code></li>
+</ul>
+</li>
+<li><p>GCC 编译器将当前正在执行的函数的帧指针存储在寄存器 s0中。向 kernel/riscv.h 添加以下函数，并在backtrace中调用这个函数来读取当前帧指针。这个函数使用内联来读取 s0：</p>
+</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs asm">static inline uint64<br>r_fp()<br>&#123;<br>  uint64 x;<br>  asm volatile(&quot;mv %0, s0&quot; : &quot;=r&quot; (x) );<br>  return x;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在printf.c文件中添加函数：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">backtrace</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span><br><span class="hljs-function"></span>&#123;<br>  uint64 fp=r_fp();<span class="hljs-comment">//get fp </span><br>  uint64 up_addr=PGROUNDUP(fp);<span class="hljs-comment">//up bound</span><br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;backtrace:\n&quot;</span>);<span class="hljs-comment">//fmt output </span><br>  <span class="hljs-keyword">while</span>(fp&lt;up_addr)<br>  &#123;<br>    uint64 ret_addr=*(uint64 *)(fp<span class="hljs-number">-8</span>);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%p\n&quot;</span>,ret_addr);<span class="hljs-comment">// attention that after %p is \n</span><br>    fp=*(uint64 *)(fp<span class="hljs-number">-16</span>);<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>bttest.c中如是写：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;kernel/types.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;kernel/stat.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;user/user.h&quot;</span></span><br><br><span class="hljs-function"><span class="hljs-keyword">int</span></span><br><span class="hljs-function"><span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-keyword">int</span> argc, <span class="hljs-keyword">char</span> *argv[])</span></span><br><span class="hljs-function"></span>&#123;<br>  sleep(<span class="hljs-number">1</span>);<br>  <span class="hljs-built_in">exit</span>(<span class="hljs-number">0</span>);<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>因此bttest作为测试文件会调用sleep，也即是sys_sleep。我们在sys_sleep中加入如下代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function">uint64</span><br><span class="hljs-function"><span class="hljs-title">sys_sleep</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-keyword">int</span> n;<br>  uint ticks0;<br>  <span class="hljs-keyword">if</span>(argint(<span class="hljs-number">0</span>, &amp;n) &lt; <span class="hljs-number">0</span>)<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;<br>  acquire(&amp;tickslock);<br>  ticks0 = ticks;<br>  <span class="hljs-keyword">while</span>(ticks - ticks0 &lt; n)&#123;<br>    <span class="hljs-keyword">if</span>(myproc()-&gt;killed)&#123;<br>      release(&amp;tickslock);<br>      <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;<br>    &#125;<br>    sleep(&amp;ticks, &amp;tickslock);<br>  &#125;<br>  release(&amp;tickslock);<br>  backtrace();<span class="hljs-comment">// </span><br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这样的话，sleep返回之前会调用backtrace函数</p>
+<p>类似的，为了更好的debug，在panic函数中加入如下代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">void</span></span><br><span class="hljs-function"><span class="hljs-title">panic</span><span class="hljs-params">(<span class="hljs-keyword">char</span> *s)</span></span><br><span class="hljs-function"></span>&#123;<br>  pr.locking = <span class="hljs-number">0</span>;<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;panic: &quot;</span>);<br>  <span class="hljs-built_in">printf</span>(s);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\n&quot;</span>);<br>  backtrace();<br>  panicked = <span class="hljs-number">1</span>; <span class="hljs-comment">// freeze uart output from other CPUs</span><br>  <span class="hljs-keyword">for</span>(;;)<br>    ;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这样会在panic输出之后，打印出返回地址</p>
+<blockquote>
+<p>ps ：做到此处发现了的qemu卡死的问题，发现是2020版本lab的传统艺能。apt remove qemu*之后使用源码编译qemu5版本即可</p>
+<p>Next, retrieve and extract the source for QEMU 5.1.0:</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs elixir"><span class="hljs-variable">$ </span>wget <span class="hljs-symbol">https:</span>/<span class="hljs-regexp">/download.qemu.org/qemu</span><span class="hljs-number">-5.1</span>.0.tar.xz<br><span class="hljs-variable">$ </span>tar xf qemu<span class="hljs-number">-5.1</span>.0.tar.xz<br></code></pre></td></tr></table></figure>
+
+<p>Build QEMU for riscv64-softmmu:</p>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs jboss-cli">$ <span class="hljs-keyword">cd</span> qemu-5.1.0<br>$ <span class="hljs-string">./configure</span> <span class="hljs-params">--disable-kvm</span> <span class="hljs-params">--disable-werror</span> <span class="hljs-params">--prefix=/usr/local</span> <span class="hljs-params">--target-list=</span><span class="hljs-string">&quot;riscv64-softmmu&quot;</span><br>$ make<br>$ sudo make install<br>$ <span class="hljs-keyword">cd</span> <span class="hljs-string">..</span><br></code></pre></td></tr></table></figure>
+</blockquote>
+<h1 id="Alarm-hard"><a href="#Alarm-hard" class="headerlink" title="Alarm (hard)"></a>Alarm (<a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.S081/2020/labs/guidance.html">hard</a>)</h1><p>目标：</p>
+<p>向 xv6添加一个特性，它将在进程使用 CPU 时间时<strong>周期性</strong>发出警报。更一般地说，实现用户级中断/错误处理程序的基本形式; 例如，可以使用类似的东西来处理应用程序中的页面错误。</p>
+<p>hint：</p>
+<ul>
+<li>添加一个新的系统调用sigalarm(interval, handler)，如果应用程序调用 sigAlarm (n，fn) ，那么在程序消耗的每 n 个 CPU 时间之后，内核应该调用应用程序函数 fn。当 fn 返回时，应用程序应该从停止的地方恢复</li>
+<li>如果一个应用程序调用 sigAlarm (0,0) ，内核应该停止生成周期性的alarm调用</li>
+<li>user/alarmtest.c是测试文件，需要将其添加到makefile。添加了 sigAlarm 和 sigreturn 系统调用，它才能正确编译</li>
+<li>可以在 user/alarmtest.asm 中看到 alarmtest 的汇编代码，这可能有助于调试</li>
+<li>alarmtest 中在 test0 调用了 sigalarm(2, periodic)，要求内核强制每隔2个tick调用 period () ，然后spin一段时间</li>
+</ul>
+<p>test0：修改内核以跳转到用户空间中的警报处理程序</p>
+<p>先修改makefile编译出alarmtest</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs c">UPROGS=\<br>	$U/_cat\<br>	$U/_echo\<br>	$U/_forktest\<br>	$U/_grep\<br>	$U/_init\<br>	$U/_kill\<br>	$U/_ln\<br>	$U/_ls\<br>	$U/_mkdir\<br>	$U/_rm\<br>	$U/_sh\<br>	$U/_stressfs\<br>	$U/_usertests\<br>	$U/_grind\<br>	$U/_wc\<br>	$U/_zombie\<br>	$U/_alarmtest\<br></code></pre></td></tr></table></figure>
+
+<p>放入 user/user.h 中的正确声明:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// system calls</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">sigalarm</span><span class="hljs-params">(<span class="hljs-keyword">int</span> ticks, <span class="hljs-keyword">void</span> (*handler)())</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">sigreturn</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">fork</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">exit</span><span class="hljs-params">(<span class="hljs-keyword">int</span>)</span> __<span class="hljs-title">attribute__</span><span class="hljs-params">((noreturn))</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">wait</span><span class="hljs-params">(<span class="hljs-keyword">int</span>*)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">pipe</span><span class="hljs-params">(<span class="hljs-keyword">int</span>*)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">write</span><span class="hljs-params">(<span class="hljs-keyword">int</span>, <span class="hljs-keyword">const</span> <span class="hljs-keyword">void</span>*, <span class="hljs-keyword">int</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">read</span><span class="hljs-params">(<span class="hljs-keyword">int</span>, <span class="hljs-keyword">void</span>*, <span class="hljs-keyword">int</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">close</span><span class="hljs-params">(<span class="hljs-keyword">int</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">kill</span><span class="hljs-params">(<span class="hljs-keyword">int</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">exec</span><span class="hljs-params">(<span class="hljs-keyword">char</span>*, <span class="hljs-keyword">char</span>**)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">open</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>*, <span class="hljs-keyword">int</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">mknod</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>*, <span class="hljs-keyword">short</span>, <span class="hljs-keyword">short</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">unlink</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>*)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">fstat</span><span class="hljs-params">(<span class="hljs-keyword">int</span> fd, struct stat*)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">link</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>*, <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>*)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">mkdir</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>*)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">chdir</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>*)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">dup</span><span class="hljs-params">(<span class="hljs-keyword">int</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">getpid</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">char</span>* <span class="hljs-title">sbrk</span><span class="hljs-params">(<span class="hljs-keyword">int</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">sleep</span><span class="hljs-params">(<span class="hljs-keyword">int</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">uptime</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><br><span class="hljs-comment">// ulib.c</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">stat</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>*, struct stat*)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">char</span>* <span class="hljs-title">strcpy</span><span class="hljs-params">(<span class="hljs-keyword">char</span>*, <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>*)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">void</span> *<span class="hljs-title">memmove</span><span class="hljs-params">(<span class="hljs-keyword">void</span>*, <span class="hljs-keyword">const</span> <span class="hljs-keyword">void</span>*, <span class="hljs-keyword">int</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">char</span>* <span class="hljs-title">strchr</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>*, <span class="hljs-keyword">char</span> c)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">strcmp</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>*, <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>*)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">fprintf</span><span class="hljs-params">(<span class="hljs-keyword">int</span>, <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>*, ...)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">printf</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>*, ...)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">char</span>* <span class="hljs-title">gets</span><span class="hljs-params">(<span class="hljs-keyword">char</span>*, <span class="hljs-keyword">int</span> max)</span></span>;<br><span class="hljs-function">uint <span class="hljs-title">strlen</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>*)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">void</span>* <span class="hljs-title">memset</span><span class="hljs-params">(<span class="hljs-keyword">void</span>*, <span class="hljs-keyword">int</span>, uint)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">void</span>* <span class="hljs-title">malloc</span><span class="hljs-params">(uint)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">free</span><span class="hljs-params">(<span class="hljs-keyword">void</span>*)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">atoi</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>*)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">memcmp</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">void</span> *, <span class="hljs-keyword">const</span> <span class="hljs-keyword">void</span> *, uint)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">void</span> *<span class="hljs-title">memcpy</span><span class="hljs-params">(<span class="hljs-keyword">void</span> *, <span class="hljs-keyword">const</span> <span class="hljs-keyword">void</span> *, uint)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<p>更新 user/usys.pl (生成 user/usys.S)</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><code class="hljs c">#!/usr/bin/perl -w<br><br># Generate usys.S, the stubs <span class="hljs-keyword">for</span> syscalls.<br><br>print <span class="hljs-string">&quot;# generated by usys.pl - do not edit\n&quot;</span>;<br><br>print <span class="hljs-string">&quot;#include \&quot;kernel/syscall.h\&quot;\n&quot;</span>;<br><br>sub entry &#123;<br>    my $name = shift;<br>    print <span class="hljs-string">&quot;.global $name\n&quot;</span>;<br>    print <span class="hljs-string">&quot;$&#123;name&#125;:\n&quot;</span>;<br>    print <span class="hljs-string">&quot; li a7, SYS_$&#123;name&#125;\n&quot;</span>;<br>    print <span class="hljs-string">&quot; ecall\n&quot;</span>;<br>    print <span class="hljs-string">&quot; ret\n&quot;</span>;<br>&#125;<br>	<br>entry(<span class="hljs-string">&quot;fork&quot;</span>);<br>entry(<span class="hljs-string">&quot;exit&quot;</span>);<br>entry(<span class="hljs-string">&quot;wait&quot;</span>);<br>entry(<span class="hljs-string">&quot;pipe&quot;</span>);<br>entry(<span class="hljs-string">&quot;read&quot;</span>);<br>entry(<span class="hljs-string">&quot;write&quot;</span>);<br>entry(<span class="hljs-string">&quot;close&quot;</span>);<br>entry(<span class="hljs-string">&quot;kill&quot;</span>);<br>entry(<span class="hljs-string">&quot;exec&quot;</span>);<br>entry(<span class="hljs-string">&quot;open&quot;</span>);<br>entry(<span class="hljs-string">&quot;mknod&quot;</span>);<br>entry(<span class="hljs-string">&quot;unlink&quot;</span>);<br>entry(<span class="hljs-string">&quot;fstat&quot;</span>);<br>entry(<span class="hljs-string">&quot;link&quot;</span>);<br>entry(<span class="hljs-string">&quot;mkdir&quot;</span>);<br>entry(<span class="hljs-string">&quot;chdir&quot;</span>);<br>entry(<span class="hljs-string">&quot;dup&quot;</span>);<br>entry(<span class="hljs-string">&quot;getpid&quot;</span>);<br>entry(<span class="hljs-string">&quot;sbrk&quot;</span>);<br>entry(<span class="hljs-string">&quot;sleep&quot;</span>);<br>entry(<span class="hljs-string">&quot;uptime&quot;</span>);<br>entry(<span class="hljs-string">&quot;sigalarm&quot;</span>);<span class="hljs-comment">//</span><br>entry(<span class="hljs-string">&quot;sigreturn&quot;</span>);<span class="hljs-comment">//</span><br></code></pre></td></tr></table></figure>
+
+<p> kernel/syscall.h </p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// System call numbers</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> SYS_fork    1</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> SYS_exit    2</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> SYS_wait    3</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> SYS_pipe    4</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> SYS_read    5</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> SYS_kill    6</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> SYS_exec    7</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> SYS_fstat   8</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> SYS_chdir   9</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> SYS_dup    10</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> SYS_getpid 11</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> SYS_sbrk   12</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> SYS_sleep  13</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> SYS_uptime 14</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> SYS_open   15</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> SYS_write  16</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> SYS_mknod  17</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> SYS_unlink 18</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> SYS_link   19</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> SYS_mkdir  20</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> SYS_close  21</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> SYS_sigalarm 22</span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> SYS_sigreturn 23</span><br></code></pre></td></tr></table></figure>
+
+<p>kernel/syscall.c</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><code class="hljs c"><br><span class="hljs-function"><span class="hljs-keyword">extern</span> uint64 <span class="hljs-title">sys_chdir</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">extern</span> uint64 <span class="hljs-title">sys_close</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">extern</span> uint64 <span class="hljs-title">sys_dup</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">extern</span> uint64 <span class="hljs-title">sys_exec</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">extern</span> uint64 <span class="hljs-title">sys_exit</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">extern</span> uint64 <span class="hljs-title">sys_fork</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">extern</span> uint64 <span class="hljs-title">sys_fstat</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">extern</span> uint64 <span class="hljs-title">sys_getpid</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">extern</span> uint64 <span class="hljs-title">sys_kill</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">extern</span> uint64 <span class="hljs-title">sys_link</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">extern</span> uint64 <span class="hljs-title">sys_mkdir</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">extern</span> uint64 <span class="hljs-title">sys_mknod</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">extern</span> uint64 <span class="hljs-title">sys_open</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">extern</span> uint64 <span class="hljs-title">sys_pipe</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">extern</span> uint64 <span class="hljs-title">sys_read</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">extern</span> uint64 <span class="hljs-title">sys_sbrk</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">extern</span> uint64 <span class="hljs-title">sys_sleep</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">extern</span> uint64 <span class="hljs-title">sys_unlink</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">extern</span> uint64 <span class="hljs-title">sys_wait</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">extern</span> uint64 <span class="hljs-title">sys_write</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">extern</span> uint64 <span class="hljs-title">sys_uptime</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">extern</span> uint64 <span class="hljs-title">sys_sigalarm</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<span class="hljs-comment">//</span><br><span class="hljs-function"><span class="hljs-keyword">extern</span> uint64 <span class="hljs-title">sys_sigreturn</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<span class="hljs-comment">//</span><br><br><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-title">uint64</span> <span class="hljs-params">(*syscalls[])</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span> </span>= &#123;<br>[SYS_fork]    sys_fork,<br>[SYS_exit]    sys_exit,<br>[SYS_wait]    sys_wait,<br>[SYS_pipe]    sys_pipe,<br>[SYS_read]    sys_read,<br>[SYS_kill]    sys_kill,<br>[SYS_exec]    sys_exec,<br>[SYS_fstat]   sys_fstat,<br>[SYS_chdir]   sys_chdir,<br>[SYS_dup]     sys_dup,<br>[SYS_getpid]  sys_getpid,<br>[SYS_sbrk]    sys_sbrk,<br>[SYS_sleep]   sys_sleep,<br>[SYS_uptime]  sys_uptime,<br>[SYS_open]    sys_open,<br>[SYS_write]   sys_write,<br>[SYS_mknod]   sys_mknod,<br>[SYS_unlink]  sys_unlink,<br>[SYS_link]    sys_link,<br>[SYS_mkdir]   sys_mkdir,<br>[SYS_close]   sys_close,<br>[SYS_sigalarm] sys_sigalarm,<span class="hljs-comment">//</span><br>[SYS_sigreturn] sys_sigreturn,<span class="hljs-comment">//</span><br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<p>在sysproc.c中加入sys_sigalarm和sys_sigreturn函数处理代码</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function">uint64 </span><br><span class="hljs-function"><span class="hljs-title">sys_sigalarm</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-keyword">int</span> n;<br>  uint64 fn;<br>  <span class="hljs-keyword">if</span>(argint(<span class="hljs-number">0</span>, &amp;n) &lt; <span class="hljs-number">0</span>) &#123;<br>      <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;<br>  &#125;<br>  <span class="hljs-keyword">if</span>(argaddr(<span class="hljs-number">1</span>, &amp;fn) &lt; <span class="hljs-number">0</span>) &#123;<br>      <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;<br>  &#125;<br>  <span class="hljs-keyword">return</span> sigalarm(n, (<span class="hljs-keyword">void</span>(*)())(fn));<br>&#125;<br><br><span class="hljs-function">uint64</span><br><span class="hljs-function"><span class="hljs-title">sys_sigreturn</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-keyword">return</span> sigreturn();<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>关于test1的提示：</p>
+<ul>
+<li>解决方案将要求您保存和恢复寄存器– 您需要保存和恢复哪些寄存器才能正确地恢复被中断的代码？(提示: 会有很多)。</li>
+<li>当计时器关闭时，用户陷阱在 struct proc 中保存足够的状态，这样签名返回就可以正确地返回到被中断的用户代码。</li>
+<li>防止对处理程序的重入调用——如果处理程序还没有返回，内核就不应该再次调用它。</li>
+</ul>
+<p>硬件时钟每次都强制执行一个中断，这个中断在 kernel/trap.c 中的 usertrap ()中处理。每次时钟发生硬件中断，都统计一次，到了次数就执行handler</p>
+<p>在proc中加入如下变量：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// Per-process state</span><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">proc</span> &#123;</span><br>  <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">spinlock</span> <span class="hljs-title">lock</span>;</span><br><br>  <span class="hljs-comment">// p-&gt;lock must be held when using these:</span><br>  <span class="hljs-class"><span class="hljs-keyword">enum</span> <span class="hljs-title">procstate</span> <span class="hljs-title">state</span>;</span>        <span class="hljs-comment">// Process state</span><br>  <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">proc</span> *<span class="hljs-title">parent</span>;</span>         <span class="hljs-comment">// Parent process</span><br>  <span class="hljs-keyword">void</span> *chan;                  <span class="hljs-comment">// If non-zero, sleeping on chan</span><br>  <span class="hljs-keyword">int</span> killed;                  <span class="hljs-comment">// If non-zero, have been killed</span><br>  <span class="hljs-keyword">int</span> xstate;                  <span class="hljs-comment">// Exit status to be returned to parent&#x27;s wait</span><br>  <span class="hljs-keyword">int</span> pid;                     <span class="hljs-comment">// Process ID</span><br><br>  <span class="hljs-comment">// these are private to the process, so p-&gt;lock need not be held.</span><br>  uint64 kstack;               <span class="hljs-comment">// Virtual address of kernel stack</span><br>  uint64 sz;                   <span class="hljs-comment">// Size of process memory (bytes)</span><br>  <span class="hljs-keyword">pagetable_t</span> pagetable;       <span class="hljs-comment">// User page table</span><br>  <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">trapframe</span> *<span class="hljs-title">trapframe</span>;</span> <span class="hljs-comment">// data page for trampoline.S</span><br>  <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">context</span> <span class="hljs-title">context</span>;</span>      <span class="hljs-comment">// swtch() here to run process</span><br>  <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">file</span> *<span class="hljs-title">ofile</span>[<span class="hljs-title">NOFILE</span>];</span>  <span class="hljs-comment">// Open files</span><br>  <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">inode</span> *<span class="hljs-title">cwd</span>;</span>           <span class="hljs-comment">// Current directory</span><br>  <span class="hljs-keyword">char</span> name[<span class="hljs-number">16</span>];               <span class="hljs-comment">// Process name (debugging)</span><br>  <br>  <span class="hljs-keyword">int</span> alarm_interval; <span class="hljs-comment">//n in sigalarm(n, (void(*)())(fn));</span><br>  <span class="hljs-keyword">void</span>(*alarm_handler)();<span class="hljs-comment">// fn in sigalarm(n, (void(*)())(fn));</span><br>  <span class="hljs-keyword">int</span> alarm_ticks;<span class="hljs-comment">//after alarm_ticks will </span><br>  <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">trapframe</span> *<span class="hljs-title">saved_trapframe</span>;</span><br>  <span class="hljs-keyword">int</span> alarm_flag;<br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<p>完善sigalarm和sigreturn函数，并在defs.h中加入声明</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// defs.h</span><br><span class="hljs-function"><span class="hljs-keyword">int</span>             <span class="hljs-title">sigalarm</span><span class="hljs-params">(<span class="hljs-keyword">int</span>, <span class="hljs-keyword">void</span> (*)())</span></span>;<br><span class="hljs-function"><span class="hljs-keyword">int</span>             <span class="hljs-title">sigreturn</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span>;<br><br><span class="hljs-comment">//trap.c</span><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">sigalarm</span><span class="hljs-params">(<span class="hljs-keyword">int</span> ticks, <span class="hljs-keyword">void</span> (*handler)())</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">proc</span> *<span class="hljs-title">p</span> =</span> myproc();<br>  p-&gt;alarm_interval=ticks;<br>  p-&gt;alarm_handler=handler;<br>  p-&gt;alarm_ticks=ticks;<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125; <br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">sigreturn</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">proc</span> *<span class="hljs-title">p</span> =</span> myproc();<br>  *p-&gt;trapframe = *p-&gt;saved_trapframe;<br>  p-&gt;alarm_flag = <span class="hljs-number">0</span>;<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>allocproc函数和freeproc函数也需要更新</p>
+<ul>
+<li>进程创建和销毁时结构体的字段的设置</li>
+</ul>
+<p>对进程的字段进行初始化和销毁以及页的申请</p>
+<ul>
+<li>使用kalloc给p-&gt;saved_trapframe分配空间</li>
+<li>使用kfree((void *)p-&gt;saved_trapframe);销毁空间</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// Look in the process table for an UNUSED proc.</span><br><span class="hljs-comment">// If found, initialize state required to run in the kernel,</span><br><span class="hljs-comment">// and return with p-&gt;lock held.</span><br><span class="hljs-comment">// If there are no free procs, or a memory allocation fails, return 0.</span><br><span class="hljs-function"><span class="hljs-keyword">static</span> struct proc*</span><br><span class="hljs-function"><span class="hljs-title">allocproc</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">proc</span> *<span class="hljs-title">p</span>;</span><br><br>  <span class="hljs-keyword">for</span>(p = proc; p &lt; &amp;proc[NPROC]; p++) &#123;<br>    acquire(&amp;p-&gt;lock);<br>    <span class="hljs-keyword">if</span>(p-&gt;state == UNUSED) &#123;<br>      <span class="hljs-keyword">goto</span> found;<br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>      release(&amp;p-&gt;lock);<br>    &#125;<br>  &#125;<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br><br>found:<br>  p-&gt;pid = allocpid();<br><br>  <span class="hljs-comment">// Allocate a trapframe page.</span><br>  <span class="hljs-keyword">if</span>((p-&gt;trapframe = (struct trapframe *)kalloc()) == <span class="hljs-number">0</span>)&#123;<br>    release(&amp;p-&gt;lock);<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>  &#125;<br><br>  <span class="hljs-comment">// An empty user page table.</span><br>  p-&gt;pagetable = proc_pagetable(p);<br>  <span class="hljs-keyword">if</span>(p-&gt;pagetable == <span class="hljs-number">0</span>)&#123;<br>    freeproc(p);<br>    release(&amp;p-&gt;lock);<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>  &#125;<br>   <span class="hljs-comment">//</span><br>  <span class="hljs-keyword">if</span>((p-&gt;saved_trapframe = (struct trapframe *)kalloc()) == <span class="hljs-number">0</span>)&#123;<br>    freeproc(p);<br>    release(&amp;p-&gt;lock);<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>  &#125;<br>  <span class="hljs-comment">// Set up new context to start executing at forkret,</span><br>  <span class="hljs-comment">// which returns to user space.</span><br>  <span class="hljs-built_in">memset</span>(&amp;p-&gt;context, <span class="hljs-number">0</span>, <span class="hljs-keyword">sizeof</span>(p-&gt;context));<br>  p-&gt;context.ra = (uint64)forkret;<br>  p-&gt;context.sp = p-&gt;kstack + PGSIZE;<br><br>  p-&gt;alarm_flag=<span class="hljs-number">0</span>;<span class="hljs-comment">//</span><br>  p-&gt;alarm_interval = <span class="hljs-number">0</span>;<br>  p-&gt;alarm_handler = <span class="hljs-number">0</span>;<br>  p-&gt;alarm_ticks = <span class="hljs-number">0</span>;<br><br>  <span class="hljs-keyword">return</span> p;<br>&#125;<br><br><span class="hljs-comment">// free a proc structure and the data hanging from it,</span><br><span class="hljs-comment">// including user pages.</span><br><span class="hljs-comment">// p-&gt;lock must be held.</span><br><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span></span><br><span class="hljs-function"><span class="hljs-title">freeproc</span><span class="hljs-params">(struct proc *p)</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-keyword">if</span>(p-&gt;trapframe)<br>    kfree((<span class="hljs-keyword">void</span>*)p-&gt;trapframe);<br>  p-&gt;trapframe = <span class="hljs-number">0</span>;<br>    <br>  <span class="hljs-keyword">if</span>(p-&gt;pagetable)<br>    proc_freepagetable(p-&gt;pagetable, p-&gt;sz);<br>  <br>  <span class="hljs-keyword">if</span>(p-&gt;saved_trapframe)<br>    kfree((<span class="hljs-keyword">void</span> *)p-&gt;saved_trapframe);<br>    <br>  p-&gt;pagetable = <span class="hljs-number">0</span>;<br>  p-&gt;sz = <span class="hljs-number">0</span>;<br>  p-&gt;pid = <span class="hljs-number">0</span>;<br>  p-&gt;parent = <span class="hljs-number">0</span>;<br>  p-&gt;name[<span class="hljs-number">0</span>] = <span class="hljs-number">0</span>;<br>  p-&gt;chan = <span class="hljs-number">0</span>;<br>  p-&gt;killed = <span class="hljs-number">0</span>;<br>  p-&gt;xstate = <span class="hljs-number">0</span>;<br>  p-&gt;state = UNUSED;<br>  <br>  p-&gt;alarm_flag=<span class="hljs-number">0</span>;<span class="hljs-comment">//</span><br>  p-&gt;alarm_interval = <span class="hljs-number">0</span>;<br>  p-&gt;alarm_handler = <span class="hljs-number">0</span>;<br>  p-&gt;alarm_ticks = <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>评分</p>
+<p><img src="https://img.gls.show/img/b48525193508d98e10d9e31c3878fbf3.png" srcset="/img/loading.gif" lazyload></p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>MIT-6.S081：Lab4 trap</div>
+      <div>http://gls.show/p/69660c86/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>郭佳明</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年8月2日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/p/b8f95159/" title="使用邮箱客户端配置中科院邮箱">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">使用邮箱客户端配置中科院邮箱</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/p/4f2baa62/" title="计算机教育中缺失的一课——Vim">
+                        <span class="hidden-mobile">计算机教育中缺失的一课——Vim</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  <article id="comments" lazyload>
+    
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-light';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'LaPhilosophie/gls.show');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+  </article>
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> <div> <span id="timeDate">载入天数...</span> <span id="times">载入时分秒...</span> <script src="/js/duration.js"></script> <script src="/js/cursor.js"></script>
+</div> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      京ICP备2021035969号
+    </a>
+  </span>
+  
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/caidai.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
