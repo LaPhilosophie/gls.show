@@ -24,8 +24,8 @@
 <meta property="og:description" content="Tmux简介——优雅永不过时Tmux是个非常强大的终端工具，不仅可以提供终端的多路复用，同时可以将会话（session）与窗口分离，大幅提升生产力  在终端写命令的时候，经常碰到这几种状况  需要多个终端命令行同时共同工作，但是： 根本没有自带分屏（比如Ubuntu），只能多开几个terminal 终端窗口自带的分屏非常难用，即是是软粉吹上天的新版Windows terminal，分屏也非常拉胯">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://gls.show/image/tmux-tutorial/tmux-1.png">
-<meta property="article:published_time" content="2022-09-04T06:32:56.315Z">
-<meta property="article:modified_time" content="2022-09-04T06:32:56.336Z">
+<meta property="article:published_time" content="2022-09-04T06:32:56.000Z">
+<meta property="article:modified_time" content="2024-06-11T08:08:41.112Z">
 <meta property="article:author" content="郭佳明">
 <meta property="article:tag" content="linux">
 <meta property="article:tag" content="Tmux">
@@ -211,7 +211,7 @@
         <i class="iconfont icon-chart"></i>
         
           <!-- compatible with older versions-->
-          1.4k 字
+          1.7k 字
         
       </span>
     
@@ -223,7 +223,7 @@
         
         
           <!-- compatible with older versions-->
-          5 分钟
+          6 分钟
         
       </span>
     
@@ -275,7 +275,7 @@
                 
                   
                     <!-- compatible with older versions-->
-                    本文最后更新于：2022年9月4日 下午
+                    本文最后更新于：2024年6月11日 下午
                   
                 
               </p>
@@ -303,10 +303,10 @@
 <p>上图是我所运行的Tmux样例，可以通过输入指令<code>ctrl-b + s</code>得到。下面我们分析该图，从而搞懂session、window、pane三者之间的关系</p>
 <ul>
 <li>最左边（0）~（8）是行号</li>
-<li>行号右边有0和1，指的是编号为0和1的两个session</li>
+<li>行号右边有第一级的0和1，指的是编号为0和1的两个session</li>
 <li>第一个session有一个Window，第二个session有两个window，且第二个window有两个pane，分别是fish的shell和bash的shell</li>
 </ul>
-<h1 id="神奇的ctrl-d按键"><a href="#神奇的ctrl-d按键" class="headerlink" title="神奇的ctrl-d按键"></a>神奇的ctrl-d按键</h1><p>请注意，几乎所有Tmux的命令都要配合ctrl-d使用。比如显示所有的Tmux session，需要输入指令<code>ctrl-b + s</code>，这意味着，你需要先同时按住ctrl 和 b，然后松开，之后按住 s。</p>
+<h1 id="神奇的ctrl-d按键"><a href="#神奇的ctrl-d按键" class="headerlink" title="神奇的ctrl-d按键"></a>神奇的ctrl-d按键</h1><p>请注意，几乎所有Tmux的命令都要配合ctrl-d使用。比如显示所有的Tmux session，需要输入指令<code>ctrl-b + s</code>，这意味着，你需要先同时按住ctrl 和 b，然后松开，之后按下 s。</p>
 <h1 id="如何分屏"><a href="#如何分屏" class="headerlink" title="如何分屏"></a>如何分屏</h1><p>分屏是Tmux的核心。输入Tmux之后，你就进入了该session对应的window，且该Window有一个pane</p>
 <ul>
 <li><p>创建新Window：<code>ctrl-b + c</code>：在当前session中创建一个新的window</p>
@@ -326,11 +326,32 @@
 </ul>
 </li>
 </ul>
-<h1 id="如何实现会话与窗口的分离"><a href="#如何实现会话与窗口的分离" class="headerlink" title="如何实现会话与窗口的分离"></a>如何实现会话与窗口的分离</h1><p>使用普通终端的痛点在于，终端窗口与会话没有完成分离，关闭了窗口，也就关闭了与远程的会话，实现会话与窗口的分离，是Tmux的杀手功能</p>
+<h1 id="如何实现会话与窗口的分离"><a href="#如何实现会话与窗口的分离" class="headerlink" title="如何实现会话与窗口的分离"></a>如何实现会话与窗口的分离</h1><p>使用普通终端的痛点在于，终端窗口与会话没有完成分离，关闭了窗口，也就关闭了与远程的会话，<strong>实现会话与窗口的分离，是Tmux的杀手功能</strong></p>
 <p>按下<code>Ctrl+b d</code>或者输入<code>Tmux detach</code>命令，就会将当前session与窗口分离，分离之后，即使关闭了当前窗口，会话中的进程依然会继续进行</p>
 <p>当下次想要继续使用的时候，可以通过输入命令<code>Tmux attach-session -t session_name</code>来继续会话</p>
 <p>挂起操作：<code>ctrl+b ctrl+z</code>(ctlr键按住不动，先按住b，松开后再按住z)</p>
-<h1 id="自定义你的Tmux"><a href="#自定义你的Tmux" class="headerlink" title="自定义你的Tmux"></a>自定义你的Tmux</h1><p>Tmux具有丰富的插件支持，在github上有许多对应资源</p>
+<h1 id="命令速查"><a href="#命令速查" class="headerlink" title="命令速查"></a>命令速查</h1><p>tmux</p>
+<ul>
+<li>tmux。启动一个新的 tmux 会话。</li>
+<li>tmux ls。查看 tmux 会话</li>
+<li>tmux new -s mysession。创建并命名一个新会话。</li>
+<li>Ctrl+b d。分离当前会话</li>
+<li>tmux attach -t mysession。连接到（共享）会话</li>
+<li>tmux kill-session -t mysession。杀死一个会话<br>窗口（Window）</li>
+<li>Ctrl+b c。创建新窗口</li>
+<li>Ctrl+b n。Ctrl+b p。下一个/上一个窗口<br>pane</li>
+<li>Ctrl+b %。Ctrl+b “。垂直/水平拆分窗格</li>
+</ul>
+<h1 id="自定义你的Tmux"><a href="#自定义你的Tmux" class="headerlink" title="自定义你的Tmux"></a>自定义你的Tmux</h1><ul>
+<li>conf 文件<ul>
+<li>定制你的 ~/.tmux.conf 文件实现对应功能</li>
+</ul>
+</li>
+<li>插件<ul>
+<li>Tmux具有丰富的插件支持，在github上有许多对应资源</li>
+</ul>
+</li>
+</ul>
 <p>//TODO </p>
 
               
@@ -421,21 +442,15 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/p/50b51ea9/" title="Linux手册指南">
+                      <a href="/p/29256323/" title="Tinyhttpd源码学习">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">Linux手册指南</span>
+                        <span class="hidden-mobile">Tinyhttpd源码学习</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
                   </article>
                   <article class="post-next col-6">
                     
-                    
-                      <a href="/p/3754ea8a/" title="CSAPP：程序的机器级表示-4">
-                        <span class="hidden-mobile">CSAPP：程序的机器级表示-4</span>
-                        <span class="visible-mobile">下一篇</span>
-                        <i class="iconfont icon-arrowright"></i>
-                      </a>
                     
                   </article>
                 </div>
