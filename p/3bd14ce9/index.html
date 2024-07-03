@@ -25,7 +25,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://gls.show/image/pwn-college.png">
 <meta property="article:published_time" content="2024-05-30T03:16:43.284Z">
-<meta property="article:modified_time" content="2024-06-27T14:40:03.467Z">
+<meta property="article:modified_time" content="2024-07-03T03:20:15.780Z">
 <meta property="article:author" content="郭佳明">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://gls.show/image/pwn-college.png">
@@ -273,7 +273,7 @@
                 
                   
                     <!-- compatible with older versions-->
-                    本文最后更新于：2024年6月27日 晚上
+                    本文最后更新于：2024年7月3日 上午
                   
                 
               </p>
@@ -438,7 +438,7 @@
 
 <h1 id="14-1"><a href="#14-1" class="headerlink" title="14-1"></a>14-1</h1><p>这次没有程序自带的栈内容的打印，可以dump 出栈上内存，找出重复出现的 Canary</p>
 <p>手搓脚本</p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs powershell">define print_rsp_to_rbp<br><br><span class="hljs-built_in">set</span> <span class="hljs-variable">$ptr</span> = <span class="hljs-variable">$rsp</span><br>	<span class="hljs-keyword">while</span> <span class="hljs-variable">$ptr</span> &lt; <span class="hljs-variable">$rbp</span><br>		x/gx <span class="hljs-variable">$ptr</span><br>		<span class="hljs-built_in">set</span> <span class="hljs-variable">$ptr</span> = <span class="hljs-variable">$ptr</span> + <span class="hljs-number">8</span><br>	<span class="hljs-keyword">end</span><br><span class="hljs-keyword">end</span><br><br><span class="hljs-comment"># 接下来直接调用print_rsp_to_rbp即可</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs powershell">define print_rsp_to_rbp<br><br><span class="hljs-built_in">set</span> <span class="hljs-variable">$ptr</span> = <span class="hljs-variable">$rsp</span><br><span class="hljs-keyword">while</span> <span class="hljs-variable">$ptr</span> &lt; <span class="hljs-variable">$rbp</span><br>x/gx <span class="hljs-variable">$ptr</span><br><span class="hljs-built_in">set</span> <span class="hljs-variable">$ptr</span> = <span class="hljs-variable">$ptr</span> + <span class="hljs-number">8</span><br><span class="hljs-keyword">end</span><br><span class="hljs-keyword">end</span><br><br><span class="hljs-comment"># 接下来直接调用print_rsp_to_rbp即可</span><br></code></pre></td></tr></table></figure>
 
 
 <p>定位到Canary 位于 rbp-0x118<br>缓冲期起始于 rbp-0x1d0</p>
